@@ -2,7 +2,7 @@
 from threading import *
 import wx, datetime
 from qarReader_prod_v1 import QARReader
-from pickFlight_v1 import Flight
+from pickFlight_v2 import Flight
 
 """this module:
 - creates window for choosing of file with flights
@@ -283,6 +283,7 @@ class MyFrame(wx.Frame):
 
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
+        print("start %s; and end %s indexes"%(start, end))
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
