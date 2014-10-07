@@ -54,7 +54,6 @@ class Flight:
             counter = header
             dat = data.read(15)
             part = [ord(each) for each in dat]
-            #print(str_part)
             while True:
                 part.append(ord(data.read(1)))
                 if part == eof:
@@ -68,11 +67,8 @@ class Flight:
             self.flight = data.read(length)
         else:
             data.seek(self.start)
-            print("start index is at %s"%data.tell())
             length = self.end - self.start
-            print("length of flight is %s in bytes"%length)
             self.flight = data.read(length)
-            print("length of flight piece that has been read is %s"%len(self.flight))
 
     def make_flight(self):
         if "flight" in self.name:
@@ -80,84 +76,82 @@ class Flight:
             separator = self.path.rfind('/')
             new_path = self.path[:separator + 1]
             file_name = new_path + str(self.name)
-            param_file_name = file_name + ".inf"
-            print("param_file_name is %s"%param_file_name)
-            tmp_file_name = file_name + ".tmp"
-            print("tmp_file_name is %s"%tmp_file_name)
+            param_file_name = file_name + ".inf"  # target parametric file/mix scheme is applied
+            tmp_param_file = file_name + ".bin"  # interim file with parametric data
+            tmp_file_name = file_name + ".tmp"  # tmp file with flight
             new_file = open(tmp_file_name, 'wb')
             new_file.write(self.flight)
-            saab = SAAB(tmp_file_name, param_file_name)
-            #self.export_param_saab()
-
-            """depending on QAR type -> send to proper method"""
-            #self.export_param_saab(tmp_file, new_path)
-
+            """depending on QAR type -> send to proper class"""
+            saab = SAAB(tmp_file_name, param_file_name, tmp_param_file)
         elif "raw" in self.name:
             """save raw data in file"""
             separ = self.path.rfind('/')
             new_path = self.path[:separ + 1]
-            #self.status = 40
             new_file = open(new_path + str(self.name) + '.bin', 'wb')
             new_file.write(self.flight)
 
 
 class SAAB(object):
 
-    def __init__(self, tmp_file_name, param_file_name):
-        self.data = open(tmp_file_name, "rb")#flight  #data of flight
-        self.param_file = open(param_file_name, "wb")  #target parametric file ".inf"
+    def __init__(self, tmp_file_name, param_file_name, tmp_param_file):
+        self.data = open(tmp_file_name, "rb")  # flight
+        self.param_file = open(param_file_name, "wb")  # target parametric file ".inf"
+        self.tmp_param_file = open(tmp_param_file, "wb")  # tmp file with parametric data
         self.frame_len = 384  # bytes in frame
         self.subframe_len = 96  # bytes in subframe
         self.sw_one = "001001000111"  # syncword one
         self.sw_two = "010110111000"  # syncword two
 
-        self.export_param_saab(tmp_file_name)
+        self.export_param_saab(tmp_file_name, tmp_param_file)
 
-    def export_param_saab(self, tmp_file_name):
-        print("flight length is %s"%(os.stat(tmp_file_name)).st_size)
-        parameters = open(tmp_file_name + ".bin", "wb")
-        print("parameters file name is %s"%parameters)
+    def export_param_saab(self, tmp_file_name, tmp_param_file):
         #--------write header to target parametric file------------
         #self.param_file.write(self.data.read(128))
-        parameters.write(self.data.read(128))
+        self.tmp_param_file.write(self.data.read(128))
         i = 128  # start after header
+        j = 0  # counter of recorded bytes
         #-------each byte after FF is a parametric byte----
         #-------so we need to write only them--------------
         while i < (os.stat(tmp_file_name)).st_size - 1:
             if ord(self.data.read(1)) == 255:
-                #print(ord(self.data.read(1)))
-                parameters.write(self.data.read(1))
-                i += 2  #not to read byte that has been already read
+                self.tmp_param_file.write(self.data.read(1))
+                i += 2  # not to read byte that has been already read
+                j += 1
             else:
-                #self.data.seek(-1, 1)
                 i += 1
-        print("i equals to %s"%i)
-        print("tmp_file_size is %s"%(os.stat(tmp_file_name + ".bin")).st_size)
-        parameters.close()
-        self.scheme_search(tmp_file_name + ".bin")
+        self.tmp_param_file.close()
+        self.scheme_search(tmp_param_file)
 
-    def scheme_search(self, tmp_file_name):
+    def scheme_search(self, tmp_param_file):
         param_file_start = 0
-        param_file_end = (os.stat(tmp_file_name)).st_size
-        source_file = open(tmp_file_name, "rb")
+        param_file_end = (os.stat(tmp_param_file)).st_size
+        source_file = open(tmp_param_file, "rb")
+        self.param_file.write(source_file.read(128))
+        self.bytes_counter = 128
+        param_file_end = (os.stat(tmp_param_file)).st_size
         found_sw = False  # indicator of found/not found syncword
         #---------four bytes, in which we search for syncword----
         search_bytes = [source_file.read(1),
                         source_file.read(1),
                         source_file.read(1)]
-        self.bytes_counter = 3
+        self.bytes_counter += 3
         mix_type = None
 
-        while not found_sw or self.bytes_counter == param_file_end:
+        while not found_sw and self.bytes_counter < param_file_end:
             next_byte = source_file.read(1)
             self.bytes_counter += 1
             search_bytes.append(next_byte)  # append fourth byte
             mixed_words = self.mix_syncword(search_bytes)  # send them to check for scheme
+
+            if mixed_words is None:
+                break
             del search_bytes[0]  # remove first byte -> ensure shift by byte
 
             i = 0
             for word in mixed_words:
                 if word == self.sw_one:
+                    print("found match")
+                    print(self.bytes_counter)
                     frame = source_file.read(self.frame_len)
                     next_frame_search = [frame[len(frame) - 4],
                                          frame[len(frame) - 3],
@@ -168,7 +162,7 @@ class SAAB(object):
                                             frame[self.subframe_len - 2],
                                             frame[self.subframe_len - 1]]
                     frame_sw_variants = self.mix_syncword(next_frame_search)
-                    subframe_sw_variants = self.mix_syncword((next_subframe_search))
+                    subframe_sw_variants = self.mix_syncword(next_subframe_search)
 
                     if frame_sw_variants[i] == self.sw_one and subframe_sw_variants[i] == self.sw_two:
                         print("found mix type")
@@ -180,6 +174,12 @@ class SAAB(object):
                         source_file.seek(-(len(frame)), 1)
                 else:
                     i += 1
+        if mix_type is None:
+            #-------cases when flight is too small------
+            #-------about few min/less than 10 min------
+            self.param_file.close()
+            print("didnt find syncword")
+
 
 
     def mix_syncword(self, four_bytes):
@@ -190,11 +190,12 @@ class SAAB(object):
             #-----convert byte to binary representation---------
             #-----exclude "0b" at start and fill with ----------
             #-----zeros at the beginning to make 8 symbols------
-            try:
+            bin_str += ((bin(ord(byte)))[2:]).zfill(byte_size)
+            '''try:
                 bin_str += ((bin(ord(byte)))[2:]).zfill(byte_size)
-            except:
-                print(self.bytes_counter)
-                break
+            except Exception as e:
+                print(self.bytes_counter, e)
+                return None'''
         #------type one |3|5|8|7|1|------------
         mixed_words.append(bin_str[23:24] + bin_str[8:16] + bin_str[:3])  # 0 index/first syncword
         mixed_words.append(bin_str[27:32] + bin_str[16:23])  # 1 index/second syncword

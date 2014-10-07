@@ -283,7 +283,7 @@ class MyFrame(wx.Frame):
 
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
-        print("start %s; and end %s indexes"%(start, end))
+        #print("starts at %s and ends at %s indexes"%(start, end))
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
