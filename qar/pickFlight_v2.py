@@ -1,5 +1,6 @@
 import binascii
 import os
+import struct
 """this module:
 - finds ARINC 717 synchrowords
 - checks integrity of frames
@@ -94,9 +95,10 @@ class Flight:
 class SAAB(object):
 
     def __init__(self, tmp_file_name, param_file_name, tmp_param_file):
-        self.data = open(tmp_file_name, "rb")  # flight
+        #self.data = open(tmp_file_name, "rb")  # flight
         self.param_file = open(param_file_name, "wb")  # target parametric file ".inf"
         self.tmp_param_file = open(tmp_param_file, "wb")  # tmp file with parametric data
+        self.parameters = []
         self.frame_len = 384  # bytes in frame
         self.subframe_len = 96  # bytes in subframe
         self.sw_one = "001001000111"  # syncword one
@@ -107,20 +109,22 @@ class SAAB(object):
     def export_param_saab(self, tmp_file_name, tmp_param_file):
         #--------write header to target parametric file------------
         #self.param_file.write(self.data.read(128))
-        self.tmp_param_file.write(self.data.read(128))
+        data = open(tmp_file_name, "rb")  # flight
+        self.tmp_param_file.write(data.read(128))
         i = 128  # start after header
         j = 0  # counter of recorded bytes
         #-------each byte after FF is a parametric byte----
         #-------so we need to write only them--------------
         while i < (os.stat(tmp_file_name)).st_size - 1:
-            if ord(self.data.read(1)) == 255:
-                self.tmp_param_file.write(self.data.read(1))
+            if ord(data.read(1)) == 255:
+                self.tmp_param_file.write(data.read(1))
                 i += 2  # not to read byte that has been already read
                 j += 1
             else:
                 i += 1
         self.tmp_param_file.close()
         self.scheme_search(tmp_param_file)
+
 
     def scheme_search(self, tmp_param_file):
         param_file_start = 0
@@ -174,13 +178,42 @@ class SAAB(object):
                         source_file.seek(-(len(frame)), 1)
                 else:
                     i += 1
+
         if mix_type is None:
             #-------cases when flight is too small------
             #-------about few min/less than 10 min------
             self.param_file.close()
             print("didnt find syncword")
+        elif mix_type % 2 == 1:
+            #----if syncword is found at 2d subword-----
+            #----it means that syncowrd is at the ------
+            #----end of list (2d, 3d bytes)-------------
+            #----so we shift two byes and --------------
+            #----can use the same scheme but for first subword------
+            mix_type -= 1
+            extract_syncword = [source_file.read(1), source_file.read(1),
+                                source_file.read(1), source_file.read(1)]
+            syncword_first = self.mix_words(extract_syncword, mix_type)
+            source_file.seek(-1, 1)
 
+            for each in syncword_first[2:]:  # take the last two byte which contain syncword
+                sw_part = int(each, 2)
+                sw_to_write = (struct.pack("i", sw_part))[:1]
+                self.param_file.write(sw_to_write)
 
+        j = self.bytes_counter
+        while j < param_file_end - 3:
+            four_bytes_to_mix = [source_file.read(1), source_file.read(1),
+                                source_file.read(1), source_file.read(1)]
+            j += 4
+            mixed_words = self.mix_words(four_bytes_to_mix, mix_type)
+            source_file.seek(-1, 1)
+            j -= 1
+            for each in mixed_words:
+                value = int(each, 2)  # convert binary string to int
+                to_write = (struct.pack("i", value))[:1]  # int takes 4 byte, but we need only first
+                # as the rest are 0s in our case, because we supply only 8 bits (one byte)
+                self.param_file.write(to_write)
 
     def mix_syncword(self, four_bytes):
         bin_str = ""
@@ -195,25 +228,33 @@ class SAAB(object):
                 bin_str += ((bin(ord(byte)))[2:]).zfill(byte_size)
             except Exception as e:
                 print(self.bytes_counter, e)
-                return None'''
+                return None  # end of file'''
         #------type one |3|5|8|7|1|------------
-        mixed_words.append(bin_str[23:24] + bin_str[8:16] + bin_str[:3])  # 0 index/first syncword
-        mixed_words.append(bin_str[27:32] + bin_str[16:23])  # 1 index/second syncword
+        mixed_words.append(bin_str[23:24] + bin_str[8:16] + bin_str[:3])  # 0 index/first subword
+        mixed_words.append(bin_str[27:32] + bin_str[16:23])  # 1 index/second subword
 
         #------type two |5|3|1|7|8|------------
-        mixed_words.append(bin_str[9:16] + bin_str[:5])  # 2 index/first syncword
-        mixed_words.append(bin_str[29:32] + bin_str[16:24] + bin_str[8:9])  # 3 index/second syncword
+        mixed_words.append(bin_str[9:16] + bin_str[:5])  # 2 index/first subword
+        mixed_words.append(bin_str[29:32] + bin_str[16:24] + bin_str[8:9])  # 3 index/second subword
 
         #------type three |8|4|4|8|------------
-        mixed_words.append(bin_str[12:16] + bin_str[:8])  # 4 index/first syncword
-        mixed_words.append(bin_str[16:24] + bin_str[8:12])  # 5 index/second syncword
+        mixed_words.append(bin_str[12:16] + bin_str[:8])  # 4 index/first subword
+        mixed_words.append(bin_str[16:24] + bin_str[8:12])  # 5 index/second subword
 
         #------type four |6|2|2|6|8|------------
-        mixed_words.append(bin_str[10:16] + bin_str[:6])  # 6 index/first syncword
-        mixed_words.append(bin_str[30:32] + bin_str[16:24] + bin_str[8:10])  # 7 index/second syncword
+        mixed_words.append(bin_str[10:16] + bin_str[:6])  # 6 index/first subword
+        mixed_words.append(bin_str[30:32] + bin_str[16:24] + bin_str[8:10])  # 7 index/second subword
 
         return mixed_words
 
+
+    def mix_words(self, bytes_to_mix, mix_type):
+        middle = self.mix_syncword(bytes_to_mix)
+        tmp_str_1 = "0000" + middle[mix_type]
+        tmp_str_2 = "0000" + middle[mix_type + 1]
+        mixed_words = [tmp_str_1[8:16], tmp_str_1[0:8],
+                       tmp_str_2[8:16], tmp_str_2[0:8]]
+        return mixed_words
 
 
 
