@@ -2,7 +2,7 @@
 from threading import *
 import wx, datetime
 from qarReader_prod_v1 import QARReader
-from pickFlight_v2 import Flight
+from pickFlight_v3 import Flight
 
 """this module:
 - creates window for choosing of file with flights
