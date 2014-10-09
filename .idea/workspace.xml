@@ -23,11 +23,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="gui_v5.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="gui_v5.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="258" column="0" selection-start="9633" selection-end="9633" vertical-scroll-proportion="0.0" vertical-offset="5113" max-vertical-offset="7216">
-              <folding />
+            <state line="15" column="30" selection-start="406" selection-end="406" vertical-scroll-proportion="0.48245615" vertical-offset="0" max-vertical-offset="7282">
+              <folding>
+                <element signature="e#21#44#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -35,23 +37,29 @@
       <file leaf-file-name="qarReader_prod_v1.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/qarReader_prod_v1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="72" column="13" selection-start="2086" selection-end="2086" vertical-scroll-proportion="0.0" vertical-offset="1584" max-vertical-offset="3960">
+            <state line="80" column="0" selection-start="2426" selection-end="2426" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3960">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pickFlight_v3.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/qar/pickFlight_v3.py">
+      <file leaf-file-name="pickFlight_v4.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/qar/pickFlight_v4.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="96" column="56" selection-start="3664" selection-end="3664" vertical-scroll-proportion="0.1850789" vertical-offset="1983" max-vertical-offset="3432">
+            <state line="183" column="0" selection-start="8560" selection-end="8560" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="594">
               <folding>
-                <element signature="e#1#16#0" expanded="true" />
-                <element signature="e#5465#5612#0" expanded="false" />
-                <element signature="e#5691#6331#0" expanded="false" />
-                <element signature="e#6370#8792#0" expanded="false" />
-                <element signature="e#8842#10149#0" expanded="false" />
-                <element signature="e#10208#10483#0" expanded="false" />
+                <element signature="e#25#172#1" expanded="false" />
+                <element signature="e#193#2332#0" expanded="false" />
+                <element signature="e#397#541#0" expanded="false" />
+                <element signature="e#577#1325#0" expanded="false" />
+                <element signature="e#1362#2332#0" expanded="false" />
+                <element signature="e#2436#3391#0" expanded="false" />
+                <element signature="e#3428#7588#0" expanded="false" />
+                <element signature="e#7634#7781#0" expanded="false" />
+                <element signature="e#7860#8559#0" expanded="false" />
+                <element signature="e#8598#11032#0" expanded="false" />
+                <element signature="e#11082#12448#0" expanded="false" />
+                <element signature="e#12497#12836#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -75,8 +83,9 @@
         <option value="$PROJECT_DIR$/qar/pickFlight_v1.py" />
         <option value="$PROJECT_DIR$/qar/test.py" />
         <option value="$PROJECT_DIR$/qar/pickFlight_v2.py" />
-        <option value="$PROJECT_DIR$/qar/gui_v5.py" />
         <option value="$PROJECT_DIR$/qar/pickFlight_v3.py" />
+        <option value="$PROJECT_DIR$/qar/gui_v5.py" />
+        <option value="$PROJECT_DIR$/qar/pickFlight_v4.py" />
       </list>
     </option>
   </component>
@@ -112,7 +121,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -147,6 +155,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -180,26 +189,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.gui_v5">
-    <configuration default="false" name="gui_v5" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/qar" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="QAR_Reader" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/qar/gui_v5.py" />
-      <option name="PARAMETERS" value="" />
-      <RunnerSettings RunnerId="PyDebugRunner" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PyDebugRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
     <configuration default="true" type="tests" factoryName="py.test">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -355,16 +344,31 @@
       <option name="PARAMETERS" value="" />
       <method />
     </configuration>
+    <configuration default="false" name="gui_v5" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/qar" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="QAR_Reader" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/qar/gui_v5.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
     <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Python.test" />
       <item index="1" class="java.lang.String" itemvalue="Python.pickFlight_v3" />
       <item index="2" class="java.lang.String" itemvalue="Python.gui_v5" />
     </list>
-    <recent_temporary>
-      <list size="1">
-        <item index="0" class="java.lang.String" itemvalue="Python.gui_v5" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
   <component name="SvnConfiguration" maxAnnotateRevisions="500" myUseAcceleration="nothing" myAutoUpdateAfterCommit="false" cleanupOnStartRun="false" SSL_PROTOCOLS="all">
@@ -394,8 +398,8 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1040" extended-state="6" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1296" height="1040" extended-state="7" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -409,11 +413,11 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21948609" sideWeight="0.25234374" order="2" side_tool="true" content_ui="tabs" x="-4" y="729" width="1280" height="308" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -456,14 +460,46 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="42" />
+      <option name="time" value="44" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="20" selection-start="332" selection-end="332" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
+        <state line="258" column="0" selection-start="9633" selection-end="9633" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/qarReader_prod_v1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="72" column="13" selection-start="2086" selection-end="2086" vertical-scroll-proportion="0.0" vertical-offset="1584" max-vertical-offset="3982">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/pickFlight_v3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="93" column="35" selection-start="3534" selection-end="3534" vertical-scroll-proportion="0.0" vertical-offset="2046" max-vertical-offset="3146">
+          <folding>
+            <element signature="e#1#16#0" expanded="false" />
+            <element signature="e#5468#5615#0" expanded="false" />
+            <element signature="e#5694#6334#0" expanded="false" />
+            <element signature="e#6373#8795#0" expanded="false" />
+            <element signature="e#8845#10152#0" expanded="false" />
+            <element signature="e#10211#10486#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="20" selection-start="332" selection-end="332" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -478,12 +514,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="83" column="0" selection-start="2881" selection-end="2881" vertical-scroll-proportion="0.0" vertical-offset="1826" max-vertical-offset="5610">
           <folding>
-            <element signature="e#1#16#0" expanded="true" />
-            <element signature="e#5465#5612#0" expanded="false" />
-            <element signature="e#5691#6331#0" expanded="false" />
-            <element signature="e#6370#8792#0" expanded="false" />
-            <element signature="e#8842#10149#0" expanded="false" />
-            <element signature="e#10208#10483#0" expanded="false" />
+            <element signature="e#1#16#0" expanded="false" />
+            <element signature="e#5468#5615#0" expanded="false" />
+            <element signature="e#5694#6334#0" expanded="false" />
+            <element signature="e#6373#8795#0" expanded="false" />
+            <element signature="e#8845#10152#0" expanded="false" />
+            <element signature="e#10211#10486#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -491,7 +527,9 @@
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="292" column="0" selection-start="10723" selection-end="10723" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
-          <folding />
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -512,7 +550,9 @@
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="299" column="20" selection-start="10955" selection-end="10955" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
-          <folding />
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -533,7 +573,9 @@
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="297" column="0" selection-start="10887" selection-end="10887" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
-          <folding />
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -554,7 +596,9 @@
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="269" column="37" selection-start="10150" selection-end="10150" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7282">
-          <folding />
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -575,7 +619,9 @@
     <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="26" column="29" selection-start="675" selection-end="675" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7260">
-          <folding />
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -610,23 +656,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/qarReader_prod_v1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="13" selection-start="2086" selection-end="2086" vertical-scroll-proportion="0.0" vertical-offset="1291" max-vertical-offset="3960">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/_core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7951" column="0" selection-start="301620" selection-end="301620" vertical-scroll-proportion="0.0" vertical-offset="174689" max-vertical-offset="372658">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="258" column="0" selection-start="9633" selection-end="9633" vertical-scroll-proportion="0.0" vertical-offset="5113" max-vertical-offset="7216">
           <folding />
         </state>
       </provider>
@@ -640,14 +672,50 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/pickFlight_v3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="96" column="56" selection-start="3664" selection-end="3664" vertical-scroll-proportion="0.1850789" vertical-offset="1983" max-vertical-offset="3432">
+        <state line="97" column="32" selection-start="3697" selection-end="3697" vertical-scroll-proportion="0.09702315" vertical-offset="2046" max-vertical-offset="3146">
           <folding>
-            <element signature="e#1#16#0" expanded="true" />
-            <element signature="e#5465#5612#0" expanded="false" />
-            <element signature="e#5691#6331#0" expanded="false" />
-            <element signature="e#6370#8792#0" expanded="false" />
-            <element signature="e#8842#10149#0" expanded="false" />
-            <element signature="e#10208#10483#0" expanded="false" />
+            <element signature="e#1#16#0" expanded="false" />
+            <element signature="e#5468#5615#0" expanded="false" />
+            <element signature="e#5694#6334#0" expanded="false" />
+            <element signature="e#6373#8795#0" expanded="false" />
+            <element signature="e#8845#10152#0" expanded="false" />
+            <element signature="e#10211#10486#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/qarReader_prod_v1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="80" column="0" selection-start="2426" selection-end="2426" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3960">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/pickFlight_v4.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="183" column="0" selection-start="8560" selection-end="8560" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="594">
+          <folding>
+            <element signature="e#25#172#1" expanded="false" />
+            <element signature="e#193#2332#0" expanded="false" />
+            <element signature="e#397#541#0" expanded="false" />
+            <element signature="e#577#1325#0" expanded="false" />
+            <element signature="e#1362#2332#0" expanded="false" />
+            <element signature="e#2436#3391#0" expanded="false" />
+            <element signature="e#3428#7588#0" expanded="false" />
+            <element signature="e#7634#7781#0" expanded="false" />
+            <element signature="e#7860#8559#0" expanded="false" />
+            <element signature="e#8598#11032#0" expanded="false" />
+            <element signature="e#11082#12448#0" expanded="false" />
+            <element signature="e#12497#12836#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/gui_v5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="30" selection-start="406" selection-end="406" vertical-scroll-proportion="0.48245615" vertical-offset="0" max-vertical-offset="7282">
+          <folding>
+            <element signature="e#21#44#0" expanded="true" />
           </folding>
         </state>
       </provider>

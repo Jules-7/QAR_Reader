@@ -1,15 +1,10 @@
-
-import binascii
 import os
 import struct
+
 """this module:
-- finds ARINC 717 synchrowords
-- checks integrity of frames
-- return only valid frames"""
-
-FRAME_SIZE = 3072
-DISTANCE = 768
-
+              - finds ARINC 717 synchrowords
+              - checks integrity of frames
+              - return only valid frames"""
 
 class Flight:
 
@@ -80,6 +75,7 @@ class SAAB(object):
         self.sw_one = "001001000111"  # syncword one
         self.sw_two = "010110111000"  # syncword two
         self.bytes_counter = 0
+        self.mix_type = None
         #----------- make export of parametric info to tmp param file -----------------
         self.export_param_saab(tmp_file_name, tmp_param_file)
         self.param_file_end = (os.stat(tmp_param_file)).st_size  # size of tmp parametric file
@@ -87,51 +83,91 @@ class SAAB(object):
         #---------- rewrite header to target parametric file --------------------------
         self.header_to_param_file()
         #--------- find mix type scheme -----------------------------------------------
-        mix_type = self.scheme_search()
-        if mix_type is None:
-            #-------cases when flight is too small------
-            #-------about few min/less than 10 min------
-            self.param_file.close()
-            print("didnt find syncword")
-        elif mix_type % 2 == 1:
-            #----if syncword is found at 2d subword-----
-            #----it means that syncowrd is at the ------
-            #----end of list (2d, 3d bytes)-------------
-            #----so we shift two byes and --------------
-            #----can use the same scheme but for first subword------
-            mix_type -= 1
-            extract_syncword = [self.source_file[self.bytes_counter],
-                                self.source_file[self.bytes_counter + 1],
-                                self.source_file[self.bytes_counter + 2],
-                                self.source_file[self.bytes_counter + 3]]
-            syncword_first = self.mix_words(extract_syncword, mix_type)
-            self.bytes_counter += 3
+        self.scheme_search()
+        self.record_data()
 
-            for each in syncword_first[2:]:  # take the last two byte which contain syncword
-                sw_part = int(each, 2)
-                sw_to_write = (struct.pack("i", sw_part))[:1]
-                self.param_file.write(sw_to_write)
+    def record_data(self):
+        while self.bytes_counter < self.param_file_end - 4:
+            if self.mix_type is None:  # cases when flight is too small less than 10 min
+                self.param_file.close()
+                print("didnt find syncword")
+            elif self.mix_type % 2 == 1:
+                #--- if syncword is found at 2d subword, it means that syncowrd ---
+                #--- is at the end of list (2d, 3d bytes), so we shift two byes ---
+                #--- and can use the same scheme but for first subword          ---
+                self.mix_type -= 1
+                extract_syncword = [self.source_file[self.bytes_counter],
+                                    self.source_file[self.bytes_counter + 1],
+                                    self.source_file[self.bytes_counter + 2],
+                                    self.source_file[self.bytes_counter + 3]]
+                syncword_first = self.mix_words(extract_syncword)
+                self.bytes_counter += 3
 
-        while self.bytes_counter < self.param_file_end - 3:
-            four_bytes_to_mix = [self.source_file[self.bytes_counter],
-                                 self.source_file[self.bytes_counter + 1],
-                                 self.source_file[self.bytes_counter + 2],
-                                 self.source_file[self.bytes_counter + 3]]
-            self.bytes_counter += 4
-            mixed_words = self.mix_words(four_bytes_to_mix, mix_type)
-            self.bytes_counter -= 1
-            for each in mixed_words:
-                value = int(each, 2)  # convert binary string to int
-                to_write = (struct.pack("i", value))[:1]  # int takes 4 byte, but we need only first
-                # as the rest are 0s in our case, because we supply only 8 bits (one byte)
-                self.param_file.write(to_write)
+                for each in syncword_first[2:]:  # take the last two byte which contain syncword
+                    sw_part = int(each, 2)
+                    sw_to_write = (struct.pack("i", sw_part))[:1]
+                    self.param_file.write(sw_to_write)
 
+                i = 0
+                while i < self.frame_len - 3:
+                    words = [self.source_file[self.bytes_counter],
+                             self.source_file[self.bytes_counter + 1],
+                             self.source_file[self.bytes_counter + 2],
+                             self.source_file[self.bytes_counter + 3]]
+                    self.bytes_counter += 4
+                    i += 4
+                    words_mixed = self.mix_words(words)
+                    self.bytes_counter -= 1
+                    i -= 1
+                    for each in words_mixed:  # take the last two byte which contain syncword
+                        sw_part = int(each, 2)
+                        sw_to_write = (struct.pack("i", sw_part))[:1]
+                        self.param_file.write(sw_to_write)
+                last_bytes = [self.source_file[self.bytes_counter],
+                             self.source_file[self.bytes_counter + 1],
+                             self.source_file[self.bytes_counter + 2],
+                             self.source_file[self.bytes_counter + 3]]
+                last_bytes_mixed = self.mix_words(last_bytes)
+                for each in last_bytes_mixed[:2]:  # take the last two byte which contain syncword
+                    sw_part = int(each, 2)
+                    sw_to_write = (struct.pack("i", sw_part))[:1]
+                    self.param_file.write(sw_to_write)
+
+                self.bytes_counter -= 2
+
+            else:
+                frame = self.source_file[self.bytes_counter:self.bytes_counter + self.frame_len + 4]
+                if len(frame) < self.frame_len:
+                    break
+                self.bytes_counter += self.frame_len
+                self.bytes_counter -= 4
+                check_next_sw = [frame[(self.frame_len + 4) - 4],
+                                 frame[(self.frame_len + 4) - 3],
+                                 frame[(self.frame_len + 4) - 2],
+                                 frame[(self.frame_len + 4) - 1]]
+
+                mixed_words = self.mix_syncword(check_next_sw)
+                if mixed_words[self.mix_type] == self.sw_one:
+                    i = 0
+                    while i < self.frame_len:
+                        next_words = [frame[i], frame[i + 1], frame[i + 2], frame[i + 3]]
+                        i += 3
+                        mix_next_words = self.mix_words(next_words)
+                        for each in mix_next_words:
+                            value = int(each, 2)  # convert binary string to int
+                            to_write = (struct.pack("i", value))[:1]  # int takes 4 byte, but we need only first
+                            # as the rest are 0s in our case, because we supply only 8 bits (one byte)
+                            self.param_file.write(to_write)
+                else:
+                    self.bytes_counter -= self.frame_len
+                    self.scheme_search()
 
     def header_to_param_file(self):
         self.param_file.write(self.source_file[:128])  # rewrite header to target file
         self.bytes_counter += 128  # increase counter on header size
 
     def export_param_saab(self, tmp_file_name, tmp_param_file_name):
+        """ Extract only parametric data into tmp file """
         data = (open(tmp_file_name, "rb")).read()  # flight
         tmp_param_file = open(tmp_param_file_name, "wb")  # tmp file with parametric data
         tmp_param_file.write(data[:128])  # rewrite header to tmp parametric file
@@ -147,13 +183,13 @@ class SAAB(object):
         tmp_param_file.close()
 
     def scheme_search(self):
+        """ Perform search of mix scheme type """
         found_sw = False  # indicator of found/not found syncword
         #---------four bytes, in which we search for syncword----
         search_bytes = [self.source_file[self.bytes_counter],
                         self.source_file[self.bytes_counter + 1],
                         self.source_file[self.bytes_counter + 2]]
         self.bytes_counter += 3
-        mix_type = None
 
         while not found_sw and self.bytes_counter < self.param_file_end:
             next_byte = self.source_file[self.bytes_counter]
@@ -187,15 +223,15 @@ class SAAB(object):
                         print("found mix type")
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
-                        mix_type = i
-                        print("mix type is # %s" % mix_type)
+                        self.mix_type = i
+                        print("mix type is # %s" % self.mix_type)
                     else:
                         self.bytes_counter -= self.frame_len
                 else:
                     i += 1
-        return mix_type
 
     def mix_syncword(self, four_bytes):
+        """ Convert words by four types of mix schemes """
         bin_str = ""
         mixed_words = []  # 8 items list
         byte_size = 8
@@ -223,10 +259,11 @@ class SAAB(object):
 
         return mixed_words
 
-    def mix_words(self, bytes_to_mix, mix_type):
+    def mix_words(self, bytes_to_mix):
+        """ Create 16 bit words from 12 bit words """
         middle = self.mix_syncword(bytes_to_mix)
-        tmp_str_1 = "0000" + middle[mix_type]
-        tmp_str_2 = "0000" + middle[mix_type + 1]
+        tmp_str_1 = "0000" + middle[self.mix_type]
+        tmp_str_2 = "0000" + middle[self.mix_type + 1]
         mixed_words = [tmp_str_1[8:16], tmp_str_1[0:8],
                        tmp_str_2[8:16], tmp_str_2[0:8]]
         return mixed_words
