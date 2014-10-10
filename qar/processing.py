@@ -1,93 +1,18 @@
-import os
 import struct
-from SAAB340 import SAAB
-from airbus import A320
-
-"""this module:
-              - finds ARINC 717 synchrowords
-              - checks integrity of frames
-              - return only valid frames"""
 
 
-class Flight:
+class PrepareData(object):
 
-    """this class takes start and end indexes of flight
-    and make either RAW file or send data further
-    to be processed according to QAR type"""
-
-    def __init__(self, start, end, path, name):
-        self.start = start
-        self.end = end
-        self.path = path
-        self.name = name
-        self.get_flight()
-        self.make_flight()
-
-    def get_flight(self):
-        header = 128
-        eof = [255] * 16
-        data = open(self.path, 'rb')
-        if self.end == 0:
-            data.seek(self.start + header)
-            counter = header
-            dat = data.read(15)
-            part = [ord(each) for each in dat]
-            while True:
-                part.append(ord(data.read(1)))
-                if part == eof:
-                    #counter += 16
-                    break
-                else:
-                    counter += 1
-                    part = part[1:]
-            data.seek(self.start)
-            length = counter
-            self.flight = data.read(length)
-        else:
-            data.seek(self.start)
-            length = self.end - self.start
-            self.flight = data.read(length)
-
-    def make_flight(self):
-        if "flight" in self.name:
-            """make tmp file for future processing"""
-            separator = self.path.rfind('/')
-            new_path = self.path[:separator + 1]
-            file_name = new_path + str(self.name)
-            param_file_name = file_name + ".inf"  # target parametric file/mix scheme is applied
-            tmp_param_file = file_name + ".bin"  # interim file with parametric data
-            tmp_file_name = file_name + ".tmp"  # tmp file with flight
-            new_file = open(tmp_file_name, 'wb')
-            new_file.write(self.flight)
-            """depending on QAR type -> send to proper class"""
-            saab = SAAB(tmp_file_name, param_file_name, tmp_param_file)
-        elif "raw" in self.name:
-            """save raw data in file"""
-            separ = self.path.rfind('/')
-            new_path = self.path[:separ + 1]
-            new_file = open(new_path + str(self.name) + '.bin', 'wb')
-            new_file.write(self.flight)
-
-
-class SAAB(object):
-
-    def __init__(self, tmp_file_name, param_file_name, tmp_param_file):
-        self.param_file = open(param_file_name, "wb")  # target parametric file ".inf"
-        self.frame_len = 384  # bytes in frame
-        self.subframe_len = 96  # bytes in subframe
+    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len):
+        self.source_file = None
+        self.param_file_end = None  # size of tmp parametric file
+        self.param_file = None  # target parametric file ".inf"
         self.sw_one = "001001000111"  # syncword one
         self.sw_two = "010110111000"  # syncword two
         self.bytes_counter = 0
         self.mix_type = None
-        #----------- make export of parametric info to tmp param file -----------------
-        self.export_param_saab(tmp_file_name, tmp_param_file)
-        self.source_file = (open(tmp_param_file, "rb")).read()  # just created tmp parametric file
-        self.param_file_end = len(self.source_file)  # size of tmp parametric file
-        #---------- rewrite header to target parametric file --------------------------
-        self.header_to_param_file()
-        #--------- find mix type scheme -----------------------------------------------
-        self.scheme_search()
-        self.record_data()
+        self.frame_len = frame_len
+        self.subframe_len = subframe_len
 
     def record_data(self):
         while self.bytes_counter < self.param_file_end - 4:
@@ -127,9 +52,9 @@ class SAAB(object):
                         sw_to_write = (struct.pack("i", sw_part))[:1]
                         self.param_file.write(sw_to_write)
                 last_bytes = [self.source_file[self.bytes_counter],
-                             self.source_file[self.bytes_counter + 1],
-                             self.source_file[self.bytes_counter + 2],
-                             self.source_file[self.bytes_counter + 3]]
+                              self.source_file[self.bytes_counter + 1],
+                              self.source_file[self.bytes_counter + 2],
+                              self.source_file[self.bytes_counter + 3]]
                 last_bytes_mixed = self.mix_words(last_bytes)
                 for each in last_bytes_mixed[:2]:  # take the last two byte which contain syncword
                     sw_part = int(each, 2)
@@ -168,22 +93,6 @@ class SAAB(object):
     def header_to_param_file(self):
         self.param_file.write(self.source_file[:128])  # rewrite header to target file
         self.bytes_counter += 128  # increase counter on header size
-
-    def export_param_saab(self, tmp_file_name, tmp_param_file_name):
-        """ Extract only parametric data into tmp file """
-        data = (open(tmp_file_name, "rb")).read()  # flight
-        tmp_param_file = open(tmp_param_file_name, "wb")  # tmp file with parametric data
-        tmp_param_file.write(data[:128])  # rewrite header to tmp parametric file
-        i = 128  # start after header
-        #-------each byte after FF is a parametric byte----
-        #-------so we need to write only it--------------
-        while i < len(data) - 1:
-            if ord(data[i]) == 255:
-                tmp_param_file.write(data[i + 1])
-                i += 2  # not to read byte that has been already read
-            else:
-                i += 1
-        tmp_param_file.close()
 
     def scheme_search(self):
         """ Perform search of mix scheme type """
