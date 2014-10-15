@@ -4,6 +4,7 @@ import wx
 import datetime
 from qarReader_prod_v2 import QARReader
 from pickFlight_v5 import Flight
+from splitter import Split
 
 """this module:
 - creates window for choosing of file with flights
@@ -31,15 +32,16 @@ class ResultEvent(wx.PyEvent):
         self.SetEventType(EVT_RESULT_ID)
         self.data = data
 
-# Thread class that executes processing
-class WorkerThread(Thread):
+
+class WorkerThread(Thread):  # Thread class that executes processing
     """Worker Thread Class."""
-    def __init__(self, notify_window, path):
+    def __init__(self, notify_window, path, flag):
         """Init Worker Thread Class."""
         Thread.__init__(self)
         self._notify_window = notify_window
         self._want_abort = 0
         self.path = path
+        self.flag = flag
         # This starts the thread running on creation, but you could
         # also make the GUI thread responsible for calling this
         self.start()
@@ -47,7 +49,8 @@ class WorkerThread(Thread):
     def run(self):
         """Run Worker Thread."""
         # This is the code executing in the new thread
-        q = QARReader(self.path)
+        s = Split(self.path, self.flag)
+        q = s.result
         # Here's where the result would be returned
         wx.PostEvent(self._notify_window, ResultEvent(q))
         return
@@ -87,7 +90,7 @@ class MyPanel(wx.Panel):
                                     data.curr_date[index].time())
             end_date = "%s %s" % (data.end_date[index].strftime('%d.%m.%Y'),
                                   data.end_date[index].time())
-            duration = data.durations[index]  #flight duration
+            duration = data.durations[index]  # flight duration
 
             #InsertStringItem provides creation of next string
             #without it impossible to create list
@@ -156,6 +159,7 @@ class MyFrame(wx.Frame):
         #-------------------------CREATE FILEMENU-------------------------------------
         filemenu = wx.Menu()  # Setting up the menu
         choose_file = filemenu.Append(wx.ID_ANY, "&Choose", " Choose file to open")
+        choose_cf = filemenu.Append(wx.ID_ANY, "&Choose Compact Flash", "Choose Compact Flash")
         save_file = filemenu.Append(wx.ID_ANY, "&Save", " Safe flight")
         save_raw_file = filemenu.Append(wx.ID_ANY, "&Save RAW", " Save raw data")
         menu_exit = filemenu.Append(wx.ID_EXIT, "E&xit", " Terminate the program")
@@ -164,13 +168,18 @@ class MyFrame(wx.Frame):
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
-        self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
-        self.Bind(wx.EVT_MENU, self.on_choose, choose_file)
+        self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
+        self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
         self.Bind(wx.EVT_TOOL, self.save, id=134)
         self.Bind(wx.EVT_MENU, self.save, save_file)
         self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_MENU, self.save_raw, save_raw_file)
         self.Bind(wx.EVT_MENU, self.on_close, menu_exit)
+        self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
+        self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
+        #self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+
+
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
@@ -179,6 +188,8 @@ class MyFrame(wx.Frame):
         self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
+        self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
+        #b = wx.Button(self, -1, "Create and Show a DirDialog", (50,50))
         #self.toolbar.AddLabelTool(3, '', wx.Bitmap('GUI/icons/close.png'))
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -206,16 +217,6 @@ class MyFrame(wx.Frame):
 
         self.tool_bar()
 
-        '''
-        #-----------------------TOOLBAR----------------------------------------
-        self.toolbar = self.CreateToolBar()
-        self.toolbar.SetToolBitmapSize((32,32))
-        self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
-        self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
-        self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
-        self.toolbar.AddSeparator()
-        self.toolbar.Realize()'''
-
         panel = MyPanel(self, self.q, self.path)
 
         self.sizer.Add(panel)
@@ -224,7 +225,7 @@ class MyFrame(wx.Frame):
     def on_close(self, event):
         self.Destroy()
 
-    def on_choose(self, event):
+    def on_choose_file(self, event):
         """ Open a file"""
         self.dirname = ''
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
@@ -238,44 +239,30 @@ class MyFrame(wx.Frame):
             self.progress_bar.Pulse()
 
             self.statusbar.SetStatusText("Downloading...", 0)
-
-            '''
-            self.DestroyChildren()
-
-            self.status_bar()
-
-            self.progress_bar.Show()
-            self.progress_bar.SetValue(10)
-            #self.progress_bar.Pulse()
-            self.progress_bar.SetValue(50)
-            #self.sizer.Layout()
-
-            #--------------THREADING-------------------------------------------
-            self.statusbar.SetStatusText('Starting reading')
-
-            #self.q = QARReader(self.path)
-            self.progress_bar.SetValue(50)
-            self.progress_bar.SetValue(90)
-            self.progress_bar.SetValue(100)
-            #self.sizer.Layout()
-
-            #-----------------------TOOLBAR----------------------------------------
-            self.toolbar = self.CreateToolBar()
-            self.toolbar.SetToolBitmapSize((32,32))
-            self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
-            #self.toolbar.AddLabelTool(3, '', wx.Bitmap('GUI/icons/close.png'))
-            self.toolbar.AddSeparator()
-            self.toolbar.Realize()
-
-            #panel = MyPanel(self, self.q, self.path)
-
-            #self.progress_bar.Hide()
-            self.sizer.Layout()'''
-            #self.sizer.Layout()
         dlg.Destroy()
-
         try:
-            self.q = WorkerThread(self, self.path)
+            flag = "qar"
+            self.q = WorkerThread(self, self.path, flag)
+        except:
+            pass
+
+    def on_choose_cf(self, event):  # choose compact flash
+        # In this case we include a "New directory" button.
+        dlg = wx.DirDialog(self, "Choose a directory:",
+                          style=wx.DD_DEFAULT_STYLE
+                           #| wx.DD_DIR_MUST_EXIST
+                           #| wx.DD_CHANGE_DIR
+                           )
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if dlg.ShowModal() == wx.ID_OK:
+            self.path = dlg.GetPath()
+        # Only destroy a dialog after you're done with it.
+        dlg.Destroy()
+        try:
+            flag = "cf"
+            self.q = WorkerThread(self, self.path, flag)
         except:
             pass
 
@@ -292,7 +279,7 @@ class MyFrame(wx.Frame):
         self.progress_bar.Pulse()
 
         name = self.form_name("flight")
-        f = Flight(start, end, self.path, name, self.qar_type)
+        f = Flight(self.progress_bar, start, end, self.path, name, self.qar_type)
         self.progress_bar.SetValue(100)
 
     def save_raw(self, event):

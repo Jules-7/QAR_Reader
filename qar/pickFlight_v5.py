@@ -13,7 +13,8 @@ class Flight:
     and make either RAW file or send data further
     to be processed according to QAR type"""
 
-    def __init__(self, start, end, path, name, qar_type):
+    def __init__(self, gui_progress, start, end, path, name, qar_type):
+        self.progress_bar = gui_progress
         self.start = start
         self.end = end
         self.path = path
@@ -58,7 +59,7 @@ class Flight:
             tmp_file_name = file_name + ".tmp"  # tmp file with flight
             new_file = open(tmp_file_name, 'wb')
             new_file.write(self.flight)
-            a320 = A320(param_file_name, tmp_file_name, 768, 192)
+            a320 = A320(param_file_name, tmp_file_name, 768, 192, self.progress_bar)
             '''
             if self.qar_type == "VDR":
                 saab = SAAB(tmp_file_name, param_file_name, tmp_param_file, 384, 96)

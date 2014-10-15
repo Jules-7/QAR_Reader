@@ -3,7 +3,7 @@ import struct
 
 class PrepareData(object):
 
-    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len):
+    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len, progress_bar):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
         self.param_file = None  # target parametric file ".inf"
@@ -13,6 +13,7 @@ class PrepareData(object):
         self.mix_type = None
         self.frame_len = frame_len
         self.subframe_len = subframe_len
+        self.progress_bar = progress_bar
 
     def record_data(self):
         while self.bytes_counter < self.param_file_end - 4:
