@@ -86,15 +86,15 @@ class MyPanel(wx.Panel):
             except IndexError:
                 flight = str(data.flight_intervals[index][0]) + ":" + str(0)
 
-            start_date = "%s %s" % (data.curr_date[index].strftime('%d.%m.%Y'),
-                                    data.curr_date[index].time())
+            start_date = "%s %s" % (data.start_date[index].strftime('%d.%m.%Y'),
+                                    data.start_date[index].time())
             end_date = "%s %s" % (data.end_date[index].strftime('%d.%m.%Y'),
                                   data.end_date[index].time())
             duration = data.durations[index]  # flight duration
 
             #InsertStringItem provides creation of next string
             #without it impossible to create list
-            self.list_ctrl.InsertStringItem(index, str(data.flights[index]))
+            self.list_ctrl.InsertStringItem(index, str(data.flights_start[index]))
             self.list_ctrl.SetStringItem(index, 1, start_date)
             self.list_ctrl.SetStringItem(index, 2, end_date)
             self.list_ctrl.SetStringItem(index, 3, duration)
