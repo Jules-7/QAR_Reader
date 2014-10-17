@@ -1,6 +1,23 @@
+#-*-coding: utf-8-*-
 import os
 import datetime
 import time
+
+
+""" Compact Flash Header description (complete description is absent)
+
+Header length: 32 B
+
+0 - 1: header pattern (in present case -> 0403 (hex))
+2 - 3: flight number (as it is) -> if there is 27 - it means 27th flight
+4 - 5: may be part of cluster №
+6 - 7: cluster № (hex)
+    9: seconds (as it is)
+   10: minutes (as it is)
+   11: hours   (as it is)
+   12: day     (as it is)
+   13: month   (as it is)
+   14: year    (last two digits as it is) """
 
 
 class CompactFlash(object):
@@ -37,8 +54,12 @@ class CompactFlash(object):
         self.get_flights_start()
         self.get_flights_duration()
         self.get_flights_end()
+        # re-assignment due to use os self.path for future processing
+        self.path = copy_file
 
     def copy_cf_data(self):
+        """ Copy data from Compact Flash into temporary file on computer.
+        This ensure more convenient and quick data access """
         copy_name = "E:/cf.tmp"
         new_file = open(copy_name, "wb")
         counter = 0
@@ -51,6 +72,8 @@ class CompactFlash(object):
         return copy_name
 
     def get_header_pattern(self):
+        """ Determine how each header start (by the first one)
+        and then use this pattern for headers chech within file """
         while not self.header_pattern:
             next_byte = self.source.read(1)
             self.bytes_counter += 1
@@ -64,6 +87,10 @@ class CompactFlash(object):
                 self.source.seek(-self.header_len, 1)
 
     def find_flights(self):
+        """ Using header pattern and notion that headers are written
+        at the start of each 8KB cluster find all flights` starts.
+        Before start flight header a chunk of zeros
+        (of different size) is present """
         while self.bytes_counter < self.source_len - self.cluster_size - 16:
             self.source.seek(self.cluster_size, 1)
             self.bytes_counter += self.cluster_size
@@ -94,6 +121,9 @@ class CompactFlash(object):
             i += 1
 
     def get_last_flight_end(self, start):
+        """ As there is no way to get another header after last flight,
+        simply process bytes starting from last flight start index
+        and search for end flight pattern, which is chunk of zeros """
         self.source.seek(start, 0)
         bytes_counter = start
         end_pattern = [0]*48

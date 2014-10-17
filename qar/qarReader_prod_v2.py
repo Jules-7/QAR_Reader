@@ -2,6 +2,7 @@
 import os
 import time
 import datetime
+
 """this module:
 - finds flight
 - checks headers
@@ -9,7 +10,7 @@ import datetime
 - return all technical/additional information"""
 
 monstr = 'MONSTR'
-cluster = 32768  #cluster size in bytes
+cluster = 32768  # cluster size in bytes
 counter_increment = float(4294967295)
 qar_types = {0: u"ЭБН-12",
              1: u"ЭБН-64",
@@ -30,7 +31,7 @@ class QARReader():
         self.path = path
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
-        self.index = 524288  #beginnig of records in bytes
+        self.index = 524288  # beginnig of records in bytes
         self.flights_start = []
         self.flight_intervals = []
         self.headers = []
@@ -134,7 +135,7 @@ class QARReader():
         self.init_counter = self.process_counter(header[109], header[108], header[107], header[106])
         # convert to int
         self.init_date = datetime.datetime(int(init_year), int(init_month), int(init_day),
-                                  int(init_hour), int(init_minute), int(init_second))
+                                           int(init_hour), int(init_minute), int(init_second))
 
     def check_header(self, header):
         corrupted = '0xff' * 16

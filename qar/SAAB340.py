@@ -1,12 +1,14 @@
 from processing import PrepareData
 
+""" SAAB - 340. Creation of parametric file with data being processed """
+
 
 class SAAB(PrepareData):
 
-    def __init__(self, tmp_file_name, param_file_name, tmp_param_file, frame, subframe):
+    def __init__(self, tmp_file_name, param_file_name, tmp_param_file, frame, subframe, progress_bar, path_to_save):
         PrepareData.__init__(self, tmp_param_file=tmp_param_file, param_file_name=param_file_name,
-                             frame_len=frame, subframe_len=subframe)
-        self.param_file = open(param_file_name, "wb")  # target parametric file ".inf"
+                             frame_len=frame, subframe_len=subframe, progress_bar=progress_bar,
+                             path_to_save=path_to_save)
         #----------- make export of parametric info to tmp param file -----------------
         self.export_param_saab(tmp_file_name, tmp_param_file)
         self.source_file = (open(tmp_param_file, "rb")).read()  # just created tmp parametric file

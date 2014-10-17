@@ -68,9 +68,9 @@ class MyPanel(wx.Panel):
         self.qar_type = data.qar_type
 
         self.list_ctrl = wx.ListCtrl(self,
-                                style=wx.LC_REPORT
-                                |wx.BORDER_SUNKEN,
-                                size=(2000, 2000))#list of items with scroll
+                                     style=wx.LC_REPORT
+                                     |wx.BORDER_SUNKEN,
+                                     size=(2000, 2000))  # list of items with scroll
         self.list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
         self.list_ctrl.InsertColumn(0, "ID", width=100)
         self.list_ctrl.InsertColumn(1, "Start date", width=140)
@@ -112,9 +112,9 @@ class MyPanel(wx.Panel):
 
     #----------------------------------------------------------------------
     def on_item_selected(self, event):
-        '''at row selection - index is returned
+        ''' at row selection - index is returned
         using that index search for flight from flights_dict
-        and pass it for processing'''
+        and pass it for processing '''
         selected_flight = event.m_itemIndex
         self.parent.selected = self.flights_dict[selected_flight]
 
@@ -179,8 +179,6 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
         #self.Bind(wx.EVT_BUTTON, self.OnButton, b)
 
-
-
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
         self.toolbar = self.CreateToolBar()
@@ -217,7 +215,7 @@ class MyFrame(wx.Frame):
 
         self.tool_bar()
 
-        panel = MyPanel(self, self.q, self.path)
+        panel = MyPanel(self, self.q, self.q.path)
 
         self.sizer.Add(panel)
         self.sizer.Layout()
@@ -241,8 +239,8 @@ class MyFrame(wx.Frame):
             self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
         try:
-            flag = "qar"
-            self.q = WorkerThread(self, self.path, flag)
+            self.flag = "qar"
+            self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
 
@@ -261,8 +259,8 @@ class MyFrame(wx.Frame):
         # Only destroy a dialog after you're done with it.
         dlg.Destroy()
         try:
-            flag = "cf"
-            self.q = WorkerThread(self, self.path, flag)
+            self.flag = "cf"
+            self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
 
@@ -272,14 +270,16 @@ class MyFrame(wx.Frame):
 
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
-        #print("starts at %s and ends at %s indexes"%(start, end))
+
+        self.get_path_to_save()
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         self.progress_bar.Pulse()
 
         name = self.form_name("flight")
-        f = Flight(self.progress_bar, start, end, self.path, name, self.qar_type)
+        f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
+                   self.path_to_save, self.flag)
         self.progress_bar.SetValue(100)
 
     def save_raw(self, event):
@@ -288,12 +288,15 @@ class MyFrame(wx.Frame):
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
 
+        self.get_path_to_save()
+
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         self.progress_bar.Pulse()
 
         name = self.form_name("raw")
-        f = Flight(start, end, self.path, name)
+        f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
+                   self.path_to_save, self.flag)
         self.progress_bar.SetValue(100)
 
     def form_name(self, rec_type):
@@ -307,6 +310,19 @@ class MyFrame(wx.Frame):
             name = "raw_" + date.strftime("%H%M%S_%d%m%y")
             self.statusbar.SetStatusText("Raw file is exported", 0)
             return name
+
+    def get_path_to_save(self):
+        save_dialog = wx.DirDialog(self, "Choose a directory to save file:",
+                                   style=wx.DD_DEFAULT_STYLE
+                                   #| wx.DD_DIR_MUST_EXIST
+                                   #| wx.DD_CHANGE_DIR
+                                   )
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if save_dialog.ShowModal() == wx.ID_OK:
+            self.path_to_save = save_dialog.GetPath()
+
 #----------------------------------------------------------------------
 
 app = wx.App(False)

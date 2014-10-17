@@ -1,12 +1,15 @@
 import struct
 
+""" This module holds basic methods for frames search"""
+
 
 class PrepareData(object):
 
-    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len, progress_bar):
+    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len, progress_bar, path_to_save):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
-        self.param_file = None  # target parametric file ".inf"
+        # target parametric file ".inf"
+        self.param_file = open(r"%s" % path_to_save + r"\\" + r"%s" % param_file_name, "wb")
         self.sw_one = "001001000111"  # syncword one
         self.sw_two = "010110111000"  # syncword two
         self.bytes_counter = 0
