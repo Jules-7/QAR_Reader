@@ -31,7 +31,7 @@ class QARReader():
         self.path = path
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
-        self.index = 524288  # beginnig of records in bytes
+        self.index = 524288  # beginning of records in bytes
         self.flights_start = []
         self.flight_intervals = []
         self.headers = []
@@ -49,7 +49,7 @@ class QARReader():
         self.dat.close()
 
     def is_flight(self):
-        '''check for MONSTR and if so record header'''
+        ''' check for MONSTR and if so record header '''
         flight = self.dat.read(6)
         if flight == monstr:
             header = self.dat.read(122)
@@ -108,7 +108,7 @@ class QARReader():
         self.dat.seek(start)
         check_twenty = ''
         counter = 0
-        ch = '00000000000000000000'
+        end_sign = '00000000000000000000'
         while True:
             next_byte = self.dat.read(1)
             counter += 1
@@ -117,7 +117,7 @@ class QARReader():
                 counter += 20
                 for each in next_twenty_byte:
                     check_twenty += str(ord(each))
-                if check_twenty == ch:
+                if check_twenty == end_sign:
                     break
                 else:
                     check_twenty = ''

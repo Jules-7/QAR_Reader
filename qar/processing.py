@@ -5,7 +5,7 @@ import struct
 
 class PrepareData(object):
 
-    def __init__(self, tmp_param_file, param_file_name, frame_len, subframe_len, progress_bar, path_to_save):
+    def __init__(self, tmp_file_name, param_file_name, frame_len, subframe_len, progress_bar, path_to_save, flag):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
         # target parametric file ".inf"
@@ -17,6 +17,7 @@ class PrepareData(object):
         self.frame_len = frame_len
         self.subframe_len = subframe_len
         self.progress_bar = progress_bar
+        self.flag = flag
 
     def record_data(self):
         while self.bytes_counter < self.param_file_end - 4:
@@ -24,7 +25,7 @@ class PrepareData(object):
                 self.param_file.close()
                 print("didnt find syncword")
             elif self.mix_type % 2 == 1:
-                #--- if syncword is found at 2d subword, it means that syncowrd ---
+                #--- if syncword is found at 2d subword, it means that syncword ---
                 #--- is at the end of list (2d, 3d bytes), so we shift two byes ---
                 #--- and can use the same scheme but for first subword          ---
                 self.mix_type -= 1
@@ -95,8 +96,13 @@ class PrepareData(object):
                     self.scheme_search()
 
     def header_to_param_file(self):
-        self.param_file.write(self.source_file[:128])  # rewrite header to target file
-        self.bytes_counter += 128  # increase counter on header size
+        header_length = None
+        if self.flag == "qar":
+            header_length = 128  # header length is 128 bytes
+        elif self.flag == "cf":  # if flag says its compact flash -> header length is 32
+            header_length = 32
+        self.param_file.write(self.source_file[:header_length])  # rewrite header to target file
+        self.bytes_counter += header_length  # increase counter on header size
 
     def scheme_search(self):
         """ Perform search of mix scheme type """
@@ -120,8 +126,9 @@ class PrepareData(object):
             i = 0
             for word in mixed_words:
                 if word == self.sw_one:
-                    print("found match")
-                    print(self.bytes_counter)
+                    #----------------------------------------------------------
+                    #print("found match")
+                    #print(self.bytes_counter)
                     frame = self.source_file[self.bytes_counter:self.bytes_counter + self.frame_len]
                     self.bytes_counter += self.frame_len
                     next_frame_search = [frame[self.frame_len - 4],
@@ -136,11 +143,12 @@ class PrepareData(object):
                     subframe_sw_variants = self.mix_syncword(next_subframe_search)
 
                     if frame_sw_variants[i] == self.sw_one and subframe_sw_variants[i] == self.sw_two:
-                        print("found mix type")
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
                         self.mix_type = i
-                        print("mix type is # %s" % self.mix_type)
+                        #------------------------------------------------------
+                        #print("found mix type")
+                        #print("mix type is # %s" % self.mix_type)
                     else:
                         self.bytes_counter -= self.frame_len
                 else:

@@ -1,8 +1,10 @@
 from SAAB340 import SAAB
 from airbus import A320
+import os
+import win32api
 
 """this module:
-              - finds ARINC 717 synchrowords
+              - finds ARINC 717 syncwords
               - checks integrity of frames
               - return only valid frames"""
 
@@ -55,20 +57,28 @@ class Flight:
     def make_flight(self):
         if "flight" in self.name:
             """make tmp file for future processing"""
-            separator = self.path.rfind('/')
-            new_path = self.path[:separator + 1]
-            file_name = new_path + str(self.name)
-            param_file_name = str(self.name) + ".inf"  # target parametric file/mix scheme is applied
-            tmp_param_file = file_name + ".bin"  # interim file with parametric data
-            tmp_file_name = file_name + ".tmp"  # tmp file with flight
+            #separator = self.path.rfind('/')
+            #new_path = self.path[:separator + 1]
+            #file_name = new_path + str(self.name)
+            tmp_file_name = str(win32api.GetTempPath()) + self.name + ".tmp"  # tmp file with flight
+            print("tmp_file_name %s" % tmp_file_name)
+            target_file_name = str(self.name) + ".inf"  # target parametric file, mix scheme is applied
+            # pass it to SAAB only
+            # interim file with parametric data for SAAB
+            tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
             new_file = open(tmp_file_name, 'wb')
             new_file.write(self.flight)
-            a320 = A320(param_file_name, tmp_file_name, 768, 192, self.progress_bar, self.path_to_save)
+            #a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar, self.path_to_save, self.flag)
+            saab = SAAB(tmp_file_name, target_file_name, 384, 96,
+                        self.progress_bar, self.path_to_save, self.flag, tmp_bin_file)
+
             '''
             if self.qar_type == "VDR":
-                saab = SAAB(tmp_file_name, param_file_name, tmp_param_file, 384, 96)
+                saab = SAAB(tmp_file_name, target_file_name, tmp_param_file, 384, 96,
+                self.progress_bar, self.path_to_save, self.flag, tmp_bin_file)
             elif self.qar_type == "":
-                a320 = A320(param_file_name, tmp_file_name, 768, 192)'''
+                a320 = A320(tmp_file_name, target_file_name, 768, 192,
+                            self.progress_bar, self.path_to_save, self.flag)'''
         elif "raw" in self.name:
             """save raw data in file"""
             #separ = self.path.rfind('/')
@@ -77,5 +87,21 @@ class Flight:
             new_file.write(self.flight)
 
     def prepare_cf_file(self):
-        header = 32
-        data = open(self.path, 'rb')
+        """ Each cluster begins with header.
+        Leave the first header and delete other """
+        header = 32  # bytes
+        data = open(self.path, 'rb')  # path to tmp file containing full copy of compact flash
+        cluster = 8192  # cluster size in bytes
+        data.seek(self.start, 0)
+        flight_length = self.end - self.start
+        self.flight = data.read(cluster)  # read first header and data till next header
+        bytes_counter = cluster
+        while bytes_counter < flight_length:
+            data.seek(header, 1)
+            self.flight += data.read(cluster - header)
+            bytes_counter += cluster
+        #print("flight length before is %s" % flight_length)
+        #print("flight length after is %s" % len(flight))
+
+
+

@@ -2,6 +2,8 @@
 import os
 import datetime
 import time
+import win32api
+
 
 
 """ Compact Flash Header description (complete description is absent)
@@ -58,9 +60,10 @@ class CompactFlash(object):
         self.path = copy_file
 
     def copy_cf_data(self):
-        """ Copy data from Compact Flash into temporary file on computer.
+        """ Copy data from Compact Flash into temporary file on computer drive C.
         This ensure more convenient and quick data access """
-        copy_name = "E:/cf.tmp"
+        copy_name = str(win32api.GetTempPath()) + "cf.tmp"
+        #copy_name = r"C:\\cf.tmp"  # when should I delete this file?
         new_file = open(copy_name, "wb")
         counter = 0
         read_chunk = 512  # amount of bytes to read at a time
