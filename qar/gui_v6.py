@@ -69,7 +69,7 @@ class MyPanel(wx.Panel):
 
         self.list_ctrl = wx.ListCtrl(self,
                                      style=wx.LC_REPORT
-                                     |wx.BORDER_SUNKEN,
+                                     | wx.BORDER_SUNKEN,
                                      size=(2000, 2000))  # list of items with scroll
         self.list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
         self.list_ctrl.InsertColumn(0, "ID", width=100)
@@ -104,7 +104,7 @@ class MyPanel(wx.Panel):
             index += 1
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.list_ctrl, 0, wx.ALL|wx.EXPAND)
+        sizer.Add(self.list_ctrl, 0, wx.ALL | wx.EXPAND)
         self.SetSizer(sizer)
 
         self.parent.statusbar.SetStatusText("All flights are downloaded. "
@@ -128,7 +128,7 @@ class MyFrame(wx.Frame):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        wx.Frame.__init__(self, None, wx.ID_ANY, "QAR", size=(500, 400))
+        wx.Frame.__init__(self, None, wx.ID_ANY, "QAR Reader", size=(600, 500))
 
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -160,12 +160,20 @@ class MyFrame(wx.Frame):
         filemenu = wx.Menu()  # Setting up the menu
         choose_file = filemenu.Append(wx.ID_ANY, "&Choose", " Choose file to open")
         choose_cf = filemenu.Append(wx.ID_ANY, "&Choose Compact Flash", "Choose Compact Flash")
-        save_file = filemenu.Append(wx.ID_ANY, "&Save", " Safe flight")
-        save_raw_file = filemenu.Append(wx.ID_ANY, "&Save RAW", " Save raw data")
-        menu_exit = filemenu.Append(wx.ID_EXIT, "E&xit", " Terminate the program")
+        menu_exit = filemenu.Append(wx.ID_EXIT, "&Exit", " Terminate the program")
+
+        savemenu = wx.Menu()  # Setting up the menu
+        save_file = savemenu.Append(wx.ID_ANY, "&Save", " Safe flight")
+        save_raw_file = savemenu.Append(wx.ID_ANY, "&Save RAW", " Save raw data")
+
+        checkmenu = wx.Menu()
+        check_boeing = checkmenu.Append(wx.ID_ANY, "&Check Boeing-747", "Choose Boeing-747 file to check ")
+
 
         menubar = wx.MenuBar()  # Creating the menubar
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
+        menubar.Append(savemenu, "&Save")  # Adding the "savemenu" to the MenuBar
+        menubar.Append(checkmenu, "&Check")
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
@@ -177,18 +185,28 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_close, menu_exit)
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
         self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
+        self.Bind(wx.EVT_TOOL, self.check_boeing_747, id=137)
+        self.Bind(wx.EVT_MENU, self.check_boeing_747, check_boeing)
         #self.Bind(wx.EVT_BUTTON, self.OnButton, b)
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
-        self.toolbar = self.CreateToolBar()
-        self.toolbar.SetToolBitmapSize((32,32))
+        self.toolbar = wx.ToolBar(self, -1)
+        #self.toolbar = self.CreateToolBar()
+        self.toolbar.SetToolBitmapSize((32, 32))
         self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
+        self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
-        self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
-        #b = wx.Button(self, -1, "Create and Show a DirDialog", (50,50))
-        #self.toolbar.AddLabelTool(3, '', wx.Bitmap('GUI/icons/close.png'))
+        self.toolbar.AddLabelTool(137, 'Check Boeing-747', wx.Bitmap('E:/boeing_747.jpg'))
+
+        #--------- HELP for toolbar bitmaps ------------------------------
+        self.toolbar.SetToolLongHelp(133, "Open file containing flights")
+        self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
+        self.toolbar.SetToolLongHelp(134, "Save chosen flight")
+        self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
+        self.toolbar.SetToolLongHelp(137, "Check Boeing-747 data")
+
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
 
@@ -247,7 +265,7 @@ class MyFrame(wx.Frame):
     def on_choose_cf(self, event):  # choose compact flash
         # In this case we include a "New directory" button.
         dlg = wx.DirDialog(self, "Choose a directory:",
-                          style=wx.DD_DEFAULT_STYLE
+                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
                            #| wx.DD_DIR_MUST_EXIST
                            #| wx.DD_CHANGE_DIR
                            )
@@ -257,12 +275,40 @@ class MyFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.path = dlg.GetPath()
         # Only destroy a dialog after you're done with it.
+
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(10)
+        self.progress_bar.Pulse()
+
+        self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
         try:
             self.flag = "cf"
             self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
+
+    def check_boeing_747(self, event):
+        self.dirname = ''
+        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.filename = dlg.GetFilename()
+            self.dirname = dlg.GetDirectory()
+            self.path = str(self.dirname + '//' + self.filename)
+
+            self.progress_bar.Show()
+            self.progress_bar.SetValue(10)
+            self.progress_bar.Pulse()
+
+        self.statusbar.SetStatusText("Downloading...", 0)
+        dlg.Destroy()
+        try:
+            self.flag = "boeing_check"
+            self.q = WorkerThread(self, self.path, self.flag)
+        except:
+            pass
+
+        #print("you have chosen boeing")
 
     def save(self, event):
 
@@ -290,6 +336,8 @@ class MyFrame(wx.Frame):
 
         self.get_path_to_save()
 
+
+
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         self.progress_bar.Pulse()
@@ -314,7 +362,7 @@ class MyFrame(wx.Frame):
     def get_path_to_save(self):
         save_dialog = wx.DirDialog(self, "Choose a directory to save file:",
                                    style=wx.DD_DEFAULT_STYLE
-                                   #| wx.DD_DIR_MUST_EXIST
+                                   | wx.DD_DIR_MUST_EXIST
                                    #| wx.DD_CHANGE_DIR
                                    )
         # If the user selects OK, then we process the dialog's data.

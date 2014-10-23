@@ -31,7 +31,7 @@ class QARReader():
         self.path = path
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
-        self.index = 524288  # beginning of records in bytes
+        self.index = 524288  # index of records beginning in bytes
         self.flights_start = []
         self.flight_intervals = []
         self.headers = []
@@ -105,12 +105,15 @@ class QARReader():
             i += 1
 
     def get_last_flight_end(self, start):
-        self.dat.seek(start)
+        header = 128
+        self.dat.seek(start + header)
         check_twenty = ''
         counter = 0
         end_sign = '00000000000000000000'
         while True:
             next_byte = self.dat.read(1)
+            if next_byte == "":
+                return start + counter
             counter += 1
             if ord(next_byte) == 0:
                 next_twenty_byte = self.dat.read(20)
