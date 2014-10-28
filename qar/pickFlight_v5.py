@@ -26,9 +26,14 @@ class Flight:
         self.qar_type = qar_type
         if self.flag == "cf":
             self.prepare_cf_file()
+            self.make_flight()
+        elif self.flag == "boeing_check":
+            self.get_flight()
+            self.save_flight()
         else:
             self.get_flight()
-        self.make_flight()
+            self.make_flight()
+
 
     def get_flight(self):
         header = 128
@@ -103,5 +108,9 @@ class Flight:
         #print("flight length before is %s" % flight_length)
         #print("flight length after is %s" % len(flight))
 
+    def save_flight(self):
+        """save flight as it is in file"""
+        new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + '.inf', 'wb')
+        new_file.write(self.flight)
 
 

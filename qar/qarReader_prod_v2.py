@@ -100,8 +100,8 @@ class QARReader():
             duration_in_sec = frames_in_flight / frame_rate
             end = self.start_date[i] + datetime.timedelta(seconds=duration_in_sec)
             self.end_date.append(end)
-            duration = time.strftime('%H h %M m %S s', time.gmtime(duration_in_sec))
-            self.durations.append(duration)
+            #duration = time.strftime('%H h %M m %S s', time.gmtime(duration_in_sec))
+            self.durations.append(duration_in_sec)
             i += 1
 
     def get_last_flight_end(self, start):

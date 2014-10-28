@@ -40,7 +40,7 @@ class CompactFlash(object):
         self.bytes_counter = 0
         self.flights_start = []
         self.flight_intervals = []
-        self.durations_int = []
+        #self.durations_int = []
         self.durations = []  # flights durations
         self.time = []
         self.end_date = []  # flights end date
@@ -172,19 +172,20 @@ class CompactFlash(object):
             i += 1
         for each in duration_cluster:
             duration_time = ((each * self.cluster_size) / self.frame_len) * self.frame_duration  # in sec
-            duration_sec = time.strftime('%H h %M m %S s', time.gmtime(duration_time))
-            self.durations.append(duration_sec)
-            self.durations_int.append(duration_time)
+            #duration_sec = time.strftime('%H h %M m %S s', time.gmtime(duration_time))
+            self.durations.append(duration_time)
+            #self.durations_int.append(duration_time)
         #------ Calculate duration for last flight ---------
         last_dur = self.flight_intervals[-1][1] - self.flight_intervals[-1][0]  # Bytes
         dur = (last_dur / self.frame_len) * self.frame_duration
-        duration_sec = time.strftime('%H h %M m %S s', time.gmtime(dur))
-        self.durations.append(duration_sec)
-        self.durations_int.append(dur)
+        #duration_sec = time.strftime('%H h %M m %S s', time.gmtime(dur))
+        #self.durations.append(duration_sec)
+        self.durations.append(dur)
+        #self.durations_int.append(dur)
 
     def get_flights_end(self):
         i = 0
         while i < len(self.start_date):
-            flight_end = self.start_date[i] + datetime.timedelta(seconds=int(self.durations_int[i]))
+            flight_end = self.start_date[i] + datetime.timedelta(seconds=int(self.durations[i]))
             self.end_date.append(flight_end)
             i += 1

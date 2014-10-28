@@ -2,10 +2,11 @@
 from threading import *
 import wx
 import datetime
+import time
 from qarReader_prod_v2 import QARReader
 from pickFlight_v5 import Flight
 from splitter import Split
-
+import os
 """this module:
 - creates window for choosing of file with flights
 - displays all flights in file
@@ -72,10 +73,11 @@ class MyPanel(wx.Panel):
                                      | wx.BORDER_SUNKEN,
                                      size=(2000, 2000))  # list of items with scroll
         self.list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
-        self.list_ctrl.InsertColumn(0, "ID", width=100)
-        self.list_ctrl.InsertColumn(1, "Start date", width=140)
-        self.list_ctrl.InsertColumn(2, "End date", width=140)
-        self.list_ctrl.InsertColumn(3, "Duration", width=100)
+        self.list_ctrl.InsertColumn(0, u"Flight №", width=70)
+        self.list_ctrl.InsertColumn(1, "ID", width=100)
+        self.list_ctrl.InsertColumn(2, "Start date", width=140)
+        self.list_ctrl.InsertColumn(3, "End date", width=140)
+        self.list_ctrl.InsertColumn(4, "Duration", width=100)
 
         index = 0
         self.flights_dict = {}
@@ -90,14 +92,16 @@ class MyPanel(wx.Panel):
                                     data.start_date[index].time())
             end_date = "%s %s" % (data.end_date[index].strftime('%d.%m.%Y'),
                                   data.end_date[index].time())
-            duration = data.durations[index]  # flight duration
-
+            # flight duration
+            #duration = data.durations[index]
+            duration = time.strftime('%H h %M m %S s', time.gmtime(data.durations[index]))
             #InsertStringItem provides creation of next string
             #without it impossible to create list
-            self.list_ctrl.InsertStringItem(index, str(data.flights_start[index]))
-            self.list_ctrl.SetStringItem(index, 1, start_date)
-            self.list_ctrl.SetStringItem(index, 2, end_date)
-            self.list_ctrl.SetStringItem(index, 3, duration)
+            self.list_ctrl.InsertStringItem(index, str(index + 1))
+            self.list_ctrl.SetStringItem(index, 1,  str(data.flights_start[index]))
+            self.list_ctrl.SetStringItem(index, 2, start_date)
+            self.list_ctrl.SetStringItem(index, 3, end_date)
+            self.list_ctrl.SetStringItem(index, 4, duration)
 
             #associate index of row with particular flight
             self.flights_dict[index] = flight
@@ -121,6 +125,55 @@ class MyPanel(wx.Panel):
         self.parent.progress_bar.Hide()
 
 
+class SettingsPanel(wx.Panel):
+    """ Panel to display Additional Settings options """
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        sampleList = ['Airbus']
+
+        wx.StaticText(self, -1, "Chose Additional Settings", (45, 15))
+        lb = wx.CheckListBox(self, -1, (30, 50), wx.DefaultSize, sampleList)
+        #self.Bind(wx.EVT_LISTBOX, self.EvtListBox, lb)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.EvtCheckListBox, lb)
+        lb.SetSelection(0)
+        self.lb = lb
+
+        #lb.Bind(wx.EVT_RIGHT_DOWN, self.OnDoHitTest)
+
+        pos = lb.GetPosition().x + lb.GetSize().width + 25
+        #btn = wx.Button(self, -1, "Test SetString", (pos, 50))
+        #self.Bind(wx.EVT_BUTTON, self.OnTestButton, btn)
+
+    '''def EvtListBox(self, event):
+        print('EvtListBox: %s\n' % event.GetString())'''
+
+    def EvtCheckListBox(self, event):
+        index = event.GetSelection()
+        label = self.lb.GetString(index)
+        status = 'un'
+        if self.lb.IsChecked(index):
+            status = ''
+        print('Box %s is %schecked \n' % (label, status))
+        self.lb.SetSelection(index)    # so that (un)checking also selects (moves the highlight)
+
+
+'''def OnDoHitTest(self, evt):
+            item = self.lb.HitTest(evt.GetPosition())
+            print("HitTest: %d\n" % item)'''
+
+
+'''def on_item_selected(self, event):
+        """ at row selection - index is returned
+        using that index search for flight from flights_dict
+        and pass it for processing """
+        selected_flight = event.m_itemIndex
+        self.parent.selected = self.flights_dict[selected_flight]
+
+        self.parent.progress_bar.Hide()'''
+
+
 ########################################################################
 class MyFrame(wx.Frame):
     """"""
@@ -133,6 +186,7 @@ class MyFrame(wx.Frame):
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.status_bar()
+        self.chosen_settings = []
         self.selected = None
         self.file_menu()
         self.tool_bar()
@@ -168,7 +222,7 @@ class MyFrame(wx.Frame):
 
         checkmenu = wx.Menu()
         check_boeing = checkmenu.Append(wx.ID_ANY, "&Check Boeing-747", "Choose Boeing-747 file to check ")
-
+        settings = checkmenu.Append(wx.ID_ANY, "&Settings", "Additional Settings")
 
         menubar = wx.MenuBar()  # Creating the menubar
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
@@ -176,6 +230,7 @@ class MyFrame(wx.Frame):
         menubar.Append(checkmenu, "&Check")
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
+        #--------- Bindings of buttons/commands with methods
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
         self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
         self.Bind(wx.EVT_TOOL, self.save, id=134)
@@ -187,18 +242,23 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
         self.Bind(wx.EVT_TOOL, self.check_boeing_747, id=137)
         self.Bind(wx.EVT_MENU, self.check_boeing_747, check_boeing)
-        #self.Bind(wx.EVT_BUTTON, self.OnButton, b)
+        self.Bind(wx.EVT_TOOL, self.settings, id=138)
+        self.Bind(wx.EVT_MENU, self.settings, settings)
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
-        self.toolbar = wx.ToolBar(self, -1)
-        #self.toolbar = self.CreateToolBar()
+        # do not use this at window reload -> toolbar is not a=show at first and
+        # then it appears on top of flights data
+        #self.toolbar = wx.ToolBar(self, -1)
+        self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((32, 32))
+        #---------- at executable creation -> place images to the same folder and change path
         self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
         self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
         self.toolbar.AddLabelTool(137, 'Check Boeing-747', wx.Bitmap('E:/boeing_747.jpg'))
+        self.toolbar.AddLabelTool(138, 'Settings', wx.Bitmap('E:/setting.png'))
 
         #--------- HELP for toolbar bitmaps ------------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -206,9 +266,17 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
         self.toolbar.SetToolLongHelp(137, "Check Boeing-747 data")
+        self.toolbar.SetToolLongHelp(138, "Additional settings")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
+
+    def settings(self, event):
+
+        panel = SettingsPanel(self)
+
+        self.sizer.Add(panel)
+        self.sizer.Layout()
 
     def OnResult(self, event):
         """Show Result status"""
@@ -220,9 +288,7 @@ class MyFrame(wx.Frame):
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
-        #self.progress_bar.Pulse()
         self.progress_bar.SetValue(50)
-        #self.sizer.Layout()
 
         #--------------THREADING-------------------------------------------
         self.statusbar.SetStatusText('Start loading')
@@ -243,18 +309,21 @@ class MyFrame(wx.Frame):
 
     def on_choose_file(self, event):
         """ Open a file"""
-        self.dirname = ''
-        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a directory:",
+                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
+                           #| wx.DD_DIR_MUST_EXIST
+                           #| wx.DD_CHANGE_DIR
+                           )
         if dlg.ShowModal() == wx.ID_OK:
-            self.filename = dlg.GetFilename()
-            self.dirname = dlg.GetDirectory()
-            self.path = str(self.dirname + '//' + self.filename)
+            self.path = u"%s" % dlg.GetPath()
+        else:
+            return     # the user changed idea...
 
-            self.progress_bar.Show()
-            self.progress_bar.SetValue(10)
-            self.progress_bar.Pulse()
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(10)
+        self.progress_bar.Pulse()
 
-            self.statusbar.SetStatusText("Downloading...", 0)
+        self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
         try:
             self.flag = "qar"
@@ -273,7 +342,9 @@ class MyFrame(wx.Frame):
         # This is done by getting the path data from the dialog - BEFORE
         # we destroy it.
         if dlg.ShowModal() == wx.ID_OK:
-            self.path = dlg.GetPath()
+            self.path = u"%s" % dlg.GetPath()
+        else:
+            return     # the user changed idea...
         # Only destroy a dialog after you're done with it.
 
         self.progress_bar.Show()
@@ -289,16 +360,19 @@ class MyFrame(wx.Frame):
             pass
 
     def check_boeing_747(self, event):
-        self.dirname = ''
-        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a directory:",
+                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
+                           #| wx.DD_DIR_MUST_EXIST
+                           #| wx.DD_CHANGE_DIR
+                           )
         if dlg.ShowModal() == wx.ID_OK:
-            self.filename = dlg.GetFilename()
-            self.dirname = dlg.GetDirectory()
-            self.path = str(self.dirname + '//' + self.filename)
+            self.path = u"%s" % dlg.GetPath()
+        else:
+            return     # the user changed idea...
 
-            self.progress_bar.Show()
-            self.progress_bar.SetValue(10)
-            self.progress_bar.Pulse()
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(10)
+        self.progress_bar.Pulse()
 
         self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
@@ -308,11 +382,12 @@ class MyFrame(wx.Frame):
         except:
             pass
 
-        #print("you have chosen boeing")
-
     def save(self, event):
-
-        separator = self.selected.find(':')
+        try:
+            separator = self.selected.find(':')
+        except AttributeError:
+            self.warning("Open file with flights to process first")
+            return
 
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
@@ -328,15 +403,22 @@ class MyFrame(wx.Frame):
                    self.path_to_save, self.flag)
         self.progress_bar.SetValue(100)
 
+    def warning(self, message, caption='Warning!'):
+        dlg = wx.MessageDialog(self, message, caption, wx.OK | wx.ICON_WARNING)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def save_raw(self, event):
-        separator = self.selected.find(':')
+        try:
+            separator = self.selected.find(':')
+        except AttributeError:
+            self.warning("Open file with flights to process first")
+            return
 
         start = int(self.selected[:separator])
         end = int(self.selected[separator + 1:])
 
         self.get_path_to_save()
-
-
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
@@ -370,10 +452,13 @@ class MyFrame(wx.Frame):
         # we destroy it.
         if save_dialog.ShowModal() == wx.ID_OK:
             self.path_to_save = save_dialog.GetPath()
+        else:
+            return     # the user changed idea...
+
+        save_dialog.Destroy()
 
 #----------------------------------------------------------------------
 
 app = wx.App(False)
 frame = MyFrame()
 app.MainLoop()
-

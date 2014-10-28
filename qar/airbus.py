@@ -11,6 +11,7 @@ class A320(PrepareData):
                              frame_len=frame, subframe_len=subframe, progress_bar=progress_bar,
                              path_to_save=path_to_save, flag=flag)
         self.progress_bar.Show()
+        self.qar_type = "airbus"
         self.progress_bar.SetValue(5)
         source = open(tmp_file_name, "rb")
         self.source_file = source.read()  # just created tmp parametric file

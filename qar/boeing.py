@@ -1,4 +1,6 @@
 import os
+import datetime
+import time
 from qarReader_prod_v2 import QARReader
 
 
@@ -13,19 +15,20 @@ class Boeing(object):
         self.flight_len = os.stat(self.path).st_size
         #self.index = 524288  # index of records beginning in bytes
         self.flights_start = []
+        self.flights_end= []
         self.flight_intervals = []
         self.headers = []
         self.date = []
         self.time = []
-        self.qar_type = None
+        self.qar_type = "boeing 747"
         self.init_date = None
-        self.start_date = []
         self.durations = []
-        self.end_date = []
         self.bytes_counter = 0
         self.subframe_len = 128
         self.frame_len = 512
+        self.frame_duration = 4  # sec
         self.end_flag = False
+        self.record_end_index = False
         #self.sw_one = "4702"
         #self.sw_two = "b805"
         #self.sw_three = "470a"
@@ -36,9 +39,13 @@ class Boeing(object):
         self.sw_three = ["71", "10"]
         self.sw_four = ["184", "13"]
         self.find_flights()
-        print(self.flights_start)
-        #self.get_flight_intervals()
-        #self.get_durations()
+        #for no we have no data -> create list of None for each date
+        date = datetime.datetime(int(2014), int(1), int(1), int(0), int(0), int(0))
+        self.start_date = [date] * len(self.flights_start)
+        self.end_date = [date] * len(self.flights_start)
+        #print(self.flights_start)
+        self.get_flight_intervals()
+        self.get_durations()
         #self.get_qar_type()
         #self.data.close()
 
@@ -71,12 +78,17 @@ class Boeing(object):
                 check = self.check_frame()
                 if check is True:
                     self.flights_start.append(flight_start)
-                    print(flight_start)
+                    #print(flight_start)
+                    self.record_end_index = True
                     return True
             else:
                 self.data.seek(-1, 1)
                 p11 = self.data.tell()
                 self.bytes_counter -= 1
+            if self.record_end_index is True:
+                self.flights_end.append(self.bytes_counter)
+                self.record_end_index = False
+
 
     def check_frame(self):
         check_sw_two = self.read_syncword()
@@ -99,3 +111,29 @@ class Boeing(object):
         self.data.seek(-2, 1)
         p2 = self.data.tell()
         return sw_ord
+
+    def get_flight_intervals(self):
+        i = 0
+        while i < len(self.flights_start):
+            start = self.flights_start[i]
+            try:
+                end = self.flights_end[i]
+            except IndexError:
+                end = self.flight_len
+            self.flight_intervals.append((start, end))
+            i += 1
+        '''
+        i = 0
+        for each in self.flights_start:
+            try:
+                self.flight_intervals.append((self.flights_start[i], self.flights_start[i + 1]))
+            except IndexError:
+                self.flight_intervals.append((self.flights_start[i], self.flight_len)) # last byte in file
+            i += 1'''
+
+    def get_durations(self):
+        for each in self.flight_intervals:
+            # get amount of bytes in flight, delete on frame length -> number of frames
+            # multiply by 4 sec -> duration of each frame
+            flight_duration = ((each[1] - each[0]) / self.frame_len) * self.frame_duration
+            self.durations.append(flight_duration)
