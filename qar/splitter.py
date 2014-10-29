@@ -1,6 +1,7 @@
 from qarReader_prod_v2 import QARReader
 from compact_flash import CompactFlash
 from boeing import Boeing
+from bur_92 import Bur
 
 
 class Split(object):
@@ -18,3 +19,6 @@ class Split(object):
         elif flag is "boeing_check":
             boeing_check = Boeing(path)
             self.result = boeing_check
+        elif flag is "bur_92":
+            bur = Bur(path)
+            self.result = bur

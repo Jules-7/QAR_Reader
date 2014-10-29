@@ -15,7 +15,7 @@ class Boeing(object):
         self.flight_len = os.stat(self.path).st_size
         #self.index = 524288  # index of records beginning in bytes
         self.flights_start = []
-        self.flights_end= []
+        self.flights_end = []
         self.flight_intervals = []
         self.headers = []
         self.date = []
@@ -43,10 +43,8 @@ class Boeing(object):
         date = datetime.datetime(int(2014), int(1), int(1), int(0), int(0), int(0))
         self.start_date = [date] * len(self.flights_start)
         self.end_date = [date] * len(self.flights_start)
-        #print(self.flights_start)
         self.get_flight_intervals()
         self.get_durations()
-        #self.get_qar_type()
         #self.data.close()
 
     def find_flights(self):

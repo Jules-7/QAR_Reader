@@ -98,7 +98,7 @@ class MyPanel(wx.Panel):
             #InsertStringItem provides creation of next string
             #without it impossible to create list
             self.list_ctrl.InsertStringItem(index, str(index + 1))
-            self.list_ctrl.SetStringItem(index, 1,  str(data.flights_start[index]))
+            self.list_ctrl.SetStringItem(index, 1, str(data.flights_start[index]))
             self.list_ctrl.SetStringItem(index, 2, start_date)
             self.list_ctrl.SetStringItem(index, 3, end_date)
             self.list_ctrl.SetStringItem(index, 4, duration)
@@ -222,6 +222,7 @@ class MyFrame(wx.Frame):
 
         checkmenu = wx.Menu()
         check_boeing = checkmenu.Append(wx.ID_ANY, "&Check Boeing-747", "Choose Boeing-747 file to check ")
+        bur = checkmenu.Append(wx.ID_ANY, "&BUR-92", "Choose BUR-92 file to structure it by flights ")
         settings = checkmenu.Append(wx.ID_ANY, "&Settings", "Additional Settings")
 
         menubar = wx.MenuBar()  # Creating the menubar
@@ -244,6 +245,9 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.check_boeing_747, check_boeing)
         self.Bind(wx.EVT_TOOL, self.settings, id=138)
         self.Bind(wx.EVT_MENU, self.settings, settings)
+        self.Bind(wx.EVT_TOOL, self.bur, id=139)
+        self.Bind(wx.EVT_MENU, self.bur, bur)
+
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
@@ -259,6 +263,7 @@ class MyFrame(wx.Frame):
         self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
         self.toolbar.AddLabelTool(137, 'Check Boeing-747', wx.Bitmap('E:/boeing_747.jpg'))
         self.toolbar.AddLabelTool(138, 'Settings', wx.Bitmap('E:/setting.png'))
+        self.toolbar.AddLabelTool(139, 'Structure BUR-92', wx.Bitmap('E:/bur_92.png'))
 
         #--------- HELP for toolbar bitmaps ------------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -267,6 +272,7 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
         self.toolbar.SetToolLongHelp(137, "Check Boeing-747 data")
         self.toolbar.SetToolLongHelp(138, "Additional settings")
+        self.toolbar.SetToolLongHelp(139, "Structure BUR-92 file")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -381,6 +387,30 @@ class MyFrame(wx.Frame):
             self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
+
+    def bur(self, event):
+        dlg = wx.FileDialog(self, "Choose a directory:",
+                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
+                            #| wx.DD_DIR_MUST_EXIST
+                            #| wx.DD_CHANGE_DIR
+                            )
+        if dlg.ShowModal() == wx.ID_OK:
+            self.path = u"%s" % dlg.GetPath()
+            print(self.path)
+        else:
+            return     # the user changed idea...
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(10)
+        self.progress_bar.Pulse()
+
+        self.statusbar.SetStatusText("Downloading...", 0)
+        dlg.Destroy()
+        try:
+            self.flag = "bur_92"
+            self.q = WorkerThread(self, self.path, self.flag)
+        except:
+            pass
+
 
     def save(self, event):
         try:

@@ -1,6 +1,5 @@
 from SAAB340 import SAAB
 from airbus import A320
-import os
 import win32api
 
 """this module:
@@ -27,7 +26,7 @@ class Flight:
         if self.flag == "cf":
             self.prepare_cf_file()
             self.make_flight()
-        elif self.flag == "boeing_check":
+        elif self.flag == "boeing_check" or self.flag == "bur_92":
             self.get_flight()
             self.save_flight()
         else:
