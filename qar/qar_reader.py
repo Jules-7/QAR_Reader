@@ -193,16 +193,19 @@ class MyFrame(wx.Frame):
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.status_bar()
-        self.chosen_settings = []
-        self.selected = []
+        self.chosen_acft_type = None  # means both acft type and data source type
+        self.acft_data_types = {321: "a320_qar",
+                                322: "a320_cf",
+                                323: "a320_fdr",
+                                331: "b747_qar",
+                                341: "an148_qar"}
+        self.selected = []  # flights selected from list
         self.file_menu()
         self.tool_bar()
-        self.saved_flights = []
+        self.saved_flights = []  # flights which are already processed and saved
 
         self.Show()
-
         EVT_RESULT(self, self.OnResult)
-
         self.SetSizer(self.sizer)
 
     def status_bar(self):
@@ -219,43 +222,127 @@ class MyFrame(wx.Frame):
 
     def file_menu(self):
         #-------------------------CREATE FILEMENU-------------------------------------
-        filemenu = wx.Menu()  # Setting up the menu
-        choose_file = filemenu.Append(wx.ID_ANY, "&Choose", " Choose file to open")
-        choose_cf = filemenu.Append(wx.ID_ANY, "&Choose Compact Flash", "Choose Compact Flash")
+
+        filemenu = wx.Menu()
+        choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
+        choose_cf = filemenu.Append(302, "&Choose Compact Flash", " Choose Compact Flash to open")
         menu_exit = filemenu.Append(wx.ID_EXIT, "&Exit", " Terminate the program")
+        filemenu.AppendSeparator()
 
-        savemenu = wx.Menu()  # Setting up the menu
-        save_file = savemenu.Append(wx.ID_ANY, "&Save", " Safe flight")
-        save_raw_file = savemenu.Append(wx.ID_ANY, "&Save RAW", " Save raw data")
+        savemenu = wx.Menu()
+        save_file = savemenu.Append(311, "&Save", " Safe flight")
+        save_raw_file = savemenu.Append(312, "&Save RAW", " Save raw data")
+        savemenu.AppendSeparator()
 
-        checkmenu = wx.Menu()
-        check_boeing = checkmenu.Append(wx.ID_ANY, "&Check Boeing-747", "Choose Boeing-747 file to check ")
-        bur = checkmenu.Append(wx.ID_ANY, "&BUR-92", "Choose BUR-92 file to structure it by flights ")
-        settings = checkmenu.Append(wx.ID_ANY, "&Settings", "Additional Settings")
+        a320menu = wx.Menu()
+        a320_qar = a320menu.Append(321, "&QAR", "Process data from QAR")
+        a320_cf = a320menu.Append(322, "&Compact Flash", " Process data from compact flash")
+        a320_fdr = a320menu.Append(323, "&FDR RAW", " Process data from FDR in RAW format")
+        a320menu.AppendSeparator()
+
+        b747menu = wx.Menu()
+        b747_qar = b747menu.Append(331, "&QAR", "Process data from QAR")
+        b747menu.AppendSeparator()
+
+        an148menu = wx.Menu()
+        an148_qar = an148menu.Append(341, "&QAR", "Process data from QAR")
 
         menubar = wx.MenuBar()  # Creating the menubar
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
         menubar.Append(savemenu, "&Save")  # Adding the "savemenu" to the MenuBar
-        menubar.Append(checkmenu, "&Check")
+        menubar.Append(a320menu, "&A320")
+        menubar.Append(b747menu, "&B747")
+        menubar.Append(an148menu, "&AN148")
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
         #--------- Bindings of buttons/commands with methods
-        self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
-        self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
+        self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)  # bind with toolbar
+        self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)  # bind with filemenu
+        self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
+        self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
         self.Bind(wx.EVT_TOOL, self.save, id=134)
         self.Bind(wx.EVT_MENU, self.save, save_file)
         self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_MENU, self.save_raw, save_raw_file)
         self.Bind(wx.EVT_MENU, self.on_close, menu_exit)
-        self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
-        self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
-        self.Bind(wx.EVT_TOOL, self.check_boeing_747, id=137)
-        self.Bind(wx.EVT_MENU, self.check_boeing_747, check_boeing)
-        self.Bind(wx.EVT_TOOL, self.settings, id=138)
-        self.Bind(wx.EVT_MENU, self.settings, settings)
-        self.Bind(wx.EVT_TOOL, self.bur, id=139)
-        self.Bind(wx.EVT_MENU, self.bur, bur)
 
+        self.Bind(wx.EVT_MENU, self.a320_qar_chosen, a320_qar)
+        self.Bind(wx.EVT_TOOL, self.a320_cf_chosen, a320_cf)
+        self.Bind(wx.EVT_TOOL, self.a320_fdr_chosen, a320_fdr)
+        self.Bind(wx.EVT_TOOL, self.b747_qar_chosen, b747_qar)
+        self.Bind(wx.EVT_TOOL, self.an148_qar_chosen, an148_qar)
+
+        self.Bind(wx.EVT_MENU, self.a320_button, id=140)
+        self.Bind(wx.EVT_MENU, self.b747_button, id=141)
+        self.Bind(wx.EVT_MENU, self.an148_button, id=142)
+
+    #---- At acft and data type selection via filemenu -> -------
+    #---- selected option is stored
+    def a320_qar_chosen(self, event):
+        self.chosen_acft_type = 321
+        print(self.chosen_acft_type)
+
+    def a320_cf_chosen(self, event):
+        self.chosen_acft_type = 322
+        print(self.chosen_acft_type)
+
+    def a320_fdr_chosen(self, event):
+        self.chosen_acft_type = 323
+        print(self.chosen_acft_type)
+
+    def b747_qar_chosen(self, event):
+        self.chosen_acft_type = 331
+        print(self.chosen_acft_type)
+
+    def an148_qar_chosen(self, event):
+        self.chosen_acft_type = 341
+        print(self.chosen_acft_type)
+
+    #---- When acft type ChoiceDialog is already opened ------------------
+    #---- -> at picking type its value is stored -------------------------
+    def a320_button(self, event):
+        #---- In case acft type bitmap is pressed -> assign value of QAR --
+        #---- as it is already marked in ChoiceDialog (as it first) -------
+        self.chosen_acft_type = 321
+        dlg = wx.SingleChoiceDialog(self, '', "A320", ['QAR', 'Compact Flash', 'FDR'])
+        if dlg.ShowModal() == wx.ID_OK:
+            option = dlg.GetStringSelection()
+            if option == "QAR":
+                self.chosen_acft_type = 321
+            elif option == "Compact Flash":
+                self.chosen_acft_type = 322
+            elif option == "FDR":
+                self.chosen_acft_type = 323
+            print(self.chosen_acft_type)
+        else:
+            return
+        dlg.Destroy()
+
+    def b747_button(self, event):
+        self.chosen_acft_type = 331
+        dlg = wx.SingleChoiceDialog(self, '', "B747", ['QAR'],
+                                    wx.CHOICEDLG_STYLE)
+        if dlg.ShowModal() == wx.ID_OK:
+            option = dlg.GetStringSelection()
+            if option is "QAR":
+                self.chosen_acft_type = 331
+            print(self.chosen_acft_type)
+        else:
+            return
+        dlg.Destroy()
+
+    def an148_button(self, event):
+        self.chosen_acft_type = 341
+        dlg = wx.SingleChoiceDialog(self, '', "AN148", ['QAR'],
+                                    wx.CHOICEDLG_STYLE)
+        if dlg.ShowModal() == wx.ID_OK:
+            option = dlg.GetStringSelection()
+            if option is "QAR":
+                self.chosen_acft_type = 341
+            print(self.chosen_acft_type)
+        else:
+            return
+        dlg.Destroy()
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
@@ -263,34 +350,27 @@ class MyFrame(wx.Frame):
         # then it appears on top of flights data
         #self.toolbar = wx.ToolBar(self, -1)
         self.toolbar = self.CreateToolBar()
-        self.toolbar.SetToolBitmapSize((32, 32))
+        self.toolbar.SetToolBitmapSize((30, 30))
         #---------- at executable creation -> place images to the same folder and change path
         self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
         self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
-        self.toolbar.AddLabelTool(137, 'Check Boeing-747', wx.Bitmap('E:/boeing_747.jpg'))
-        self.toolbar.AddLabelTool(138, 'Settings', wx.Bitmap('E:/setting.png'))
-        self.toolbar.AddLabelTool(139, 'Structure BUR-92', wx.Bitmap('E:/bur_92.png'))
+        self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.png'))
+        self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('E:/b747.png'))
+        self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.png'))
 
         #--------- HELP for toolbar bitmaps ------------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
         self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
         self.toolbar.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
-        self.toolbar.SetToolLongHelp(137, "Check Boeing-747 data")
-        self.toolbar.SetToolLongHelp(138, "Additional settings")
-        self.toolbar.SetToolLongHelp(139, "Structure BUR-92 file")
+        self.toolbar.SetToolLongHelp(140, "A320. Chose data source.")
+        self.toolbar.SetToolLongHelp(141, "B747. Chose data source.")
+        self.toolbar.SetToolLongHelp(142, "AN148. Chose data source.")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
-
-    def settings(self, event):
-
-        panel = SettingsPanel(self)
-
-        self.sizer.Add(panel)
-        self.sizer.Layout()
 
     def OnResult(self, event):
         """Show Result status"""
@@ -330,8 +410,8 @@ class MyFrame(wx.Frame):
                            )
         if dlg.ShowModal() == wx.ID_OK:
             self.path = u"%s" % dlg.GetPath()
-        else:
-            return     # the user changed idea...
+        else:  # user pressed Cancel
+            return
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
@@ -339,8 +419,11 @@ class MyFrame(wx.Frame):
 
         self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
-        try:
+        if self.chosen_acft_type is None:
             self.flag = "qar"
+        else:
+            self.flag = self.acft_data_types[self.chosen_acft_type]
+        try:
             self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
@@ -358,8 +441,7 @@ class MyFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.path = u"%s" % dlg.GetPath()
         else:
-            return     # the user changed idea...
-        # Only destroy a dialog after you're done with it.
+            return
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
@@ -368,65 +450,22 @@ class MyFrame(wx.Frame):
         self.statusbar.SetStatusText("Downloading...", 0)
         dlg.Destroy()
         try:
-            self.flag = "cf"
+            self.flag = "a320_cf"
             self.q = WorkerThread(self, self.path, self.flag)
         except:
             pass
-
-    def check_boeing_747(self, event):
-        dlg = wx.FileDialog(self, "Choose a directory:",
-                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
-                           #| wx.DD_DIR_MUST_EXIST
-                           #| wx.DD_CHANGE_DIR
-                           )
-        if dlg.ShowModal() == wx.ID_OK:
-            self.path = u"%s" % dlg.GetPath()
-        else:
-            return     # the user changed idea...
-
-        self.progress_bar.Show()
-        self.progress_bar.SetValue(10)
-        self.progress_bar.Pulse()
-
-        self.statusbar.SetStatusText("Downloading...", 0)
-        dlg.Destroy()
-        try:
-            self.flag = "boeing_check"
-            self.q = WorkerThread(self, self.path, self.flag)
-        except:
-            pass
-
-    def bur(self, event):
-        dlg = wx.FileDialog(self, "Choose a directory:",
-                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
-                            #| wx.DD_DIR_MUST_EXIST
-                            #| wx.DD_CHANGE_DIR
-                            )
-        if dlg.ShowModal() == wx.ID_OK:
-            self.path = u"%s" % dlg.GetPath()
-            print(self.path)
-        else:
-            return     # the user changed idea...
-        self.progress_bar.Show()
-        self.progress_bar.SetValue(10)
-        self.progress_bar.Pulse()
-
-        self.statusbar.SetStatusText("Downloading...", 0)
-        dlg.Destroy()
-        try:
-            self.flag = "bur_92"
-            self.q = WorkerThread(self, self.path, self.flag)
-        except:
-            pass
-
 
     def save(self, event):
         self.get_path_to_save()
         self.progress_bar.Show()
         #self.progress_bar.SetValue(5)
         #self.progress_bar.Pulse()
+        if self.chosen_acft_type is None:
+            self.flag = "qar"
+        else:
+            self.flag = self.acft_data_types[self.chosen_acft_type]
+        print(self.flag)
         try:
-            i = 0
             for each in self.selected:
                 if each in self.saved_flights:
                     pass
@@ -437,16 +476,14 @@ class MyFrame(wx.Frame):
                     end = int(each[separator + 1:])
 
                     name = self.form_name("flight")
+
                     f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
-                           self.path_to_save, self.flag)
+                               self.path_to_save, self.flag)
                     self.saved_flights.append(each)
-            i += 1
         except AttributeError:
             self.warning("Open file with flights to process first")
             return
-        print(self.selected)
         self.selected = []
-        print(self.selected)
         self.progress_bar.SetValue(100)
 
     def warning(self, message, caption='Warning!'):
@@ -455,24 +492,26 @@ class MyFrame(wx.Frame):
         dlg.Destroy()
 
     def save_raw(self, event):
-        try:
-            separator = self.selected.find(':')
-        except AttributeError:
-            self.warning("Open file with flights to process first")
-            return
-
-        start = int(self.selected[:separator])
-        end = int(self.selected[separator + 1:])
-
         self.get_path_to_save()
-
         self.progress_bar.Show()
-        self.progress_bar.SetValue(5)
-        self.progress_bar.Pulse()
+        if self.chosen_acft_type is None:
+            self.flag = "qar"
+        else:
+            self.flag = self.acft_data_types[self.chosen_acft_type]
+        for each in self.selected:
+            try:
+                separator = each.find(':')
 
-        name = self.form_name("raw")
-        f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
-                   self.path_to_save, self.flag)
+                start = int(self.selected[:separator])
+                end = int(self.selected[separator + 1:])
+
+                name = self.form_name("raw")
+                f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
+                           self.path_to_save, self.flag)
+            except AttributeError:
+                self.warning("Open file with flights to process first")
+                return
+        self.selected = []
         self.progress_bar.SetValue(100)
 
     def form_name(self, rec_type):

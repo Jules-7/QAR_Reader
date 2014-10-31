@@ -97,9 +97,9 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "qar":
+        if self.flag == "a320_qar" or self.flag == "qar_VDR":
             header_length = 128  # header length is 128 bytes
-        elif self.flag == "cf":  # if flag says its compact flash -> header length is 32
+        elif self.flag == "a320_cf":  # if flag says its compact flash -> header length is 32
             header_length = 32
         self.param_file.write(self.source_file[:header_length])  # rewrite header to target file
         self.bytes_counter += header_length  # increase counter on header size

@@ -20,7 +20,7 @@ class Boeing(object):
         self.headers = []
         self.date = []
         self.time = []
-        self.qar_type = "boeing 747"
+        self.qar_type = "b747_qar"
         self.init_date = None
         self.durations = []
         self.bytes_counter = 0

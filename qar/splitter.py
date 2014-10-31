@@ -10,15 +10,15 @@ class Split(object):
 
     def __init__(self, path, flag):
         self.result = None
-        if flag is "qar":
+        if flag == "qar":
             qar = QARReader(path)
             self.result = qar
-        elif flag is "cf":
+        elif flag is "a320_cf":
             cf = CompactFlash(path)
             self.result = cf
-        elif flag is "boeing_check":
+        elif flag is "b747_qar":
             boeing_check = Boeing(path)
             self.result = boeing_check
-        elif flag is "bur_92":
+        elif flag is "an148_qar":
             bur = Bur(path)
             self.result = bur

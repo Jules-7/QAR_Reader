@@ -23,16 +23,20 @@ class Flight:
         self.path_to_save = path_to_save
         self.flag = flag
         self.qar_type = qar_type
-        if self.flag == "cf":
+        print(self.qar_type)
+        if self.flag == "a320_cf":
             self.prepare_cf_file()
             self.make_flight()
-        elif self.flag == "boeing_check" or self.flag == "bur_92":
+        elif self.flag == "b747_qar" or self.flag == "an148_qar":
             self.get_flight()
             self.save_flight()
-        else:
+        elif self.flag == "qar":
             self.get_flight()
             self.make_flight()
-
+        elif self.flag == "a320_qar":
+            self.qar_type = self.flag
+            self.get_flight()
+            self.make_flight()
 
     def get_flight(self):
         header = 128
@@ -73,17 +77,12 @@ class Flight:
             tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
             new_file = open(tmp_file_name, 'wb')
             new_file.write(self.flight)
-            #a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar, self.path_to_save, self.flag)
-            saab = SAAB(tmp_file_name, target_file_name, 384, 96,
-                        self.progress_bar, self.path_to_save, self.flag, tmp_bin_file)
-
-            '''
             if self.qar_type == "VDR":
-                saab = SAAB(tmp_file_name, target_file_name, tmp_param_file, 384, 96,
-                self.progress_bar, self.path_to_save, self.flag, tmp_bin_file)
-            elif self.qar_type == "":
-                a320 = A320(tmp_file_name, target_file_name, 768, 192,
-                            self.progress_bar, self.path_to_save, self.flag)'''
+                saab = SAAB(tmp_file_name, target_file_name, 384, 96,
+                            self.progress_bar, self.path_to_save, self.flag, tmp_bin_file)
+            elif self.qar_type == "a320_qar" or self.qar_type == "a320_cf":
+                a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar,
+                            self.path_to_save, self.flag)
         elif "raw" in self.name:
             """save raw data in file"""
             #separ = self.path.rfind('/')

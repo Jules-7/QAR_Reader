@@ -29,7 +29,7 @@ class CompactFlash(object):
         self.frame_len = 768  # Bytes
         self.cluster_size = 8192
         self.frame_duration = 2  # sec
-        self.qar_type = None
+        self.qar_type = "a320_cf"
         self.path = path
         transformed_path = r"\\.\%s" % self.path[:2]
         self.dat = file(transformed_path, "rb")
