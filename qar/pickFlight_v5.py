@@ -59,6 +59,7 @@ class Flight:
             self.flight = data.read(length)
 
     def make_flight(self):
+
         if "flight" in self.name:
             """make tmp file for future processing"""
             #separator = self.path.rfind('/')

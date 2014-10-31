@@ -108,9 +108,12 @@ class PrepareData(object):
         """ Perform search of mix scheme type """
         found_sw = False  # indicator of found/not found syncword
         #---------four bytes, in which we search for syncword----
-        search_bytes = [self.source_file[self.bytes_counter],
-                        self.source_file[self.bytes_counter + 1],
-                        self.source_file[self.bytes_counter + 2]]
+        try:
+            search_bytes = [self.source_file[self.bytes_counter],
+                            self.source_file[self.bytes_counter + 1],
+                            self.source_file[self.bytes_counter + 2]]
+        except IndexError:
+            return
         self.bytes_counter += 3
 
         while not found_sw and self.bytes_counter < self.param_file_end:

@@ -67,6 +67,8 @@ class MyPanel(wx.Panel):
         self.parent = parent
         self.path = path
         self.qar_type = data.qar_type
+        self.selected_flight = []
+        self.selected_parent_set = []
 
         self.list_ctrl = wx.ListCtrl(self,
                                      style=wx.LC_REPORT
@@ -119,9 +121,14 @@ class MyPanel(wx.Panel):
         ''' at row selection - index is returned
         using that index search for flight from flights_dict
         and pass it for processing '''
-        selected_flight = event.m_itemIndex
-        self.parent.selected = self.flights_dict[selected_flight]
+        #-------- Ensures multiple flights selection -----------
+        self.selected_flight.append(event.m_itemIndex)
+        print('selected flights %s ' % self.selected_flight)
+        for each in self.selected_flight:
+            self.selected_parent_set.append(self.flights_dict[each])
 
+        self.parent.selected = list(set(self.selected_parent_set))
+        print("selected to parent %s " % self.parent.selected)
         self.parent.progress_bar.Hide()
 
 
@@ -187,9 +194,10 @@ class MyFrame(wx.Frame):
 
         self.status_bar()
         self.chosen_settings = []
-        self.selected = None
+        self.selected = []
         self.file_menu()
         self.tool_bar()
+        self.saved_flights = []
 
         self.Show()
 
@@ -413,24 +421,32 @@ class MyFrame(wx.Frame):
 
 
     def save(self, event):
+        self.get_path_to_save()
+        self.progress_bar.Show()
+        #self.progress_bar.SetValue(5)
+        #self.progress_bar.Pulse()
         try:
-            separator = self.selected.find(':')
+            i = 0
+            for each in self.selected:
+                if each in self.saved_flights:
+                    pass
+                else:
+                    separator = each.find(':')
+
+                    start = int(each[:separator])
+                    end = int(each[separator + 1:])
+
+                    name = self.form_name("flight")
+                    f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
+                           self.path_to_save, self.flag)
+                    self.saved_flights.append(each)
+            i += 1
         except AttributeError:
             self.warning("Open file with flights to process first")
             return
-
-        start = int(self.selected[:separator])
-        end = int(self.selected[separator + 1:])
-
-        self.get_path_to_save()
-
-        self.progress_bar.Show()
-        self.progress_bar.SetValue(5)
-        self.progress_bar.Pulse()
-
-        name = self.form_name("flight")
-        f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
-                   self.path_to_save, self.flag)
+        print(self.selected)
+        self.selected = []
+        print(self.selected)
         self.progress_bar.SetValue(100)
 
     def warning(self, message, caption='Warning!'):

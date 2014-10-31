@@ -32,6 +32,7 @@ class QARReader():
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
         self.index = 524288  # index of records beginning in bytes
+        self.cluster = 32 * 1024  # size of cluster
         self.flights_start = []
         self.flight_intervals = []
         self.headers = []
@@ -60,7 +61,7 @@ class QARReader():
                 self.flights_start.append(self.index)
                 self.get_current_date(header)
                 self.headers.append(header)
-        self.index += cluster
+        self.index += self.cluster
 
     def find_flights(self):
         ''' find all flights indexes '''
