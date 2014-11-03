@@ -63,17 +63,17 @@ class Flight:
             self.flight = data.read(length)
 
     def make_flight(self):
-
-        if "flight" in self.name:
+        if "raw" in self.name:
+            """save raw data in file"""
+            new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + '.bin', 'wb')
+            new_file.write(self.flight)
+        else:
             """make tmp file for future processing"""
-            #separator = self.path.rfind('/')
-            #new_path = self.path[:separator + 1]
-            #file_name = new_path + str(self.name)
             tmp_file_name = str(win32api.GetTempPath()) + self.name + ".tmp"  # tmp file with flight
-            print("tmp_file_name %s" % tmp_file_name)
+            #print("tmp_file_name %s" % tmp_file_name)
             target_file_name = str(self.name) + ".inf"  # target parametric file, mix scheme is applied
+            # tmp_bin_file -> interim file with parametric data for SAAB
             # pass it to SAAB only
-            # interim file with parametric data for SAAB
             tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
             new_file = open(tmp_file_name, 'wb')
             new_file.write(self.flight)
@@ -83,12 +83,7 @@ class Flight:
             elif self.qar_type == "a320_qar" or self.qar_type == "a320_cf":
                 a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar,
                             self.path_to_save, self.flag)
-        elif "raw" in self.name:
-            """save raw data in file"""
-            #separ = self.path.rfind('/')
-            #new_path = self.path[:separ + 1]
-            new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + '.bin', 'wb')
-            new_file.write(self.flight)
+
 
     def prepare_cf_file(self):
         """ Each cluster begins with header.
@@ -104,8 +99,6 @@ class Flight:
             data.seek(header, 1)
             self.flight += data.read(cluster - header)
             bytes_counter += cluster
-        #print("flight length before is %s" % flight_length)
-        #print("flight length after is %s" % len(flight))
 
     def save_flight(self):
         """save flight as it is in file"""

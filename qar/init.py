@@ -1,5 +1,0 @@
-
-
-class Initialize(object):
-
-    pass

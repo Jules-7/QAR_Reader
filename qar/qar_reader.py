@@ -1,12 +1,11 @@
 #-*-coding: utf-8-*-
 from threading import *
 import wx
-import datetime
+import re
 import time
-from qarReader_prod_v2 import QARReader
 from pickFlight_v5 import Flight
 from splitter import Split
-import os
+from initialization import Initialize
 """this module:
 - creates window for choosing of file with flights
 - displays all flights in file
@@ -106,15 +105,15 @@ class MyPanel(wx.Panel):
             self.list_ctrl.SetStringItem(index, 4, duration)
 
             #associate index of row with particular flight
-            self.flights_dict[index] = flight
+            self.flights_dict[index] = [flight, index, start_date, self.qar_type]
             index += 1
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.list_ctrl, 0, wx.ALL | wx.EXPAND)
         self.SetSizer(sizer)
 
-        self.parent.statusbar.SetStatusText("All flights are downloaded. "
-                                            "QAR type is %s" % data.qar_type, 0)
+        self.parent.statusbar.SetStatusText("All flights are downloaded. ", 0)
+        self.parent.statusbar.SetStatusText("%s" % data.qar_type, 1)
 
     #----------------------------------------------------------------------
     def on_item_selected(self, event):
@@ -123,62 +122,17 @@ class MyPanel(wx.Panel):
         and pass it for processing '''
         #-------- Ensures multiple flights selection -----------
         self.selected_flight.append(event.m_itemIndex)
-        print('selected flights %s ' % self.selected_flight)
+        #print('selected flights %s ' % self.selected_flight)
         for each in self.selected_flight:
             self.selected_parent_set.append(self.flights_dict[each])
-
-        self.parent.selected = list(set(self.selected_parent_set))
-        print("selected to parent %s " % self.parent.selected)
+        chosen_flights = [each[0] for each in self.selected_parent_set]
+        unique_elements = list(set(chosen_flights))
+        for element in unique_elements:
+            for choice in self.selected_parent_set:
+                if element == choice[0]:
+                    self.parent.selected.append(choice)
+        #print("selected to parent %s " % self.parent.selected)
         self.parent.progress_bar.Hide()
-
-
-class SettingsPanel(wx.Panel):
-    """ Panel to display Additional Settings options """
-    #----------------------------------------------------------------------
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-
-        sampleList = ['Airbus']
-
-        wx.StaticText(self, -1, "Chose Additional Settings", (45, 15))
-        lb = wx.CheckListBox(self, -1, (30, 50), wx.DefaultSize, sampleList)
-        #self.Bind(wx.EVT_LISTBOX, self.EvtListBox, lb)
-        self.Bind(wx.EVT_CHECKLISTBOX, self.EvtCheckListBox, lb)
-        lb.SetSelection(0)
-        self.lb = lb
-
-        #lb.Bind(wx.EVT_RIGHT_DOWN, self.OnDoHitTest)
-
-        pos = lb.GetPosition().x + lb.GetSize().width + 25
-        #btn = wx.Button(self, -1, "Test SetString", (pos, 50))
-        #self.Bind(wx.EVT_BUTTON, self.OnTestButton, btn)
-
-    '''def EvtListBox(self, event):
-        print('EvtListBox: %s\n' % event.GetString())'''
-
-    def EvtCheckListBox(self, event):
-        index = event.GetSelection()
-        label = self.lb.GetString(index)
-        status = 'un'
-        if self.lb.IsChecked(index):
-            status = ''
-        print('Box %s is %schecked \n' % (label, status))
-        self.lb.SetSelection(index)    # so that (un)checking also selects (moves the highlight)
-
-
-'''def OnDoHitTest(self, evt):
-            item = self.lb.HitTest(evt.GetPosition())
-            print("HitTest: %d\n" % item)'''
-
-
-'''def on_item_selected(self, event):
-        """ at row selection - index is returned
-        using that index search for flight from flights_dict
-        and pass it for processing """
-        selected_flight = event.m_itemIndex
-        self.parent.selected = self.flights_dict[selected_flight]
-
-        self.parent.progress_bar.Hide()'''
 
 
 ########################################################################
@@ -205,17 +159,17 @@ class MyFrame(wx.Frame):
         self.saved_flights = []  # flights which are already processed and saved
 
         self.Show()
-        EVT_RESULT(self, self.OnResult)
+        EVT_RESULT(self, self.on_result)
         self.SetSizer(self.sizer)
 
     def status_bar(self):
         #------------------------CREATE STATUSBAR---------------------------------
         self.statusbar = self.CreateStatusBar()   # Create StatusBar in the bottom of the window
-        self.statusbar.SetFieldsCount(2)  # Set number of fields in statusbar
-        self.statusbar.SetStatusWidths([320, -1])
+        self.statusbar.SetFieldsCount(3)  # Set number of fields in statusbar
+        self.statusbar.SetStatusWidths([-2, -1, 200])
 
         self.progress_bar = wx.Gauge(self.statusbar, -1, style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
-        rect = self.statusbar.GetFieldRect(1)
+        rect = self.statusbar.GetFieldRect(2)
         self.progress_bar.SetPosition((rect.x + 2, rect.y + 2))
         self.progress_bar.SetSize((rect.width - 4, rect.height - 4))
         self.progress_bar.Hide()
@@ -227,6 +181,7 @@ class MyFrame(wx.Frame):
         choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
         choose_cf = filemenu.Append(302, "&Choose Compact Flash", " Choose Compact Flash to open")
         menu_exit = filemenu.Append(wx.ID_EXIT, "&Exit", " Terminate the program")
+        initialize = filemenu.Append(wx.ID_ANY, "&Initialize", " Initialize QAR")
         filemenu.AppendSeparator()
 
         savemenu = wx.Menu()
@@ -260,11 +215,12 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)  # bind with filemenu
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
         self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
-        self.Bind(wx.EVT_TOOL, self.save, id=134)
-        self.Bind(wx.EVT_MENU, self.save, save_file)
+        self.Bind(wx.EVT_TOOL, self.save_flight, id=134)
+        self.Bind(wx.EVT_MENU, self.save_flight, save_file)
         self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_MENU, self.save_raw, save_raw_file)
         self.Bind(wx.EVT_MENU, self.on_close, menu_exit)
+        self.Bind(wx.EVT_MENU, self.initialization, initialize)
 
         self.Bind(wx.EVT_MENU, self.a320_qar_chosen, a320_qar)
         self.Bind(wx.EVT_TOOL, self.a320_cf_chosen, a320_cf)
@@ -280,23 +236,23 @@ class MyFrame(wx.Frame):
     #---- selected option is stored
     def a320_qar_chosen(self, event):
         self.chosen_acft_type = 321
-        print(self.chosen_acft_type)
+        #print(self.chosen_acft_type)
 
     def a320_cf_chosen(self, event):
         self.chosen_acft_type = 322
-        print(self.chosen_acft_type)
+        #print(self.chosen_acft_type)
 
     def a320_fdr_chosen(self, event):
         self.chosen_acft_type = 323
-        print(self.chosen_acft_type)
+        #print(self.chosen_acft_type)
 
     def b747_qar_chosen(self, event):
         self.chosen_acft_type = 331
-        print(self.chosen_acft_type)
+        #print(self.chosen_acft_type)
 
     def an148_qar_chosen(self, event):
         self.chosen_acft_type = 341
-        print(self.chosen_acft_type)
+        #print(self.chosen_acft_type)
 
     #---- When acft type ChoiceDialog is already opened ------------------
     #---- -> at picking type its value is stored -------------------------
@@ -313,7 +269,7 @@ class MyFrame(wx.Frame):
                 self.chosen_acft_type = 322
             elif option == "FDR":
                 self.chosen_acft_type = 323
-            print(self.chosen_acft_type)
+            #print(self.chosen_acft_type)
         else:
             return
         dlg.Destroy()
@@ -326,7 +282,7 @@ class MyFrame(wx.Frame):
             option = dlg.GetStringSelection()
             if option is "QAR":
                 self.chosen_acft_type = 331
-            print(self.chosen_acft_type)
+            #print(self.chosen_acft_type)
         else:
             return
         dlg.Destroy()
@@ -339,10 +295,28 @@ class MyFrame(wx.Frame):
             option = dlg.GetStringSelection()
             if option is "QAR":
                 self.chosen_acft_type = 341
-            print(self.chosen_acft_type)
+            #print(self.chosen_acft_type)
         else:
             return
         dlg.Destroy()
+
+    def initialization(self, event):
+        init_drive = wx.DirDialog(self, "Choose a drive to initialize:",
+                                  style=wx.DD_DEFAULT_STYLE
+                                  | wx.DD_DIR_MUST_EXIST
+                                  #| wx.DD_CHANGE_DIR
+                                  )
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if init_drive.ShowModal() == wx.ID_OK:
+            path_to_init = init_drive.GetPath()
+            #print(path_to_init)
+        else:
+            return     # the user changed idea...
+
+        init_drive.Destroy()
+        i = Initialize(path_to_init)
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
@@ -372,7 +346,7 @@ class MyFrame(wx.Frame):
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
 
-    def OnResult(self, event):
+    def on_result(self, event):
         """Show Result status"""
         self.q = event.data
         self.qar_type = self.q.qar_type
@@ -395,6 +369,8 @@ class MyFrame(wx.Frame):
 
         panel = MyPanel(self, self.q, self.q.path)
 
+        self.statusbar.SetStatusText(self.qar_type, 2)
+
         self.sizer.Add(panel)
         self.sizer.Layout()
 
@@ -404,10 +380,7 @@ class MyFrame(wx.Frame):
     def on_choose_file(self, event):
         """ Open a file"""
         dlg = wx.FileDialog(self, "Choose a directory:",
-                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
-                           #| wx.DD_DIR_MUST_EXIST
-                           #| wx.DD_CHANGE_DIR
-                           )
+                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         if dlg.ShowModal() == wx.ID_OK:
             self.path = u"%s" % dlg.GetPath()
         else:  # user pressed Cancel
@@ -431,10 +404,7 @@ class MyFrame(wx.Frame):
     def on_choose_cf(self, event):  # choose compact flash
         # In this case we include a "New directory" button.
         dlg = wx.DirDialog(self, "Choose a directory:",
-                          style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON
-                           #| wx.DD_DIR_MUST_EXIST
-                           #| wx.DD_CHANGE_DIR
-                           )
+                           style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         # If the user selects OK, then we process the dialog's data.
         # This is done by getting the path data from the dialog - BEFORE
         # we destroy it.
@@ -455,27 +425,39 @@ class MyFrame(wx.Frame):
         except:
             pass
 
-    def save(self, event):
+    def save_flight(self, event):
+        self.save("flight")
+
+    def save_raw(self, event):
+        self.save("raw")
+
+    def save(self, mode):
         self.get_path_to_save()
         self.progress_bar.Show()
-        #self.progress_bar.SetValue(5)
-        #self.progress_bar.Pulse()
         if self.chosen_acft_type is None:
             self.flag = "qar"
+            acft = None
         else:
             self.flag = self.acft_data_types[self.chosen_acft_type]
-        print(self.flag)
+            acft_index = self.flag.find("_")
+            acft = self.flag[:acft_index]
         try:
-            for each in self.selected:
+            for each in self.selected:  # [flight_interval, index, date, qar]
                 if each in self.saved_flights:
                     pass
                 else:
-                    separator = each.find(':')
-
-                    start = int(each[:separator])
-                    end = int(each[separator + 1:])
-
-                    name = self.form_name("flight")
+                    # get flight start and end indexes
+                    separator = each[0].find(':')  # flight_interval
+                    start = int(each[0][:separator])
+                    end = int(each[0][separator + 1:])
+                    flight_index = each[1] + 1
+                    flight_date = each[2]
+                    flight_qar = each[3]
+                    if acft:
+                        flight_acft = acft
+                    else:
+                        flight_acft = None
+                    name = self.form_name(mode, flight_index, flight_acft, flight_qar,flight_date)
 
                     f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
                                self.path_to_save, self.flag)
@@ -491,52 +473,28 @@ class MyFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
-    def save_raw(self, event):
-        self.get_path_to_save()
-        self.progress_bar.Show()
-        if self.chosen_acft_type is None:
-            self.flag = "qar"
-        else:
-            self.flag = self.acft_data_types[self.chosen_acft_type]
-        for each in self.selected:
-            try:
-                separator = each.find(':')
-
-                start = int(self.selected[:separator])
-                end = int(self.selected[separator + 1:])
-
-                name = self.form_name("raw")
-                f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
-                           self.path_to_save, self.flag)
-            except AttributeError:
-                self.warning("Open file with flights to process first")
-                return
-        self.selected = []
-        self.progress_bar.SetValue(100)
-
-    def form_name(self, rec_type):
+    def form_name(self, rec_type, index, acft, qar, date):
+        cor_date = re.sub(r":", r"_", date)
+        name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(cor_date)
         if rec_type == "flight":
-            date = datetime.datetime.now()
-            name = "flight_" + date.strftime("%H%M%S_%d%m%y")
             self.statusbar.SetStatusText("Flight is exported", 0)
             return name
         elif rec_type == "raw":
-            date = datetime.datetime.now()
-            name = "raw_" + date.strftime("%H%M%S_%d%m%y")
+            #date = datetime.datetime.now()
+            #name = "raw_" + date.strftime("%H%M%S_%d%m%y")
+            name_raw = name + "_raw"
             self.statusbar.SetStatusText("Raw file is exported", 0)
-            return name
+            return name_raw
 
     def get_path_to_save(self):
         save_dialog = wx.DirDialog(self, "Choose a directory to save file:",
-                                   style=wx.DD_DEFAULT_STYLE
-                                   | wx.DD_DIR_MUST_EXIST
-                                   #| wx.DD_CHANGE_DIR
-                                   )
+                                   style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
         # If the user selects OK, then we process the dialog's data.
         # This is done by getting the path data from the dialog - BEFORE
         # we destroy it.
         if save_dialog.ShowModal() == wx.ID_OK:
             self.path_to_save = save_dialog.GetPath()
+            #print(self.path_to_save)
         else:
             return     # the user changed idea...
 

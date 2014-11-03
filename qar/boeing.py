@@ -29,15 +29,11 @@ class Boeing(object):
         self.frame_duration = 4  # sec
         self.end_flag = False
         self.record_end_index = False
-        #self.sw_one = "4702"
-        #self.sw_two = "b805"
-        #self.sw_three = "470a"
-        #self.sw_four = "b80d"
         # decimal representation of syncwords
-        self.sw_one = ["71", "2"]
-        self.sw_two = ["184", "5"]
-        self.sw_three = ["71", "10"]
-        self.sw_four = ["184", "13"]
+        self.sw_one = ["71", "2"]     # hex -> "4702"
+        self.sw_two = ["184", "5"]    # hex -> "b805"
+        self.sw_three = ["71", "10"]  # hex -> "470a"
+        self.sw_four = ["184", "13"]  # hex -> "b80d"
         self.find_flights()
         #for no we have no data -> create list of None for each date
         date = datetime.datetime(int(2014), int(1), int(1), int(0), int(0), int(0))
@@ -46,6 +42,7 @@ class Boeing(object):
         self.get_flight_intervals()
         self.get_durations()
         #self.data.close()
+        print(self.flight_intervals)
 
     def find_flights(self):
         while not self.end_flag:
@@ -82,11 +79,11 @@ class Boeing(object):
             else:
                 self.data.seek(-1, 1)
                 p11 = self.data.tell()
-                self.bytes_counter -= 1
+                self.bytes_counter = p11
+                #self.bytes_counter -= 1
             if self.record_end_index is True:
                 self.flights_end.append(self.bytes_counter)
                 self.record_end_index = False
-
 
     def check_frame(self):
         check_sw_two = self.read_syncword()
@@ -99,6 +96,7 @@ class Boeing(object):
             p3 = self.data.tell()
             #self.bytes_counter += self.subframe_len
             return True
+
 
     def read_syncword(self):
         self.data.seek(self.subframe_len, 1)
@@ -120,14 +118,6 @@ class Boeing(object):
                 end = self.flight_len
             self.flight_intervals.append((start, end))
             i += 1
-        '''
-        i = 0
-        for each in self.flights_start:
-            try:
-                self.flight_intervals.append((self.flights_start[i], self.flights_start[i + 1]))
-            except IndexError:
-                self.flight_intervals.append((self.flights_start[i], self.flight_len)) # last byte in file
-            i += 1'''
 
     def get_durations(self):
         for each in self.flight_intervals:
