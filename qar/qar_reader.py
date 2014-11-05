@@ -475,13 +475,12 @@ class MyFrame(wx.Frame):
 
     def form_name(self, rec_type, index, acft, qar, date):
         cor_date = re.sub(r":", r"_", date)
-        name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(cor_date)
+        no_space_date = str(cor_date).replace(" ", "_")
+        name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(no_space_date)
         if rec_type == "flight":
             self.statusbar.SetStatusText("Flight is exported", 0)
             return name
         elif rec_type == "raw":
-            #date = datetime.datetime.now()
-            #name = "raw_" + date.strftime("%H%M%S_%d%m%y")
             name_raw = name + "_raw"
             self.statusbar.SetStatusText("Raw file is exported", 0)
             return name_raw
