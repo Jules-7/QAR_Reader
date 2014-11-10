@@ -5,7 +5,10 @@ import re
 import time
 from pickFlight_v5 import Flight
 from splitter import Split
+from datetime import datetime
 from initialization import Initialize
+import wx.lib.filebrowsebutton as filebrowse
+from wx.lib.masked import TimeCtrl
 """this module:
 - creates window for choosing of file with flights
 - displays all flights in file
@@ -135,7 +138,145 @@ class MyPanel(wx.Panel):
         self.parent.progress_bar.Hide()
 
 
+class InitializationFrame(wx.Frame):
+
+    def __init__(self):
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Initialization settings", size=(400, 350))
+
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        panel = InitializationPanel(self)
+        self.sizer.Add(panel)
+        self.sizer.Layout()
+
+
+class InitializationPanel(wx.Panel):
+    """Panel to display Initialization settings menu"""
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        self.parent = parent
+        self.drive = None
+        self.qar_type = None
+        self.date = datetime.today()
+        self.time = datetime.now().strftime('%H:%M:%S')
+        self.flight_n = None
+        self.qar_n = None
+
+        title = wx.StaticText(self, -1, "Please choose options for initialization")
+        path_to_drive = filebrowse.DirBrowseButton(self, -1, size=(350, -1),
+                                                   changeCallback = self.get_drive,
+                                                   labelText="Choose a drive")
+
+        qar_type_list = ['A320 - QAR',
+                         'A320 - Compact Flash',
+                         'B747 - QAR',
+                         'An148 - BUR-92',
+                         'QAR-4XXX']
+
+        select_txt = wx.StaticText(self, -1, "Select qar type", (2, 50))
+        choose_qar_type = wx.Choice(self, -1, size=(100, -1), choices=qar_type_list)
+
+        date_txt = wx.StaticText(self, -1, "Select date", (2, 50))
+        pick_date = wx.GenericDatePickerCtrl(self, size=(120, -1),
+                                             style = wx.DP_DROPDOWN
+                                             | wx.DP_SHOWCENTURY
+                                             | wx.DP_ALLOWNONE)
+        time_now = datetime.now().strftime('%H:%M:%S')
+        time_txt = wx.StaticText(self, -1, " and time ", (2, 50))
+        time_input = wx.TextCtrl(self, -1, size=(140, -1))
+        time_input.SetValue('%s' % time_now)
+        flight_N_txt = wx.StaticText(self, -1, "Insert flight number", (2, 50))
+        self.flight_N = wx.TextCtrl(self, -1, size=(140, -1))
+        qar_N_txt = wx.StaticText(self, -1, "Insert QAR number", (2, 50))
+        self.qar_N = wx.TextCtrl(self, -1, size=(140, -1))
+        ok_button = wx.Button(self, id=1111, label="Ok")
+        cancel_button = wx.Button(self, id=2222, label="Cancel")
+
+        general_sizer = wx.BoxSizer(wx.VERTICAL)
+        title_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        path_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        qar_type_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        date_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        flight_N_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        qar_N_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttons_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        #element to add, proportion, apply border to side, width of border
+        title_sizer.Add(title, 0, wx.ALL, 5)
+
+        path_sizer.Add(path_to_drive, 0, wx.ALL, 5)
+
+        qar_type_sizer.Add(select_txt, 0, wx.ALL, 5)
+        qar_type_sizer.Add(choose_qar_type, 1, wx.ALL, 5)
+
+        date_sizer.Add(date_txt, 0, wx.ALL, 5)
+        date_sizer.Add(pick_date, 1, wx.ALL, 5)
+        date_sizer.Add(time_txt, 2, wx.ALL, 5)
+        date_sizer.Add(time_input, 3, wx.ALL, 5)
+
+        flight_N_sizer.Add(flight_N_txt, 0, wx.ALL, 5)
+        flight_N_sizer.Add(self.flight_N, 1, wx.ALL | wx.EXPAND, 5)
+
+        qar_N_sizer.Add(qar_N_txt, 0, wx.ALL, 5)
+        qar_N_sizer.Add(self.qar_N, 0, wx.ALL, 5)
+
+        buttons_sizer.Add(ok_button, 0, wx.ALL, 5)
+        buttons_sizer.Add(cancel_button, 0, wx.ALL, 5)
+
+        general_sizer.Add(title_sizer, 0, wx.CENTER)
+        general_sizer.Add(wx.StaticLine(self), 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(path_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(qar_type_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(date_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(flight_N_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(qar_N_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(buttons_sizer, 0, wx.ALL | wx.CENTER, 5)
+
+        self.SetSizer(general_sizer)
+
+        self.Bind(wx.EVT_CHOICE, self.qar_type_choice, choose_qar_type)
+        self.Bind(wx.EVT_DATE_CHANGED, self.on_date_changed, pick_date)
+        self.Bind(wx.EVT_TEXT, self.on_time_changed, time_txt)
+        self.Bind(wx.EVT_BUTTON, self.on_ok, ok_button)
+        self.Bind(wx.EVT_BUTTON, self.on_cancel, cancel_button)
+        self.Bind(wx.EVT_CLOSE, self.on_cancel)
+
+    def get_drive(self, event):
+        self.drive = event.GetString()
+
+    def qar_type_choice(self, event):
+        self.qar_type = event.GetString()
+
+    def on_date_changed(self, event):
+        self.date = event.GetDate()
+
+    def on_time_changed(self, event):
+        self.time = event.GetString()
+
+    def on_ok(self, event):
+        try:
+            flight_n = self.flight_N.GetValue()
+            self.flight_n = flight_n
+        except AttributeError:
+            self.flight_n = None
+        try:
+            qar_n = self.qar_N.GetValue()
+            self.qar_n = qar_n
+        except AttributeError:
+            self.qar_n = None
+        wait = wx.BusyInfo("Please wait, working...")
+        print(self.qar_n)
+        i = Initialize(self.drive, self.qar_type, self.date,
+                       self.time, self.flight_n, self.qar_n)
+        del wait
+        self.parent.Close()
+
+    def on_cancel(self, event):
+        self.parent.Close()
 ########################################################################
+
+
 class MyFrame(wx.Frame):
     """"""
 
@@ -157,6 +298,7 @@ class MyFrame(wx.Frame):
         self.file_menu()
         self.tool_bar()
         self.saved_flights = []  # flights which are already processed and saved
+        self.init_options = []
 
         self.Show()
         EVT_RESULT(self, self.on_result)
@@ -301,22 +443,9 @@ class MyFrame(wx.Frame):
         dlg.Destroy()
 
     def initialization(self, event):
-        init_drive = wx.DirDialog(self, "Choose a drive to initialize:",
-                                  style=wx.DD_DEFAULT_STYLE
-                                  | wx.DD_DIR_MUST_EXIST
-                                  #| wx.DD_CHANGE_DIR
-                                  )
-        # If the user selects OK, then we process the dialog's data.
-        # This is done by getting the path data from the dialog - BEFORE
-        # we destroy it.
-        if init_drive.ShowModal() == wx.ID_OK:
-            path_to_init = init_drive.GetPath()
-            #print(path_to_init)
-        else:
-            return     # the user changed idea...
-
-        init_drive.Destroy()
-        i = Initialize(path_to_init)
+        # Show initialization window
+        window = InitializationFrame()
+        window.Show(True)
 
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
@@ -500,7 +629,7 @@ class MyFrame(wx.Frame):
         save_dialog.Destroy()
 
 #----------------------------------------------------------------------
-
+# runs the script
 app = wx.App(False)
 frame = MyFrame()
 app.MainLoop()
