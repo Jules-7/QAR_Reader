@@ -85,7 +85,8 @@ class MyPanel(wx.Panel):
 
         index = 0
         self.flights_dict = {}
-
+        if not data.flight_intervals:
+            self.no_flights = True
         for each in data.flight_intervals:
             try:
                 flight = str(data.flight_intervals[index][0]) + ":" + str(data.flight_intervals[index][1])
@@ -115,8 +116,8 @@ class MyPanel(wx.Panel):
         sizer.Add(self.list_ctrl, 0, wx.ALL | wx.EXPAND)
         self.SetSizer(sizer)
 
-        self.parent.statusbar.SetStatusText("All flights are downloaded. ", 0)
-        self.parent.statusbar.SetStatusText("%s" % data.qar_type, 1)
+        #self.parent.statusbar.SetStatusText("All flights are downloaded. ", 0)
+        #self.parent.statusbar.SetStatusText("%s" % data.qar_type, 1)
 
     #----------------------------------------------------------------------
     def on_item_selected(self, event):
@@ -172,7 +173,11 @@ class InitializationPanel(wx.Panel):
                          'A320 - Compact Flash',
                          'B747 - QAR',
                          'An148 - BUR-92',
-                         'QAR-4XXX']
+                         'SAAB',
+                         'QAR-2100',
+                         'QAR-4100',
+                         'QAR-4120',
+                         'QAR-4700']
 
         select_txt = wx.StaticText(self, -1, "Select qar type", (2, 50))
         choose_qar_type = wx.Choice(self, -1, size=(100, -1), choices=qar_type_list)
@@ -265,18 +270,25 @@ class InitializationPanel(wx.Panel):
             self.qar_n = qar_n
         except AttributeError:
             self.qar_n = None
-        wait = wx.BusyInfo("Please wait, working...")
-        i = Initialize(self.drive, self.qar_type, self.date,
-                       self.time, self.flight_n, self.qar_n)
-        del wait
+        if not self.drive or not self.qar_type:
+            warn_message = wx.MessageDialog(self, message="Choose both drive and Initialization type",
+                                            caption="Warning",
+                                            style=wx.OK | wx.CENTRE,
+                                            pos=wx.DefaultPosition)
+            warn_message.ShowModal()
+        else:
+            wait = wx.BusyInfo("Please wait, working...")
+            i = Initialize(self.drive, self.qar_type, self.date,
+                           self.time, self.flight_n, self.qar_n)
+            del wait
 
 
-        done_message = wx.MessageDialog(self, message="Initialization is over",
-                                        caption="Fulfilment message",
-                                        style=wx.OK | wx.CENTRE,
-                                        pos=wx.DefaultPosition)
-        done_message.ShowModal()
-        self.parent.Close()
+            done_message = wx.MessageDialog(self, message="Initialization is over",
+                                            caption="Fulfilment message",
+                                            style=wx.OK | wx.CENTRE,
+                                            pos=wx.DefaultPosition)
+            done_message.ShowModal()
+            self.parent.Close()
 
     def on_cancel(self, event):
         self.parent.Close()
@@ -299,7 +311,8 @@ class MyFrame(wx.Frame):
                                 322: "a320_cf",
                                 323: "a320_fdr",
                                 331: "b747_qar",
-                                341: "an148_qar"}
+                                341: "an148_qar",
+                                351: "an32_qar"}
         self.selected = []  # flights selected from list
         self.file_menu()
         self.tool_bar()
@@ -350,12 +363,16 @@ class MyFrame(wx.Frame):
         an148menu = wx.Menu()
         an148_qar = an148menu.Append(341, "&QAR", "Process data from QAR")
 
+        an32menu = wx.Menu()
+        an32_qar = an32menu.Append(351, "&QAR", "Process data from QAR")
+
         menubar = wx.MenuBar()  # Creating the menubar
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
         menubar.Append(savemenu, "&Save")  # Adding the "savemenu" to the MenuBar
         menubar.Append(a320menu, "&A320")
         menubar.Append(b747menu, "&B747")
         menubar.Append(an148menu, "&AN148")
+        menubar.Append(an32menu, "&AN32")
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
         #--------- Bindings of buttons/commands with methods
@@ -375,10 +392,12 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_TOOL, self.a320_fdr_chosen, a320_fdr)
         self.Bind(wx.EVT_TOOL, self.b747_qar_chosen, b747_qar)
         self.Bind(wx.EVT_TOOL, self.an148_qar_chosen, an148_qar)
+        self.Bind(wx.EVT_TOOL, self.an32_qar_chosen, an32_qar)
 
         self.Bind(wx.EVT_MENU, self.a320_button, id=140)
         self.Bind(wx.EVT_MENU, self.b747_button, id=141)
         self.Bind(wx.EVT_MENU, self.an148_button, id=142)
+        self.Bind(wx.EVT_MENU, self.an32_button, id=143)
 
     #---- At acft and data type selection via filemenu -> -------
     #---- selected option is stored
@@ -401,6 +420,9 @@ class MyFrame(wx.Frame):
     def an148_qar_chosen(self, event):
         self.chosen_acft_type = 341
         #print(self.chosen_acft_type)
+
+    def an32_qar_chosen(self, event):
+        self.chosen_acft_type = 351
 
     #---- When acft type ChoiceDialog is already opened ------------------
     #---- -> at picking type its value is stored -------------------------
@@ -448,6 +470,19 @@ class MyFrame(wx.Frame):
             return
         dlg.Destroy()
 
+    def an32_button(self, event):
+        self.chosen_acft_type = 351
+        dlg = wx.SingleChoiceDialog(self, '', "AN32", ['QAR'],
+                                    wx.CHOICEDLG_STYLE)
+        if dlg.ShowModal() == wx.ID_OK:
+            option = dlg.GetStringSelection()
+            if option is "QAR":
+                self.chosen_acft_type = 351
+            #print(self.chosen_acft_type)
+        else:
+            return
+        dlg.Destroy()
+
     def initialization(self, event):
         # Show initialization window
         window = InitializationFrame()
@@ -468,15 +503,17 @@ class MyFrame(wx.Frame):
         self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.png'))
         self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('E:/b747.png'))
         self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.png'))
+        self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('E:/an32.png'))
 
         #--------- HELP for toolbar bitmaps ------------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
         self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
         self.toolbar.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
-        self.toolbar.SetToolLongHelp(140, "A320. Chose data source.")
-        self.toolbar.SetToolLongHelp(141, "B747. Chose data source.")
-        self.toolbar.SetToolLongHelp(142, "AN148. Chose data source.")
+        self.toolbar.SetToolLongHelp(140, "A320. Choose data source.")
+        self.toolbar.SetToolLongHelp(141, "B747. Choose data source.")
+        self.toolbar.SetToolLongHelp(142, "AN148. Choose data source.")
+        self.toolbar.SetToolLongHelp(143, "AN32. Choose data source.")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -504,7 +541,14 @@ class MyFrame(wx.Frame):
 
         panel = MyPanel(self, self.q, self.q.path)
 
-        self.statusbar.SetStatusText(self.qar_type, 2)
+        if panel.no_flights:
+            self.statusbar.SetStatusText("There are no flights", 0)
+            self.statusbar.SetStatusText("", 2)
+        else:
+            self.statusbar.SetStatusText("All flights are downloaded", 0)
+            self.statusbar.SetStatusText(self.qar_type, 2)
+
+
 
         self.sizer.Add(panel)
         self.sizer.Layout()

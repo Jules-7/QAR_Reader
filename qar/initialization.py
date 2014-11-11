@@ -3,7 +3,7 @@ import datetime
 import os
 import struct
 import stat
-
+import time
 
 """
           HEADER DESCRIPTION
@@ -39,21 +39,29 @@ import stat
 
     QAR types
 
---------------------------
-| Name      | Identifier |
---------------------------
-| QAR-12    | 0          |
-| QAR-64    | 1          |
-| QAR-T-M   | 5          |
-| QAR-T-L   | 6          |
-| QAR-B-1   | 10         |
-| QAR-B-3   | 11         |
-| QAR-T-2   | 14         |
-| CFDR-42   | 21         |
-| QAR-SARPP | 22         |
-| VDR       | 254        |
-| QAR-P     | 255        |
---------------------------
+-----------------------------
+| Name         | Identifier |
+-----------------------------
+| QAR-12       | 0          |
+| QAR-64       | 1          |
+| QAR-T-M      | 5          |
+| QAR-T-L      | 6          |
+| QAR-B-1      | 10         |
+| QAR-B-3      | 11         |
+| QAR-T-2      | 14         |
+| CFDR-42      | 21         |
+| QAR-SARPP    | 22         |
+| VDR          | 254        |
+| QAR-P        | 255        |
+-----------------------------
+| A320-CF      | 70         |
+| B747-QAR     | 71         |
+| An148-BUR-92 | 72         |
+| QAR-2100     | 73         |
+| QAR-4100     | 74         |
+| QAR-4120     | 75         |
+| QAR-4700     | 76         |
+-----------------------------
 """
 
 monstr = 'MONSTR'
@@ -76,23 +84,41 @@ class Initialize(object):
         self.clu_3_size = 1015234560  # bytes
         self.clu_2 = self.path + "CLU_0002.dat"
         self.clu_3 = self.path + "CLU_0003.dat"
-        self.qars = {'A320 - QAR': [255, 1],
-                'A320 - Compact Flash': [3, 1/2],
-                'B747 - QAR': [7, 1/4],
-                'An148 - BUR-92': [13, 1],
-                'QAR-4XXX': [254, 1]}
+        self.qars = {'A320 - QAR':           [255, 1],
+                     'SAAB':                 [254, 1],
+                     'A320 - Compact Flash': [70, 1/2],
+                     'B747 - QAR':           [71, 1/4],
+                     'An148 - BUR-92':       [72, 1],
+                     'QAR-2100':             [73, 1],
+                     'QAR-4100':             [74, 1],
+                     'QAR-4120':             [75, 1],
+                     'QAR-4700':             [76, 1]}
         self.headers = []
         self.get_day_time()
         self.get_qar_and_flight()
         self.get_frame_frequency()
+        self.check_path()
         self.write_header()
-        self.find_flights()
-        self.clear_clu_3()
 
-    #def check_path(self):
-        #check_clu_2 = os.path.isfile(self.clu_2)
-        #check_clu_3 = os.path.isfile(self.clu_3)
-        #print(check_clu_3), check_clu_2
+
+    def check_path(self):
+        check_clu_2 = os.path.isfile(self.clu_2)
+        if not check_clu_2:
+            clu_2 = open(self.clu_2, "w+")
+            clu_2.close()
+        check_clu_3 = os.path.isfile(self.clu_3)
+        if not check_clu_3:
+            start = time.clock()
+            with open(self.clu_3, "wb") as clu_3:
+                clu_3.truncate(self.clu_3_size)
+            end = time.clock()
+            print(end - start)
+        else:
+            with open(self.clu_3, "r+") as self.dat:
+                self.index = 0
+                self.file_len = os.stat(self.clu_3).st_size
+                self.find_flights()
+                self.clear_clu_3()
 
     def get_day_time(self):
         self.year = datetime.datetime.strftime(self.date, "%y")
