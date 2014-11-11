@@ -266,10 +266,16 @@ class InitializationPanel(wx.Panel):
         except AttributeError:
             self.qar_n = None
         wait = wx.BusyInfo("Please wait, working...")
-        print(self.qar_n)
         i = Initialize(self.drive, self.qar_type, self.date,
                        self.time, self.flight_n, self.qar_n)
         del wait
+
+
+        done_message = wx.MessageDialog(self, message="Initialization is over",
+                                        caption="Fulfilment message",
+                                        style=wx.OK | wx.CENTRE,
+                                        pos=wx.DefaultPosition)
+        done_message.ShowModal()
         self.parent.Close()
 
     def on_cancel(self, event):

@@ -1,10 +1,9 @@
 #-*-coding: utf-8-*-
-import time
 import datetime
 import os
 import struct
 import stat
-#from os import stat
+
 
 """
           HEADER DESCRIPTION
@@ -57,10 +56,13 @@ import stat
 --------------------------
 """
 
+monstr = 'MONSTR'
+
+
 
 class Initialize(object):
 
-    def __init__(self, path, qar_type, date, time_val, flight, qar_n):
+    def __init__(self, path, qar_type, date, time_val, flight_n, qar_n):
         self.cluster_size = 32 * 1024  # 32KB
         self.sector_size = 512  # Bytes
         self.path = path
@@ -68,16 +70,24 @@ class Initialize(object):
         self.date = date
         self.time = time_val
         #self.switchboard = switchboard  # Number of switchboard for QAR-12
-        self.qar_n = int(str(qar_n))  # number of QAR
-        print(self.qar_n)
-        self.flight = flight  # flight number
+        self.qar_n = qar_n  # number of QAR
+        self.flight_n = flight_n  # flight number
         self.clu_2_size = 32768 / 2  # bytes -> one cluster
         self.clu_3_size = 1015234560  # bytes
         self.clu_2 = self.path + "CLU_0002.dat"
         self.clu_3 = self.path + "CLU_0003.dat"
+        self.qars = {'A320 - QAR': [255, 1],
+                'A320 - Compact Flash': [3, 1/2],
+                'B747 - QAR': [7, 1/4],
+                'An148 - BUR-92': [13, 1],
+                'QAR-4XXX': [254, 1]}
+        self.headers = []
         self.get_day_time()
+        self.get_qar_and_flight()
+        self.get_frame_frequency()
         self.write_header()
-        #self.clear_clu_3()
+        self.find_flights()
+        self.clear_clu_3()
 
     #def check_path(self):
         #check_clu_2 = os.path.isfile(self.clu_2)
@@ -85,9 +95,34 @@ class Initialize(object):
         #print(check_clu_3), check_clu_2
 
     def get_day_time(self):
-        print(self.date)
-        print(self.time)
-        #day_time = datetime.datetime.now()
+        self.year = datetime.datetime.strftime(self.date, "%y")
+        self.month = datetime.datetime.strftime(self.date, "%m")
+        self.day = datetime.datetime.strftime(self.date, "%d")
+        self.hour = datetime.datetime.strftime(self.date, "%H")
+        self.minute = datetime.datetime.strftime(self.date, "%M")
+        self.second = datetime.datetime.strftime(self.date, "%S")
+
+    def get_qar_and_flight(self):
+        if self.qar_n:
+            self.qar = self.qar_n
+        else:
+            self.qar_n = 0
+            self.qar = self.qar_n
+        if self.flight_n:
+            self.flight = self.flight_n
+        else:
+            self.flight_n = 0
+            self.flight = self.flight_n
+
+    def get_hex_repr(self, value):
+        hex_value = '0x%s' % value
+        int_value = int(hex_value, 16)
+        bin_value = bin(int_value)
+        return bin_value
+
+    def get_frame_frequency(self):
+        frequency = self.qars[self.qar_type][1]
+        self.frequency = self.get_hex_repr(frequency)
 
     def write_header(self):
         qar_types = {0: [u"ЭБН-12", ],
@@ -102,116 +137,141 @@ class Initialize(object):
                      254: [u"VDR", 1],
                      255: [u"ЭБН-Р", 1]}
 
-        qars = {'A320 - QAR': [255, 1],
-                'A320 - Compact Flash': [3, 1/2],
-                'B747 - QAR': [7, 1/4],
-                'An148 - BUR-92': [13, 1],
-                'QAR-4XXX': [254, 1]}
-        os.chmod(self.clu_2, stat.S_IRWXU)  # change mode for writing
-        dat_2 = open(self.clu_2, "wb")
-        data_for_header = []
+        os.chmod(self.clu_2, stat.S_IWRITE)  # change mode for writing
 
-        #----- monstr word ------
-        monstr = "MONSTR00"
-        monstr_word = [(str(bin(ord(each)))[2:]).rjust(8, "0") for each in monstr]
-        for each in monstr_word:
-            data_for_header.append(each)
+        with open(self.clu_2, "wb") as dat_2:
+            data_for_header = []
 
-        #----- 9-10 bytes ------
-        data_for_header.append("0")
-        data_for_header.append("0")
+            #----- monstr word ------
+            monstr = "MONSTR00"
+            monstr_word = [(str(bin(ord(each)))[2:]).rjust(8, "0") for each in monstr]
+            for each in monstr_word:
+                data_for_header.append(each)
 
-        #----- qar_type ------
-        qar_type = int(str((qars[self.qar_type])[0]))
-        qar = (str(bin(qar_type))[2:]).rjust(8, "0")
-        data_for_header.append(str(qar))
-
-        #----- dimension -------
-        data_for_header.append("0")
-
-        #----- channel size -----
-        data_for_header.append("0")
-        data_for_header.append("0")
-
-        #----- frame size -------
-        data_for_header.append("0")
-        data_for_header.append("0")
-
-        #---- frame frequency ----
-        data_for_header.append("0")
-        frame_frequency = str((qars[self.qar_type])[1])
-        print(frame_frequency)
-        data_for_header.append((str(bin(ord(frame_frequency)))[2:]).rjust(8, "0"))
-
-        #----- 18 empty bytes ----
-        i = 0
-        while i < 16:
+            #----- 9-10 bytes ------
             data_for_header.append("0")
-            i += 1
-
-        #----- qar_number -----
-        qar_number = (str(bin(self.qar_n))[2:]).rjust(8, "0")
-        data_for_header.append(qar_number)
-
-        #----- year --------
-        value = bin(1)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- month ------
-        value = bin(2)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- day ------
-        value = bin(3)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- hour -----
-        value = bin(4)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- minute ----
-        value = bin(5)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- sec ------
-        value = bin(6)
-        data_for_header.append(value)
-        data_for_header.append("0")
-
-        #----- 64 empty bytes ----
-        i = 0
-        while i < 64:
             data_for_header.append("0")
-            i += 1
 
-        data = [str(each) for each in data_for_header]
+            #----- qar_type ------
+            qar_type = int(str((self.qars[self.qar_type])[0]))
+            qar = (str(bin(qar_type))[2:]).rjust(8, "0")
+            data_for_header.append(str(qar))
 
-        for each in data:
-            print(each)
-            dat_int = int(each, 2)
-            dat_write = (struct.pack("i", dat_int))[:1]
-            dat_2.write(dat_write)
-        dat_2.close()
+            #----- dimension -------
+            data_for_header.append("0")
+
+            #----- channel size -----
+            data_for_header.append("0")
+            data_for_header.append("0")
+
+            #----- frame size -------
+            data_for_header.append("0")
+            data_for_header.append("0")
+
+            #---- frame frequency ----
+            data_for_header.append("0")
+            data_for_header.append(self.frequency)
+
+            #----- 18 empty bytes ----
+            i = 0
+            while i < 18:
+                data_for_header.append("0")
+                i += 1
+
+            #----- qar_number -----
+            qar_bin = self.get_hex_repr(self.qar)
+            data_for_header.append(qar_bin)
+            data_for_header.append("0")
+
+            #----- year --------
+            year_bin = self.get_hex_repr(self.year)
+            data_for_header.append(year_bin)
+            data_for_header.append("0")
+
+            #----- month ------
+            month_bin = self.get_hex_repr(self.month)
+            data_for_header.append(month_bin)
+            data_for_header.append("0")
+
+            #----- day ------
+            day_bin = self.get_hex_repr(self.day)
+            data_for_header.append(day_bin)
+            data_for_header.append("0")
+
+            #----- hour -----
+            hour_bin = self.get_hex_repr(self.hour)
+            data_for_header.append(hour_bin)
+            data_for_header.append("0")
+
+            #----- minute ----
+            minute_bin = self.get_hex_repr(self.minute)
+            data_for_header.append(minute_bin)
+            data_for_header.append("0")
+
+            #----- sec ------
+            second_bin = self.get_hex_repr(self.second)
+            data_for_header.append(second_bin)
+            data_for_header.append("0")
+
+            data_for_header.append("0")
+            data_for_header.append("0")
+
+            #----- flight number ------
+            flight_bin = self.get_hex_repr(self.flight)
+            data_for_header.append(flight_bin)
+            data_for_header.append("0")
+
+            #----- 74 empty bytes ----
+            i = 0
+            while i < 74:
+                data_for_header.append("0")
+                i += 1
+
+            data = [str(each) for each in data_for_header]
+
+            for each in data:
+                dat_int = int(each, 2)
+                dat_write = (struct.pack("i", dat_int))[:1]
+                dat_2.write(dat_write)
 
     def clear_clu_3(self):
-        start = time.clock()
+        """ Clearing means overwrite only first byte of each header with 0,
+        so it won`t be found during search """
+        os.chmod(self.clu_3, stat.S_IWRITE)  # change mode for writing
+        # in case of using r+ mode it is possible to overwrite only specific bytes
+        # in case of wb mode -> it will write necessary bytes, fill in other with zeros
+        # and after last written byte (last specified to be written) will truncate file
+        with open(self.clu_3, "r+") as dat_3:
+            source_data = int(self.get_hex_repr(0), 2)
+            for each in self.headers:
+                dat_3.seek(each, 0)
+                data = struct.pack("i", source_data)
+                dat_3.write(data)
+
+    def format_clu_3(self):
+        """ Formatting clears file -> fill whole file with zeros
+        This process takes about 40 min """
         byte_counter = 0
         os.chmod(self.clu_3, stat.S_IWRITE)  # change mode for writing
-        #fd = os.open(self.clu_3, os.O_RDWR|os.O_CREAT )
         dat_3 = open(self.clu_3, "wb")
         zeros = (struct.pack("i", 0))
         while byte_counter <= self.clu_3_size:
-            #os.write(fd, zeros)
-            #os.ftruncate(fd, 10)
             dat_3.write(zeros)
             byte_counter += 4
-        end = time.clock()
-        print(end-start)
-        # Open a file
 
+    def is_flight(self):
+        ''' check for MONSTR and if so capture header index '''
+        flight = self.dat.read(6)
+        if flight == monstr:
+            self.headers.append(self.index)
+        self.index += self.cluster_size
 
+    def find_flights(self):
+        ''' find all flights indexes '''
+        while self.index < self.file_len:
+            if self.index == 524288:
+                self.dat.seek(524288)
+                self.is_flight()
+            else:
+                self.dat.seek(self.index)
+                self.is_flight()
