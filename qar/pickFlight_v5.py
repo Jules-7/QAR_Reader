@@ -1,11 +1,7 @@
 from SAAB340 import SAAB
 from airbus import A320
 import win32api
-
-"""this module:
-              - finds ARINC 717 syncwords
-              - checks integrity of frames
-              - return only valid frames"""
+from tester import TesterU32
 
 
 class Flight:
@@ -23,7 +19,6 @@ class Flight:
         self.path_to_save = path_to_save
         self.flag = flag
         self.qar_type = qar_type
-        print(self.qar_type)
         if self.flag == "a320_cf":
             self.prepare_cf_file()
             self.make_flight()
@@ -37,8 +32,12 @@ class Flight:
             self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
+        elif self.flag == "an32_qar":
+            self.get_flight()
+            self.make_flight()
 
     def get_flight(self):
+        """ get the whole flight from source file """
         header = 128
         eof = [255] * 16
         data = open(self.path, 'rb')
@@ -83,10 +82,14 @@ class Flight:
             elif self.qar_type == "a320_qar" or self.qar_type == "a320_cf":
                 a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar,
                             self.path_to_save, self.flag)
+            elif self.qar_type == "QAR-T-2":  # an32
+                tester = TesterU32(tmp_file_name, target_file_name, self.progress_bar,
+                                   self.path_to_save, self.flag)
 
 
     def prepare_cf_file(self):
-        """ Each cluster begins with header.
+        """ Prepares Compact Flash file
+        Each cluster begins with header.
         Leave the first header and delete other """
         header = 32  # bytes
         data = open(self.path, 'rb')  # path to tmp file containing full copy of compact flash

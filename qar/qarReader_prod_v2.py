@@ -1,6 +1,6 @@
 #-*-coding: utf-8-*-
 import os
-import time
+import struct
 import datetime
 
 """this module:
@@ -12,23 +12,24 @@ import datetime
 monstr = 'MONSTR'
 cluster = 32768  # cluster size in bytes
 counter_increment = float(4294967295)
-qar_types = {0: u"ЭБН-12",
-             1: u"ЭБН-64",
-             5: u"ЭБН-Т-М",
-             6: u"ЭБН-Т-Л",
-             10: u"ЭБН-Б-1",
-             11: u"ЭБН-Б-3",
-             14: u"ЭБН-Т-2",
+qar_types = {0: u"QAR-12",
+             1: u"QAR-64",
+             5: u"QAR-T-M",
+             6: u"QAR-T-L",
+             10: u"QAR-B-1",
+             11: u"QAR-B-3",
+             14: u"QAR-T-2",
              21: u"CFDR-42",
-             22: u"ЭБН САРПП",
+             22: u"QAR SARPP",
              254: u"VDR",
-             255: u"ЭБН-Р"}
+             255: u"QAR-R"}
 
 
 class QARReader():
 
-    def __init__(self, path):
+    def __init__(self, path, info=None):
         self.path = path
+        self.info = info
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
         self.index = 524288  # index of records beginning in bytes
@@ -40,17 +41,29 @@ class QARReader():
         self.time = []
         self.qar_type = None
         self.init_date = None
+        self.add_current_date = False
         self.start_date = []
+        self.start_date_str_repr = []
         self.durations = []
         self.end_date = []
         self.find_flights()
-        self.get_flight_intervals()
-        self.get_durations()
-        self.get_qar_type()
-        self.dat.close()
+        if self.flights_start:
+            self.get_flight_intervals()
+            if self.info == "a320":  # count durations by frames - 1 frame = 4 sec
+                self.get_durations_a320()
+            else:
+                self.get_durations()  # count durations using QAR header -> processor time
+            self.get_qar_type()
+            self.dat.close()
+            # additional
+            # write current date (flight start date) to header if it has not been written before
+            # in bytes: 70, 72, 74, 76, 78, 80
+            # symmetrically + 2 lines (16 columns) to date of initialization
+            if self.add_current_date:  # True means it is necessary to write current date to header
+                self.add_date_to_header()
 
     def is_flight(self):
-        ''' check for MONSTR and if so record header '''
+        """ check for MONSTR and if so record header """
         flight = self.dat.read(6)
         if flight == monstr:
             header = self.dat.read(122)
@@ -64,7 +77,7 @@ class QARReader():
         self.index += self.cluster
 
     def find_flights(self):
-        ''' find all flights indexes '''
+        """ find all flights indexes """
         while self.index < self.file_len:
             if self.index == 524288:
                 self.dat.seek(524288)
@@ -105,7 +118,23 @@ class QARReader():
             self.durations.append(duration_in_sec)
             i += 1
 
+    def get_durations_a320(self):
+        """ for A320 flight duration is counted by frames, not by counter value from header"""
+        i = 0
+        for each in self.start_date:
+            bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
+            bytes_in_frame = 768
+            frames_in_flight = bytes_in_flight / bytes_in_frame
+            duration_in_sec = frames_in_flight * 4  # 1 frame - 4 sec
+            end = each + datetime.timedelta(seconds=duration_in_sec)
+            self.end_date.append(end)
+            self.durations.append(duration_in_sec)
+            i += 1
+
     def get_last_flight_end(self, start):
+        """ as there are no headers after last flight
+        (which can be used as definite sign of flight end)
+        we search for zeroes, which mean that flight has ended """
         header = 128
         self.dat.seek(start + header)
         check_twenty = ''
@@ -127,8 +156,8 @@ class QARReader():
                     check_twenty = ''
         return start + counter
 
-
     def get_initial_date(self, header):
+        """ initial date is written in header as it is (by exact value we can see) """
         init_year = '20' + (hex(ord(header[32])))[2:]
         init_month = '0' + (hex(ord(header[34])))[2:] if len((hex(ord(header[34])))[2:]) == 1 else (hex(ord(header[34])))[2:]
         init_day = '0' + (hex(ord(header[36])))[2:] if len((hex(ord(header[36])))[2:]) == 1 else (hex(ord(header[36])))[2:]
@@ -140,8 +169,19 @@ class QARReader():
         # convert to int
         self.init_date = datetime.datetime(int(init_year), int(init_month), int(init_day),
                                            int(init_hour), int(init_minute), int(init_second))
+        if not self.add_current_date:
+            # if False -> we need to check has current date been written or not
+            # if True -> current date has been written in header
+            self.check_if_current_date(header)
+
+    def check_if_current_date(self, header):
+        """ check if current date has already been written in header """
+        curr_year_ord = (hex(ord(header[64])))[2:]
+        if curr_year_ord == '0':
+            self.add_current_date = True
 
     def check_header(self, header):
+        """ if header is corrupted - filled with ff we don`t take it into account"""
         corrupted = '0xff' * 16
         to_check = ''
         for each in header:
@@ -152,6 +192,7 @@ class QARReader():
             return True
 
     def get_current_date(self, header):
+        """ flight start date """
         curr_counter = (self.process_counter(header[117], header[116],
                                              header[115], header[114]))
         if curr_counter < self.init_counter:
@@ -159,9 +200,18 @@ class QARReader():
             diff = (curr_counter - self.init_counter)/256
         else:
             diff = (curr_counter - self.init_counter)/256
-        self.start_date.append((self.init_date + datetime.timedelta(seconds=diff)))
+        start_date = (self.init_date + datetime.timedelta(seconds=diff))
+        self.start_date.append(start_date)
+        year = start_date.strftime("%y")
+        month = start_date.strftime("%m")
+        day = start_date.strftime("%d")
+        hour = start_date.strftime("%H")
+        minute = start_date.strftime("%M")
+        second = start_date.strftime("%S")
+        self.start_date_str_repr.append([year, month, day, hour, minute, second])
 
     def process_counter(self, *args):
+        """ processing (transformation) of hex value to decimal """
         counter = '0x'
         for each in args:
             if len((hex(ord(each)))[2:]) == 1:
@@ -176,3 +226,55 @@ class QARReader():
         for key, value in qar_types.iteritems():
             if qar_type == key:
                 self.qar_type = value
+
+    def add_date_to_header(self):
+        """ add each flight start date to its header  inside CLU-0003.DAT file
+        by overwriting empty bytes """
+        #current_date_bytes = [70, 72, 74, 76, 78, 80]
+        with open(self.path, "r+") as source:
+            i = 0
+            for each in self.flights_start:
+                source.seek(each, 0)  # get at the beginning of flight
+                source.seek(69, 1)  # get before byte 70 to start record current date
+                data_for_header = []
+                cur_date = self.start_date_str_repr[i]
+                #----- year --------
+                year_bin = self.get_hex_repr(cur_date[0])
+                data_for_header.append(year_bin)
+
+                #----- month ------
+                month_bin = self.get_hex_repr(cur_date[1])
+                data_for_header.append(month_bin)
+
+                #----- day ------
+                day_bin = self.get_hex_repr(cur_date[2])
+                data_for_header.append(day_bin)
+
+                #----- hour -----
+                hour_bin = self.get_hex_repr(cur_date[3])
+                data_for_header.append(hour_bin)
+
+                #----- minute ----
+                minute_bin = self.get_hex_repr(cur_date[4])
+                data_for_header.append(minute_bin)
+
+                #----- sec ------
+                second_bin = self.get_hex_repr(cur_date[5])
+                data_for_header.append(second_bin)
+
+                data = [str(each) for each in data_for_header]
+
+                for value in data:
+                    dat_int = int(value, 2)
+                    dat_write = (struct.pack("i", dat_int))[:1]
+                    source.seek(1, 1)  # seek next byte before byte to write
+                    source.write(dat_write)
+                i += 1
+
+    def get_hex_repr(self, value):
+        """ processing (transformation) of integer in string representation to its binary repr """
+        hex_value = '0x%s' % value
+        int_value = int(hex_value, 16)
+        bin_value = bin(int_value)
+        return bin_value
+

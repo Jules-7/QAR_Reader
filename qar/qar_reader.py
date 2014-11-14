@@ -8,7 +8,7 @@ from splitter import Split
 from datetime import datetime
 from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
-from wx.lib.masked import TimeCtrl
+from formatting import FormatCompactFlash
 """this module:
 - creates window for choosing of file with flights
 - displays all flights in file
@@ -85,8 +85,11 @@ class MyPanel(wx.Panel):
 
         index = 0
         self.flights_dict = {}
+        # in case there are no flights in file
         if not data.flight_intervals:
             self.no_flights = True
+        else:
+            self.no_flights = False
         for each in data.flight_intervals:
             try:
                 flight = str(data.flight_intervals[index][0]) + ":" + str(data.flight_intervals[index][1])
@@ -307,7 +310,7 @@ class MyFrame(wx.Frame):
 
         self.status_bar()
         self.chosen_acft_type = None  # means both acft type and data source type
-        self.acft_data_types = {321: "a320_qar",
+        self.acft_data_types = {321: "a320_qar",  # A320
                                 322: "a320_cf",
                                 323: "a320_fdr",
                                 331: "b747_qar",
@@ -341,8 +344,9 @@ class MyFrame(wx.Frame):
         filemenu = wx.Menu()
         choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
         choose_cf = filemenu.Append(302, "&Choose Compact Flash", " Choose Compact Flash to open")
-        menu_exit = filemenu.Append(wx.ID_EXIT, "&Exit", " Terminate the program")
         initialize = filemenu.Append(wx.ID_ANY, "&Initialize", " Initialize QAR")
+        format = filemenu.Append(wx.ID_ANY, "&Format CF", " Formatting Compact Flash")
+        menu_exit = filemenu.Append(wx.ID_EXIT, "&Exit", " Terminate the program")
         filemenu.AppendSeparator()
 
         savemenu = wx.Menu()
@@ -386,6 +390,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.save_raw, save_raw_file)
         self.Bind(wx.EVT_MENU, self.on_close, menu_exit)
         self.Bind(wx.EVT_MENU, self.initialization, initialize)
+        self.Bind(wx.EVT_MENU, self.formatting, format)
 
         self.Bind(wx.EVT_MENU, self.a320_qar_chosen, a320_qar)
         self.Bind(wx.EVT_TOOL, self.a320_cf_chosen, a320_cf)
@@ -488,6 +493,27 @@ class MyFrame(wx.Frame):
         window = InitializationFrame()
         window.Show(True)
 
+    def formatting(self, event):
+        dlg = wx.DirDialog(self, "Choose a Compact Flash:",
+                           style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if dlg.ShowModal() == wx.ID_OK:
+            path = u"%s" % dlg.GetPath()
+        else:
+            return
+        dlg.Destroy()
+        wait = wx.BusyInfo("Please wait, formatting...")
+        f = FormatCompactFlash(path)
+        del wait
+        done_message = wx.MessageDialog(self, message="Formatting is over",
+                                        caption="Fulfilment message",
+                                        style=wx.OK | wx.CENTRE,
+                                        pos=wx.DefaultPosition)
+        done_message.ShowModal()
+
+
     def tool_bar(self):
         #-----------------------CREATE TOOLBAR----------------------------------------
         # do not use this at window reload -> toolbar is not a=show at first and
@@ -546,9 +572,7 @@ class MyFrame(wx.Frame):
             self.statusbar.SetStatusText("", 2)
         else:
             self.statusbar.SetStatusText("All flights are downloaded", 0)
-            self.statusbar.SetStatusText(self.qar_type, 2)
-
-
+            self.statusbar.SetStatusText(self.q.qar_type, 2)
 
         self.sizer.Add(panel)
         self.sizer.Layout()
@@ -575,10 +599,9 @@ class MyFrame(wx.Frame):
             self.flag = "qar"
         else:
             self.flag = self.acft_data_types[self.chosen_acft_type]
-        try:
-            self.q = WorkerThread(self, self.path, self.flag)
-        except:
-            pass
+
+        self.q = WorkerThread(self, self.path, self.flag)
+
 
     def on_choose_cf(self, event):  # choose compact flash
         # In this case we include a "New directory" button.
@@ -636,8 +659,9 @@ class MyFrame(wx.Frame):
                         flight_acft = acft
                     else:
                         flight_acft = None
-                    name = self.form_name(mode, flight_index, flight_acft, flight_qar,flight_date)
-
+                    print(flight_acft)
+                    name = self.form_name(mode, flight_index, flight_acft, flight_qar, flight_date)
+                    print(self.qar_type)
                     f = Flight(self.progress_bar, start, end, self.q.path, name, self.qar_type,
                                self.path_to_save, self.flag)
                     self.saved_flights.append(each)
@@ -657,7 +681,7 @@ class MyFrame(wx.Frame):
         no_space_date = str(cor_date).replace(" ", "_")
         name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(no_space_date)
         if rec_type == "flight":
-            self.statusbar.SetStatusText("Flight is exported", 0)
+            #self.statusbar.SetStatusText("Flight is exported", 0)
             return name
         elif rec_type == "raw":
             name_raw = name + "_raw"

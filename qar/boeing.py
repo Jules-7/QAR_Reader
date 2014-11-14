@@ -44,25 +44,28 @@ class Boeing(object):
         self.get_flight_ends()
 
     def find_flights(self):
+        """ find all flights
+        in B747 - frames are good
+         if there is no syncword in next frame - it indicates about flight end"""
         while not self.end_flag:
             start = self.get_flight_start()
-            while start is True:
-                check = self.check_frame()
-                if check is True:
-                    pass
+            while start is True:  # if start is found
+                check = self.check_frame()  # check frame
+                if check is True:  # if it is correct
+                    pass  # dont do anything
                 else:
-                    start = False
+                    start = False  # means that flight has ended
                     #self.bytes_counter += self.frame_len - self.subframe_len
 
     def get_flight_start(self):
         while not self.end_flag:
             byte_one = self.data.read(1)
-            p12 = self.data.tell()
+            #p12 = self.data.tell()
             byte_two = self.data.read(1)
             if byte_one == "" or byte_two == "":
                 self.end_flag = True
                 break
-            p13 = self.data.tell()
+            #p13 = self.data.tell()
             next_two_bytes = [str(ord(byte_one)), str(ord(byte_two))]
             self.bytes_counter += 2
             if next_two_bytes == self.sw_one:
@@ -82,10 +85,12 @@ class Boeing(object):
                 self.bytes_counter -= 1
             if self.record_end_index is True:
                 self.flights_end.append(self.bytes_counter)
+                # important value -> ensures same value of actual index in file and bytes_counter
                 self.bytes_counter = p11
                 self.record_end_index = False
 
     def check_frame(self):
+        """ check if there is a next frame """
         check_sw_two = self.read_syncword()
         check_sw_three = self.read_syncword()
         check_sw_four = self.read_syncword()
@@ -98,6 +103,7 @@ class Boeing(object):
             return True
 
     def read_syncword(self):
+        """ reads syncword and convert to str format"""
         self.data.seek(self.subframe_len, 1)
         sw_ord = []
         sw = self.data.read(2)
@@ -187,6 +193,7 @@ class Boeing(object):
             i += 1
 
     def check_minutes(self, digit_one, digit_two):
+        """ check minutes to be in valid range"""
         digit_one_corrected = None
         digit_two_corrected = None
         if digit_one > 5:
@@ -204,6 +211,7 @@ class Boeing(object):
         return int("%s%s" % (one, two))
 
     def check_hours(self, digit_one, digit_two):
+        """ check hours to be in valid range"""
         digit_one_corrected = None
         digit_two_corrected = None
         if digit_one > 2:

@@ -1,9 +1,9 @@
 import struct
 
-""" This module holds basic methods for frames search"""
-
 
 class PrepareData(object):
+
+    """ This module holds basic methods for frames search"""
 
     def __init__(self, tmp_file_name, param_file_name, frame_len, subframe_len, progress_bar, path_to_save, flag):
         self.source_file = None
@@ -20,6 +20,7 @@ class PrepareData(object):
         self.flag = flag
 
     def record_data(self):
+        """ perform recording of valid frames only """
         while self.bytes_counter < self.param_file_end - 4:
             if self.mix_type is None:  # cases when flight is too small less than 10 min
                 self.param_file.close()
@@ -43,6 +44,8 @@ class PrepareData(object):
 
                 i = 0
                 while i < self.frame_len - 3:
+                    # read frame by 4 bytes, apply mix scheme to it and record to target file
+                    # -1 byte_counter due to the fact the 12 bits words
                     words = [self.source_file[self.bytes_counter],
                              self.source_file[self.bytes_counter + 1],
                              self.source_file[self.bytes_counter + 2],
@@ -68,9 +71,9 @@ class PrepareData(object):
 
                 self.bytes_counter -= 2
 
-            else:
+            else:  # no need to change mix_type
                 frame = self.source_file[self.bytes_counter:self.bytes_counter + self.frame_len + 4]
-                if len(frame) < self.frame_len:
+                if len(frame) < self.frame_len:  # end of data
                     break
                 self.bytes_counter += self.frame_len
                 self.bytes_counter -= 4
@@ -80,7 +83,8 @@ class PrepareData(object):
                                  frame[(self.frame_len + 4) - 1]]
 
                 mixed_words = self.mix_syncword(check_next_sw)
-                if mixed_words[self.mix_type] == self.sw_one:
+                # perform syncword mixing according to mix scheme
+                if mixed_words[self.mix_type] == self.sw_one:  # if its ok
                     i = 0
                     while i < self.frame_len:
                         next_words = [frame[i], frame[i + 1], frame[i + 2], frame[i + 3]]
@@ -91,7 +95,7 @@ class PrepareData(object):
                             to_write = (struct.pack("i", value))[:1]  # int takes 4 byte, but we need only first
                             # as the rest are 0s in our case, because we supply only 8 bits (one byte)
                             self.param_file.write(to_write)
-                else:
+                else:  # if its not a syncword -> search for it
                     self.bytes_counter -= self.frame_len
                     self.scheme_search()
 
@@ -187,7 +191,7 @@ class PrepareData(object):
         return mixed_words
 
     def mix_words(self, bytes_to_mix):
-        """ Create 16 bit words from 12 bit words """
+        """ Create 16 bit words from 12 bit words to be recorded in target file """
         middle = self.mix_syncword(bytes_to_mix)
         tmp_str_1 = "0000" + middle[self.mix_type]
         tmp_str_2 = "0000" + middle[self.mix_type + 1]

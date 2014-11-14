@@ -1,10 +1,10 @@
 from processing import PrepareData
 import os
 
-""" A320. Creation of parametric file with data being processed """
-
 
 class A320(PrepareData):
+
+    """ A320. Creation of parametric file with data being processed """
 
     def __init__(self, tmp_file_name, param_file_name, frame, subframe, progress_bar, path_to_save, flag):
         PrepareData.__init__(self, tmp_file_name=tmp_file_name, param_file_name=param_file_name,

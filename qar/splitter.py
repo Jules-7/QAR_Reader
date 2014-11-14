@@ -6,7 +6,8 @@ from bur_92 import Bur
 
 class Split(object):
 
-    """ This class redirect either to QARReader or to Compact Flash class """
+    """ This class redirect to appropriate class
+    depending on type of data source (QAR, CF, FDR) and aircraft type"""
 
     def __init__(self, path, flag):
         self.result = None
@@ -22,3 +23,9 @@ class Split(object):
         elif flag is "an148_qar":
             bur = Bur(path)
             self.result = bur
+        elif flag is "an32_qar":
+            qar = QARReader(path)
+            self.result = qar
+        elif flag == "a320_qar":
+            qar = QARReader(path, info="a320")
+            self.result = qar

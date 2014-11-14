@@ -109,16 +109,19 @@ class Initialize(object):
         check_clu_3 = os.path.isfile(self.clu_3)
         if not check_clu_3:
             start = time.clock()
-            with open(self.clu_3, "wb") as clu_3:
-                clu_3.truncate(self.clu_3_size)
+            clu_3 = open(self.clu_3, "wb")
+            clu_3.truncate(self.clu_3_size)
+            clu_3.close()
             end = time.clock()
             print(end - start)
         else:
-            with open(self.clu_3, "r+") as self.dat:
-                self.index = 0
-                self.file_len = os.stat(self.clu_3).st_size
-                self.find_flights()
-                self.clear_clu_3()
+            os.chmod(self.clu_3, stat.S_IWRITE)  # change mode for writing
+            self.dat = open(self.clu_3, "r+")
+            self.index = 0
+            self.file_len = os.stat(self.clu_3).st_size
+            self.find_flights()
+            self.clear_clu_3()
+            self.dat.close()
 
     def get_day_time(self):
         self.year = datetime.datetime.strftime(self.date, "%y")
