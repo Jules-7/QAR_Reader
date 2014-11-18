@@ -1,10 +1,10 @@
 from processing import PrepareData
 import os
 
-""" SAAB - 340. Creation of parametric file with data being processed """
-
 
 class SAAB(PrepareData):
+
+    """ SAAB - 340. Creation of parametric file with data being processed """
 
     def __init__(self,  tmp_file_name, param_file_name,
                  frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file):

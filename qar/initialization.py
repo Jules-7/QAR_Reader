@@ -154,18 +154,6 @@ class Initialize(object):
         self.frequency = self.get_hex_repr(frequency)
 
     def write_header(self):
-        qar_types = {0: [u"ЭБН-12", ],
-                     1: [u"ЭБН-64", ],
-                     5: u"ЭБН-Т-М",
-                     6: u"ЭБН-Т-Л",
-                     10: u"ЭБН-Б-1",
-                     11: u"ЭБН-Б-3",
-                     14: u"ЭБН-Т-2",
-                     21: u"CFDR-42",
-                     22: u"ЭБН САРПП",
-                     254: [u"VDR", 1],
-                     255: [u"ЭБН-Р", 1]}
-
         os.chmod(self.clu_2, stat.S_IWRITE)  # change mode for writing
 
         with open(self.clu_2, "wb") as dat_2:
@@ -289,14 +277,14 @@ class Initialize(object):
             byte_counter += 4
 
     def is_flight(self):
-        ''' check for MONSTR and if so capture header index '''
+        """ check for MONSTR and if so capture header index """
         flight = self.dat.read(6)
         if flight == monstr:
             self.headers.append(self.index)
         self.index += self.cluster_size
 
     def find_flights(self):
-        ''' find all flights indexes '''
+        """ find all flights indexes """
         while self.index < self.file_len:
             if self.index == 524288:
                 self.dat.seek(524288)

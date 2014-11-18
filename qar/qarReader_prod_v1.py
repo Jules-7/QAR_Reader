@@ -87,9 +87,9 @@ class QARReader():
             channel = self.process_counter(self.headers[i][7], self.headers[i][6])#bits/bytes in channel
             frame = self.process_counter(self.headers[i][9], self.headers[i][8])#channels in frame
             frame_rate = self.process_counter(self.headers[i][11], self.headers[i][10])
-            if dimension == 0:#bytes
+            if dimension == 0:  # bytes
                 bytes_in_frame = frame * channel
-            elif dimension == 1:#bits
+            elif dimension == 1:  # bits
                 bytes_in_frame = (frame * channel) / byte
 
             bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]

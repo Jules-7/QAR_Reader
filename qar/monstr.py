@@ -3,29 +3,28 @@ import os
 import struct
 import datetime
 
-"""this module:
-- finds flight
-- checks headers
-- determines information from headers
-- return all technical/additional information"""
-
-monstr = 'MONSTR'
-cluster = 32768  # cluster size in bytes
-counter_increment = float(4294967295)
-qar_types = {0: u"QAR-12",
-             1: u"QAR-64",
-             5: u"QAR-T-M",
-             6: u"QAR-T-L",
-             10: u"QAR-B-1",
-             11: u"QAR-B-3",
-             14: u"QAR-T-2",
-             21: u"CFDR-42",
-             22: u"QAR SARPP",
-             254: u"VDR",
-             255: u"QAR-R"}
+MONSTR = 'MONSTR'
+CLUSTER = 32768  # cluster size in bytes
+COUNTER_INCREMENT = float(4294967295)
+QAR_TYPES = {0: "MSRP-12",  # An26
+             14: "Tester-2",  # An32
+             70: "Compact Flash",  # A320
+             71: "QAR-B747",
+             72: "BUR-92",  # An148
+             73: "QAR-2100",
+             74: "QAR-4100",
+             75: "QAR-4120",
+             76: "QAR-4700",
+             254: "QAR SAAB",
+             255: "QAR-R"}
 
 
-class QARReader():
+class MonstrHeader():
+
+    """ - find flights
+        - check headers
+        - extract information from headers
+        - provide with all technical/additional information    """
 
     def __init__(self, path, info=None):
         self.path = path
@@ -49,8 +48,8 @@ class QARReader():
         self.find_flights()
         if self.flights_start:
             self.get_flight_intervals()
-            if self.info == "a320":  # count durations by frames - 1 frame = 4 sec
-                self.get_durations_a320()
+            if self.info == "a320" or self.info == "an26":  # count durations by frames
+                self.get_durations_optional(self.info)
             else:
                 self.get_durations()  # count durations using QAR header -> processor time
             self.get_qar_type()
@@ -65,7 +64,7 @@ class QARReader():
     def is_flight(self):
         """ check for MONSTR and if so record header """
         flight = self.dat.read(6)
-        if flight == monstr:
+        if flight == MONSTR:
             header = self.dat.read(122)
             check = self.check_header(header)
             if check:
@@ -118,14 +117,19 @@ class QARReader():
             self.durations.append(duration_in_sec)
             i += 1
 
-    def get_durations_a320(self):
-        """ for A320 flight duration is counted by frames, not by counter value from header"""
+    def get_durations_optional(self, acft):
+        """ for these aircraft types flight duration is counted by frames,
+        not by counter value from header"""
+        # frame duration for aircraft type in sec
+        acft_frame_duration = {"a320": 4,  # 1 frame - 4 sec
+                               "an26": 0.5}
+        frame_duration = acft_frame_duration[acft]
         i = 0
         for each in self.start_date:
             bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
             bytes_in_frame = 768
             frames_in_flight = bytes_in_flight / bytes_in_frame
-            duration_in_sec = frames_in_flight * 4  # 1 frame - 4 sec
+            duration_in_sec = frames_in_flight * frame_duration
             end = each + datetime.timedelta(seconds=duration_in_sec)
             self.end_date.append(end)
             self.durations.append(duration_in_sec)
@@ -196,7 +200,7 @@ class QARReader():
         curr_counter = (self.process_counter(header[117], header[116],
                                              header[115], header[114]))
         if curr_counter < self.init_counter:
-            curr_counter += counter_increment
+            curr_counter += COUNTER_INCREMENT
             diff = (curr_counter - self.init_counter)/256
         else:
             diff = (curr_counter - self.init_counter)/256
@@ -223,7 +227,7 @@ class QARReader():
 
     def get_qar_type(self):
         qar_type = ord(self.headers[0][4])
-        for key, value in qar_types.iteritems():
+        for key, value in QAR_TYPES.iteritems():
             if qar_type == key:
                 self.qar_type = value
 

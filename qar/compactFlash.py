@@ -5,24 +5,22 @@ import time
 import win32api
 
 
-
-""" Compact Flash Header description (complete description is absent)
-
-Header length: 32 B
-
-0 - 1: header pattern (in present case -> 0403 (hex))
-2 - 3: flight number (as it is) -> if there is 27 - it means 27th flight
-4 - 5: may be part of cluster №
-6 - 7: cluster № (hex)
-    9: seconds (as it is)
-   10: minutes (as it is)
-   11: hours   (as it is)
-   12: day     (as it is)
-   13: month   (as it is)
-   14: year    (last two digits as it is) """
-
-
 class CompactFlash(object):
+
+    """  Compact Flash Header description (complete description is absent)
+
+    Header length: 32 B
+
+    0 - 1: header pattern (in present case -> 0403 (hex))
+    2 - 3: flight number (as it is) -> if there is 27 - it means 27th flight
+    4 - 5: may be part of cluster #
+    6 - 7: cluster # (hex)
+    9: seconds (as it is)
+    10: minutes (as it is)
+    11: hours   (as it is)
+    12: day     (as it is)
+    13: month   (as it is)
+    14: year    (last two digits as it is) """
 
     def __init__(self, path):
         self.header_len = 32  # Bytes

@@ -4,8 +4,8 @@ import datetime
 
 class Boeing(object):
 
-    """ This class ensures flights search and
-    data integrity check obtained from Boeing 747-200"""
+    """ Ensure flights search and
+    data integrity check from Boeing 747-200"""
 
     def __init__(self, path):
         self.path = path
@@ -46,13 +46,13 @@ class Boeing(object):
     def find_flights(self):
         """ find all flights
         in B747 - frames are good
-         if there is no syncword in next frame - it indicates about flight end"""
+         if there is no syncword in next frame - it is an indication of flight end"""
         while not self.end_flag:
             start = self.get_flight_start()
             while start is True:  # if start is found
                 check = self.check_frame()  # check frame
                 if check is True:  # if it is correct
-                    pass  # dont do anything
+                    pass  # don`t do anything
                 else:
                     start = False  # means that flight has ended
                     #self.bytes_counter += self.frame_len - self.subframe_len
@@ -103,7 +103,7 @@ class Boeing(object):
             return True
 
     def read_syncword(self):
-        """ reads syncword and convert to str format"""
+        """ read syncword and convert to str format"""
         self.data.seek(self.subframe_len, 1)
         sw_ord = []
         sw = self.data.read(2)
@@ -231,4 +231,3 @@ class Boeing(object):
         else:
             two = digit_two
         return int("%s%s" % (one, two))
-

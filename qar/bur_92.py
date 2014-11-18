@@ -8,7 +8,7 @@ class Bur(object):
         self.path = path
         self.dat = open(path, "rb")
         self.file_len = os.stat(path).st_size
-        self.qar_type = u"Bur-92"
+        self.qar_type = "BUR-92"
         self.start = True
         self.flights_start = [0]
         self.flights_end = []
@@ -18,7 +18,7 @@ class Bur(object):
         self.end_date = []
         self.bytes_counter = 0
         self.frame_size = 512  # byte
-        self.frame_duration = 1  # sex
+        self.frame_duration = 1  # sec
         self.end_check = [255] * 4
         self.end_pattern = [255] * self.frame_size
         self.get_flights()
