@@ -26,62 +26,16 @@
       <file leaf-file-name="qar_reader.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="662" column="0" selection-start="26889" selection-end="26889" vertical-scroll-proportion="0.0" vertical-offset="8928" max-vertical-offset="9680">
-              <folding>
-                <element signature="e#5367#5627#0" expanded="false" />
-                <element signature="e#5395#5627#0" expanded="false" />
-                <element signature="e#5672#11689#0" expanded="false" />
-                <element signature="e#18009#18457#0" expanded="false" />
-                <element signature="e#18501#18700#0" expanded="false" />
-                <element signature="e#18745#18945#0" expanded="false" />
-                <element signature="e#18989#19188#0" expanded="false" />
-                <element signature="e#19232#19431#0" expanded="false" />
-                <element signature="e#19490#19753#0" expanded="false" />
-                <element signature="e#19879#19972#0" expanded="false" />
-                <element signature="e#20094#20944#0" expanded="false" />
-                <element signature="e#20985#22732#0" expanded="false" />
-                <element signature="e#23775#23789#0" expanded="false" />
-                <element signature="e#27306#27423#0" expanded="false" />
-                <element signature="e#27492#27893#0" expanded="false" />
-                <element signature="e#27935#28420#0" expanded="false" />
-              </folding>
+            <state line="662" column="0" selection-start="26889" selection-end="26889" vertical-scroll-proportion="0.0" vertical-offset="14167" max-vertical-offset="15378">
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="msrp.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="msrp.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/qar/msrp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="71" column="38" selection-start="2486" selection-end="2486" vertical-scroll-proportion="0.0" vertical-offset="1190" max-vertical-offset="1958">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="extractFlight.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="103" column="0" selection-start="3841" selection-end="3841" vertical-scroll-proportion="0.0" vertical-offset="2042" max-vertical-offset="3036">
-              <folding>
-                <element signature="e#0#24#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="processing.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/processing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="28" selection-start="617" selection-end="617" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4532">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="monstr.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/qar/monstr.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="39" selection-start="270" selection-end="270" vertical-scroll-proportion="0.2615156" vertical-offset="0" max-vertical-offset="6336">
+            <state line="67" column="26" selection-start="2338" selection-end="2338" vertical-scroll-proportion="0.20785597" vertical-offset="1347" max-vertical-offset="1958">
               <folding />
             </state>
           </provider>
@@ -90,7 +44,16 @@
       <file leaf-file-name="tester.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/tester.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="67" column="26" selection-start="2428" selection-end="2428" vertical-scroll-proportion="0.0" vertical-offset="1228" max-vertical-offset="1914">
+            <state line="77" column="32" selection-start="3033" selection-end="3033" vertical-scroll-proportion="0.0" vertical-offset="1501" max-vertical-offset="2112">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="extractFlight.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="103" column="0" selection-start="3841" selection-end="3841" vertical-scroll-proportion="0.0" vertical-offset="1979" max-vertical-offset="2904">
               <folding />
             </state>
           </provider>
@@ -718,27 +681,27 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1040" extended-state="0" />
+    <frame x="-8" y="-8" width="1296" height="1040" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13062099" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32976446" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15329626" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21905805" sideWeight="0.85859376" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2996707" sideWeight="0.85859376" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2248394" sideWeight="0.1125" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2015334" sideWeight="0.8875" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20087816" sideWeight="0.8875" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21948609" sideWeight="0.25234374" order="2" side_tool="true" content_ui="tabs" x="-4" y="729" width="1280" height="308" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32976446" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32976446" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -778,23 +741,37 @@
           <option name="timeStamp" value="24" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/msrp.py</url>
-          <line>62</line>
-          <option name="timeStamp" value="224" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/qar_reader.py</url>
           <line>661</line>
           <option name="timeStamp" value="226" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/qar/tester.py</url>
+          <line>55</line>
+          <option name="timeStamp" value="234" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="228" />
+      <option name="time" value="236" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/qar/monstr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="39" selection-start="270" selection-end="270" vertical-scroll-proportion="0.0" vertical-offset="220" max-vertical-offset="6336">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/tester.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="67" column="26" selection-start="2428" selection-end="2428" vertical-scroll-proportion="0.0" vertical-offset="1474" max-vertical-offset="1914">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/qar/qarReader_prod_v1.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="72" column="13" selection-start="2086" selection-end="2086" vertical-scroll-proportion="0.0" vertical-offset="1584" max-vertical-offset="3982" />
@@ -979,67 +956,54 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="20" selection-start="361" selection-end="361" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1166">
-          <folding />
-        </state>
+        <state line="17" column="20" selection-start="361" selection-end="361" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1166" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/airbus.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="9" selection-start="44" selection-end="44" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="748">
-          <folding />
-        </state>
+        <state line="1" column="9" selection-start="44" selection-end="44" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="748" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/compactFlash.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="37" selection-start="692" selection-end="692" vertical-scroll-proportion="0.5659955" vertical-offset="0" max-vertical-offset="4202">
-          <folding />
-        </state>
+        <state line="26" column="37" selection-start="692" selection-end="692" vertical-scroll-proportion="0.5659955" vertical-offset="0" max-vertical-offset="4202" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/splitter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="34" selection-start="891" selection-end="891" vertical-scroll-proportion="0.31117398" vertical-offset="396" max-vertical-offset="1210">
-          <folding>
-            <element signature="e#0#31#0" expanded="false" />
-          </folding>
-        </state>
+        <state line="28" column="34" selection-start="891" selection-end="891" vertical-scroll-proportion="0.31117398" vertical-offset="396" max-vertical-offset="1210" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/boeing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="105" column="16" selection-start="3946" selection-end="3946" vertical-scroll-proportion="-3.2161384" vertical-offset="4542" max-vertical-offset="5236">
-          <folding>
-            <element signature="e#0#9#0" expanded="false" />
-          </folding>
-        </state>
+        <state line="105" column="16" selection-start="3946" selection-end="3946" vertical-scroll-proportion="-3.2161384" vertical-offset="4542" max-vertical-offset="5236" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/bur_92.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="26" selection-end="26" vertical-scroll-proportion="0.03268945" vertical-offset="0" max-vertical-offset="3586">
-          <folding />
-        </state>
+        <state line="2" column="0" selection-start="26" selection-end="26" vertical-scroll-proportion="0.03268945" vertical-offset="0" max-vertical-offset="3586" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/SAAB340.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="72" selection-start="363" selection-end="363" vertical-scroll-proportion="0.28862974" vertical-offset="0" max-vertical-offset="1188">
-          <folding />
-        </state>
+        <state line="10" column="72" selection-start="363" selection-end="363" vertical-scroll-proportion="0.28862974" vertical-offset="0" max-vertical-offset="1188" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/initialization.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="67" column="0" selection-start="2781" selection-end="2781" vertical-scroll-proportion="0.09620991" vertical-offset="1320" max-vertical-offset="6512">
-          <folding />
-        </state>
+        <state line="67" column="0" selection-start="2781" selection-end="2781" vertical-scroll-proportion="0.09620991" vertical-offset="1320" max-vertical-offset="6512" />
       </provider>
     </entry>
     <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/_core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7951" column="0" selection-start="301620" selection-end="301620" vertical-scroll-proportion="0.33283803" vertical-offset="174676" max-vertical-offset="372658">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/monstr.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="18" column="26" selection-start="510" selection-end="510" vertical-scroll-proportion="0.19186047" vertical-offset="220" max-vertical-offset="6336">
           <folding />
         </state>
       </provider>
@@ -1051,56 +1015,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/msrp.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="71" column="38" selection-start="2486" selection-end="2486" vertical-scroll-proportion="0.0" vertical-offset="1190" max-vertical-offset="1958">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="662" column="0" selection-start="26889" selection-end="26889" vertical-scroll-proportion="0.0" vertical-offset="8928" max-vertical-offset="9680">
-          <folding>
-            <element signature="e#5367#5627#0" expanded="false" />
-            <element signature="e#5395#5627#0" expanded="false" />
-            <element signature="e#5672#11689#0" expanded="false" />
-            <element signature="e#18009#18457#0" expanded="false" />
-            <element signature="e#18501#18700#0" expanded="false" />
-            <element signature="e#18745#18945#0" expanded="false" />
-            <element signature="e#18989#19188#0" expanded="false" />
-            <element signature="e#19232#19431#0" expanded="false" />
-            <element signature="e#19490#19753#0" expanded="false" />
-            <element signature="e#19879#19972#0" expanded="false" />
-            <element signature="e#20094#20944#0" expanded="false" />
-            <element signature="e#20985#22732#0" expanded="false" />
-            <element signature="e#23775#23789#0" expanded="false" />
-            <element signature="e#27306#27423#0" expanded="false" />
-            <element signature="e#27492#27893#0" expanded="false" />
-            <element signature="e#27935#28420#0" expanded="false" />
-          </folding>
+        <state line="662" column="0" selection-start="26889" selection-end="26889" vertical-scroll-proportion="0.0" vertical-offset="14167" max-vertical-offset="15378">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="103" column="0" selection-start="3841" selection-end="3841" vertical-scroll-proportion="0.0" vertical-offset="2042" max-vertical-offset="3036">
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
+        <state line="103" column="0" selection-start="3841" selection-end="3841" vertical-scroll-proportion="0.0" vertical-offset="1954" max-vertical-offset="2904">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/tester.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="67" column="26" selection-start="2428" selection-end="2428" vertical-scroll-proportion="0.0" vertical-offset="1228" max-vertical-offset="1914">
+        <state line="77" column="32" selection-start="3033" selection-end="3033" vertical-scroll-proportion="0.0" vertical-offset="1501" max-vertical-offset="2112">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/monstr.py">
+    <entry file="file://$PROJECT_DIR$/qar/msrp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="39" selection-start="270" selection-end="270" vertical-scroll-proportion="0.2615156" vertical-offset="0" max-vertical-offset="6336">
+        <state line="67" column="26" selection-start="2338" selection-end="2338" vertical-scroll-proportion="0.20785597" vertical-offset="1347" max-vertical-offset="1958">
           <folding />
         </state>
       </provider>

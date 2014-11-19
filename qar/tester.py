@@ -26,7 +26,6 @@ class TesterU32(object):
         self.source.close()
         self.target_file.close()
 
-
     def record_header(self):
         header = self.source.read(128)
         self.bytes_counter += 128
@@ -38,19 +37,27 @@ class TesterU32(object):
                 break
             sw = self.find_syncword()
             while sw:
-                p1 = self.source.tell()
+                #p1 = self.source.tell()
                 checked = self.check_frame()
                 if checked:
+                    #pp1 = self.source.tell()
                     frame = self.source.read(self.frame_size)
+                    #pp2 = self.source.tell()
                     self.target_file.write(frame)
+                    self.bytes_counter += self.frame_size
                     # -2 as we already know that first two bytes are syncword
-                    self.source.seek(-(self.frame_size - 2), 1)
+                    #self.source.seek(-(self.frame_size - 2), 1)
+                    #pp3 = self.source.tell()
                 else:
+                    # need to include those bytes which have been read, but not included
+                    # as there was no syncword -> equate to position in source file
+                    position_at_source = self.source.tell()
+                    self.bytes_counter = position_at_source
                     break
 
     def find_syncword(self):
         while self.bytes_counter < self.source_len - self.frame_size:
-            p2 = self.source.tell()
+            #p2 = self.source.tell()
             byte_one = self.source.read(1)
             byte_two = self.source.read(1)
             try:
@@ -60,22 +67,25 @@ class TesterU32(object):
                 break
             #if syncword == self.syncword_one or syncword == self.syncword_two:
             if syncword == self.syncword_one:
+                self.source.seek(-2, 1)
+                #p4 = self.source.tell()
                 return True
             else:
                 self.source.seek(-1, 1)
                 self.bytes_counter += 1
 
     def check_frame(self):
-        p3 = self.source.tell()
-        self.source.seek(self.frame_size - 2, 1)
-        p4 = self.source.tell()
+        #p3 = self.source.tell()
+        self.source.seek(self.frame_size, 1)
+        #pppp4 = self.source.tell()
         byte_one = self.source.read(1)
         byte_two = self.source.read(1)
+        if byte_one == "" or byte_two == "":
+            return False
         syncword = [str(ord(byte_one)), str(ord(byte_two))]
         #if syncword == self.syncword_one or syncword == self.syncword_two:
         if syncword == self.syncword_one:
-            self.source.seek(-2, 1)
-            self.bytes_counter += self.frame_size
+            #pp4 = self.source.tell()
+            self.source.seek(-(self.frame_size + 2), 1)
+            #pp5 = self.source.tell()
             return True
-
-
