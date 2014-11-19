@@ -8,8 +8,9 @@ ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
                   331: ["b747", "qar"],
                   341: ["an148", "bur92"],
                   351: ["an32", "testerU32"],
-                  361: ["an26", "msrp12"]}
-MONSTR_HEADER_TYPES = [321, 351, 361]
+                  361: ["an26", "msrp12"],
+                  371: ["an72", "testerU32"]}
+MONSTR_HEADER_TYPES = [321, 351, 361, 371]
 OWN_HEADER_TYPES = [322]
 NO_HEADER_TYPES = [331, 341]
 
@@ -22,7 +23,8 @@ class Split(object):
     def __init__(self, path, flag):
         self.path = path
         self.flag = flag
-        self.acft_fdr_type = "%s_%s" % (ACFT_FDR_TYPES[flag][0], ACFT_FDR_TYPES[flag][1])
+        self.acft_fdr_type = "%s_%s" % (ACFT_FDR_TYPES[flag][0],
+                                        ACFT_FDR_TYPES[flag][1])
         self.result = None
         self.define_file_opening()
 

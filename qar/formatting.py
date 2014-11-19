@@ -15,7 +15,8 @@ class FormatCompactFlash(object):
         """ Formatting clears file -> fill whole file with zeros
         This process takes about 40 min """
         byte_counter = 0
-        #os.chmod(r"%s" % self.path[:3], stat.S_IWRITE)  # change mode for writing
+        # change mode for writing
+        #os.chmod(r"%s" % self.path[:3], stat.S_IWRITE)
         correct_path = r"\\.\%s" % str(self.path)[:2]
 
         dat_3 = file(correct_path, "rb+")

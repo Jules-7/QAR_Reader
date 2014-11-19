@@ -6,10 +6,11 @@ class HeaderFrameSearchWrite(object):
 
     """ record monstr header as it is;
         search for frames and write them
-        same algorithm for MSRP-12 and TesterU3-2 but with different syncwords"""
+        same algorithm for MSRP-12 and TesterU3-2
+        but with different syncwords"""
 
-    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag,
-                 syncword, shift_after_header):
+    def __init__(self, tmp_file_name, target_file_name, progress_bar,
+                 path_to_save, flag, syncword, shift_after_header):
         self.tmp_file_name = tmp_file_name
         self.target_file_name = target_file_name
         self.progress_bar = progress_bar
@@ -59,7 +60,8 @@ class HeaderFrameSearchWrite(object):
                     #self.source.seek(-(self.frame_size - 2), 1)
                     #pp3 = self.source.tell()
                 else:
-                    # need to include those bytes which have been read, but not included
+                    # need to include those bytes which have been read,
+                    # but not included
                     # as there was no syncword -> equate to position in source file
                     position_at_source = self.source.tell()
                     self.bytes_counter = position_at_source

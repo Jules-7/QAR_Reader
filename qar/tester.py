@@ -6,7 +6,8 @@ class TesterU32(object):
 
     """ Perform frames check -> save only valid frames"""
 
-    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag):
+    def __init__(self, tmp_file_name, target_file_name,
+                 progress_bar, path_to_save, flag):
         self.tmp_file_name = tmp_file_name
         self.target_file_name = target_file_name
         self.progress_bar = progress_bar
@@ -49,8 +50,10 @@ class TesterU32(object):
                     #self.source.seek(-(self.frame_size - 2), 1)
                     #pp3 = self.source.tell()
                 else:
-                    # need to include those bytes which have been read, but not included
-                    # as there was no syncword -> equate to position in source file
+                    # need to include those bytes which have been read,
+                    # but not included
+                    # as there was no syncword -> equate to position
+                    # in source file
                     position_at_source = self.source.tell()
                     self.bytes_counter = position_at_source
                     break

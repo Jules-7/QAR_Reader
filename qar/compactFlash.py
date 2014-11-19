@@ -42,13 +42,13 @@ class CompactFlash(object):
         self.durations = []  # flights durations
         self.time = []
         self.end_date = []  # flights end date
-        #------ Copy data from compact flash into tmp file on desktop ---------
+        #------ Copy data from compact flash into tmp file on desktop
         copy_file = self.copy_cf_data()
         self.source = open(copy_file, "rb")
         self.source_len = os.stat(copy_file).st_size
-        #------ Define pattern with which starts every header -----------------
+        #------ Define pattern with which starts every header ---
         self.get_header_pattern()
-        #------ Search for flights start -------------------------------------
+        #------ Search for flights start -----------------------
         self.find_flights()
         self.get_flight_intervals()
         self.get_flights_start()
@@ -58,7 +58,8 @@ class CompactFlash(object):
         self.path = copy_file
 
     def copy_cf_data(self):
-        """ Copy data from Compact Flash into temporary file on computer drive C.
+        """ Copy data from Compact Flash into temporary
+        file on computer drive C.
         This ensure more convenient and quick data access """
         copy_name = str(win32api.GetTempPath()) + "cf.tmp"
         #copy_name = r"C:\\cf.tmp"  # when should I delete this file?
@@ -98,7 +99,7 @@ class CompactFlash(object):
             next_byte = self.source.read(1)
             try:
                 if (ord(next_byte) == self.header_pattern[0] and
-                    ord(self.source.read(1)) == self.header_pattern[1]):
+                        ord(self.source.read(1)) == self.header_pattern[1]):
                     # check previous 48 bytes
                     self.source.seek(-50, 1)
                     prev_48_bytes = self.source.read(48)
@@ -115,7 +116,8 @@ class CompactFlash(object):
         i = 0
         while i < len(self.flights_start):
             try:
-                self.flight_intervals.append([self.flights_start[i], self.flights_start[i+1]])
+                self.flight_intervals.append([self.flights_start[i],
+                                              self.flights_start[i+1]])
             except IndexError:
                 self.flight_intervals.append([self.flights_start[i],
                                               self.get_last_flight_end(self.flights_start[i])])
@@ -142,11 +144,27 @@ class CompactFlash(object):
     def get_flights_start(self):
         for header in self.headers:
             year = '20' + (hex(ord(header[15])))[2:]
-            month = '0' + (hex(ord(header[14])))[2:] if len((hex(ord(header[14])))[2:]) == 1 else (hex(ord(header[14])))[2:]
-            day = '0' + (hex(ord(header[13])))[2:] if len((hex(ord(header[13])))[2:]) == 1 else (hex(ord(header[13])))[2:]
-            hour = '0' + (hex(ord(header[11])))[2:] if len((hex(ord(header[11])))[2:]) == 1 else (hex(ord(header[11])))[2:]
-            minute = '0' + (hex(ord(header[10])))[2:] if len((hex(ord(header[10])))[2:]) == 1 else (hex(ord(header[10])))[2:]
-            second = '0' + (hex(ord(header[9])))[2:] if len((hex(ord(header[9])))[2:]) == 1 else (hex(ord(header[9])))[2:]
+
+            month = '0' + (hex(ord(header[14])))[2:] if \
+                        len((hex(ord(header[14])))[2:]) == 1 else \
+                        (hex(ord(header[14])))[2:]
+
+            day = '0' + (hex(ord(header[13])))[2:] if \
+                         len((hex(ord(header[13])))[2:]) == 1 else \
+                         (hex(ord(header[13])))[2:]
+
+            hour = '0' + (hex(ord(header[11])))[2:] if \
+                          len((hex(ord(header[11])))[2:]) == 1 else \
+                          (hex(ord(header[11])))[2:]
+
+            minute = '0' + (hex(ord(header[10])))[2:] if \
+                            len((hex(ord(header[10])))[2:]) == 1 else \
+                            (hex(ord(header[10])))[2:]
+
+            second = '0' + (hex(ord(header[9])))[2:] if \
+                            len((hex(ord(header[9])))[2:]) == 1 else \
+                            (hex(ord(header[9])))[2:]
+
             start_date = datetime.datetime(int(year), int(month), int(day),
                                            int(hour), int(minute), int(second))
             self.start_date.append(start_date)
@@ -169,7 +187,8 @@ class CompactFlash(object):
             duration_cluster.append(duration[i+1] - duration[i])  # amount of clusters
             i += 1
         for each in duration_cluster:
-            duration_time = ((each * self.cluster_size) / self.frame_len) * self.frame_duration  # in sec
+            duration_time = ((each * self.cluster_size) / self.frame_len) * \
+                            self.frame_duration  # in sec
             #duration_sec = time.strftime('%H h %M m %S s', time.gmtime(duration_time))
             self.durations.append(duration_time)
             #self.durations_int.append(duration_time)

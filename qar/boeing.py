@@ -45,13 +45,14 @@ class Boeing(object):
 
     def find_flights(self):
         """ find all flights
-        in B747 - frames are good
-         if there is no syncword in next frame - it is an indication of flight end"""
+                    in B747 - frames are good
+                    if there is no syncword in next frame -
+                    it is an indication of flight end"""
         while not self.end_flag:
             start = self.get_flight_start()
-            while start is True:  # if start is found
+            while start:  # if start is found
                 check = self.check_frame()  # check frame
-                if check is True:  # if it is correct
+                if check:  # if it is correct
                     pass  # don`t do anything
                 else:
                     start = False  # means that flight has ended
@@ -73,7 +74,7 @@ class Boeing(object):
                 flight_start = self.bytes_counter
                 self.data.seek(-2, 1)
                 check = self.check_frame()
-                if check is True:
+                if check:
                     self.flights_start.append(flight_start)
                     #print(flight_start)
                     self.record_end_index = True
@@ -83,9 +84,10 @@ class Boeing(object):
                 p11 = self.data.tell()
                 #self.bytes_counter = p11
                 self.bytes_counter -= 1
-            if self.record_end_index is True:
+            if self.record_end_index:
                 self.flights_end.append(self.bytes_counter)
-                # important value -> ensures same value of actual index in file and bytes_counter
+                # important value -> ensures same value of
+                # actual index in file and bytes_counter
                 self.bytes_counter = p11
                 self.record_end_index = False
 
@@ -126,9 +128,11 @@ class Boeing(object):
 
     def get_durations(self):
         for each in self.flight_intervals:
-            # get amount of bytes in flight, delete on frame length -> number of frames
+            # get amount of bytes in flight,
+            # delete on frame length -> number of frames
             # multiply by 4 sec -> duration of each frame
-            flight_duration = ((each[1] - each[0]) / self.frame_len) * self.frame_duration
+            flight_duration = ((each[1] - each[0]) /
+                               self.frame_len) * self.frame_duration
             self.durations.append(flight_duration)
 
     def get_time(self):
@@ -140,10 +144,12 @@ class Boeing(object):
         i = 1
         for each in self.flight_intervals:
             frames_in_flight = (each[1] - each[0]) / self.frame_len
-            half_flight_frames = frames_in_flight / 2  # amount of frames in half flight
-            half_flight_index = each[0] + half_flight_frames * self.frame_len  # index of half flight
+            # amount of frames in half flight
+            half_flight_frames = frames_in_flight / 2
+            # index of half flight
+            half_flight_index = each[0] + half_flight_frames * self.frame_len
 
-            #--------- subframe 1 byte 72 and 73 (36 channel) --------
+            #--------- subframe 1 byte 72 and 73 (36 channel)
             minutes_index = half_flight_index + 36 * 2
             self.data.seek(minutes_index, 0)
             minutes = [self.data.read(1), self.data.read(1)]
@@ -178,7 +184,8 @@ class Boeing(object):
                                             hour=hours_checked,
                                             minute=minutes_checked,
                                             second=0)
-            duration = half_flight_frames * self.frame_duration  # seconds first half of flight
+            # seconds first half of flight
+            duration = half_flight_frames * self.frame_duration
             start_date = middle_date - datetime.timedelta(seconds=duration)
             self.start_date.append(start_date)
             i += 1

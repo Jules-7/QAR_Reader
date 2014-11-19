@@ -6,7 +6,8 @@ class MSRP12(object):
 
     """  """
 
-    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag):
+    def __init__(self, tmp_file_name, target_file_name,
+                 progress_bar, path_to_save, flag):
         self.tmp_file_name = tmp_file_name
         self.target_file_name = target_file_name
         self.progress_bar = progress_bar

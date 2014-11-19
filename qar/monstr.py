@@ -6,11 +6,11 @@ import datetime
 MONSTR = 'MONSTR'
 CLUSTER = 32768  # cluster size in bytes
 COUNTER_INCREMENT = float(4294967295)
-QAR_TYPES = {0: "MSRP-12",  # An26
-             14: "Tester-2",  # An32
+QAR_TYPES = {0: "msrp12",  # An26
+             14: "testerU32",  # An32
              70: "Compact Flash",  # A320
              71: "QAR-B747",
-             72: "BUR-92",  # An148
+             72: "bur92",  # An148
              73: "QAR-2100",
              74: "QAR-4100",
              75: "QAR-4120",
@@ -48,17 +48,21 @@ class MonstrHeader():
         self.find_flights()
         if self.flights_start:
             self.get_flight_intervals()
-            if self.info == "a320" or self.info == "an26":  # count durations by frames
+            # count durations by frames
+            if self.info == "a320" or self.info == "an26":
                 self.get_durations_optional(self.info)
             else:
-                self.get_durations()  # count durations using QAR header -> processor time
+                # count durations using QAR header -> processor time
+                self.get_durations()
             self.get_qar_type()
             self.dat.close()
             # additional
-            # write current date (flight start date) to header if it has not been written before
+            # write current date (flight start date) to header
+            # if it has not been written before
             # in bytes: 70, 72, 74, 76, 78, 80
             # symmetrically + 2 lines (16 columns) to date of initialization
-            if self.add_current_date:  # True means it is necessary to write current date to header
+            if self.add_current_date:  # True means it is necessary
+            # to write current date to header
                 self.add_date_to_header()
 
     def is_flight(self):
@@ -89,7 +93,8 @@ class MonstrHeader():
         i = 0
         for each in self.flights_start:
             try:
-                self.flight_intervals.append((self.flights_start[i], self.flights_start[i + 1]))
+                self.flight_intervals.append((self.flights_start[i],
+                                              self.flights_start[i + 1]))
             except IndexError:
                 self.flight_intervals.append((self.flights_start[i],
                                               self.get_last_flight_end(self.flights_start[i])))
@@ -99,9 +104,11 @@ class MonstrHeader():
         i = 0
         byte = 8
         for each in self.headers:
-            dimension = self.process_counter(self.headers[i][5])  # dimension
-            channel = self.process_counter(self.headers[i][7], self.headers[i][6])  # bits/bytes in channel
-            frame = self.process_counter(self.headers[i][9], self.headers[i][8])  # channels in frame
+            dimension = self.process_counter(self.headers[i][5])
+            # bits/bytes in channel
+            channel = self.process_counter(self.headers[i][7], self.headers[i][6])
+            # channels in frame
+            frame = self.process_counter(self.headers[i][9], self.headers[i][8])
             frame_rate = self.process_counter(self.headers[i][11], self.headers[i][10])
             if dimension == 0:  # bytes
                 bytes_in_frame = frame * channel
@@ -163,11 +170,26 @@ class MonstrHeader():
     def get_initial_date(self, header):
         """ initial date is written in header as it is (by exact value we can see) """
         init_year = '20' + (hex(ord(header[32])))[2:]
-        init_month = '0' + (hex(ord(header[34])))[2:] if len((hex(ord(header[34])))[2:]) == 1 else (hex(ord(header[34])))[2:]
-        init_day = '0' + (hex(ord(header[36])))[2:] if len((hex(ord(header[36])))[2:]) == 1 else (hex(ord(header[36])))[2:]
-        init_hour = '0' + (hex(ord(header[38])))[2:] if len((hex(ord(header[38])))[2:]) == 1 else (hex(ord(header[38])))[2:]
-        init_minute = '0' + (hex(ord(header[40])))[2:] if len((hex(ord(header[40])))[2:]) == 1 else (hex(ord(header[40])))[2:]
-        init_second = '0' + (hex(ord(header[42])))[2:] if len((hex(ord(header[42])))[2:]) == 1 else (hex(ord(header[42])))[2:]
+
+        init_month = '0' + (hex(ord(header[34])))[2:] if \
+                            len((hex(ord(header[34])))[2:]) == 1 else \
+                           (hex(ord(header[34])))[2:]
+
+        init_day = '0' + (hex(ord(header[36])))[2:] if \
+                          len((hex(ord(header[36])))[2:]) == 1 else \
+                          (hex(ord(header[36])))[2:]
+
+        init_hour = '0' + (hex(ord(header[38])))[2:] if \
+                           len((hex(ord(header[38])))[2:]) == 1 else \
+                           (hex(ord(header[38])))[2:]
+
+        init_minute = '0' + (hex(ord(header[40])))[2:] if \
+                             len((hex(ord(header[40])))[2:]) == 1 else \
+                             (hex(ord(header[40])))[2:]
+
+        init_second = '0' + (hex(ord(header[42])))[2:] if \
+                             len((hex(ord(header[42])))[2:]) == 1 else \
+                             (hex(ord(header[42])))[2:]
 
         self.init_counter = self.process_counter(header[109], header[108], header[107], header[106])
         # convert to int
@@ -185,7 +207,8 @@ class MonstrHeader():
             self.add_current_date = True
 
     def check_header(self, header):
-        """ if header is corrupted - filled with ff we don`t take it into account"""
+        """ if header is corrupted - filled with ff
+        we don`t take it into account"""
         corrupted = '0xff' * 16
         to_check = ''
         for each in header:
@@ -212,7 +235,8 @@ class MonstrHeader():
         hour = start_date.strftime("%H")
         minute = start_date.strftime("%M")
         second = start_date.strftime("%S")
-        self.start_date_str_repr.append([year, month, day, hour, minute, second])
+        self.start_date_str_repr.append([year, month, day,
+                                         hour, minute, second])
 
     def process_counter(self, *args):
         """ processing (transformation) of hex value to decimal """
@@ -276,7 +300,8 @@ class MonstrHeader():
                 i += 1
 
     def get_hex_repr(self, value):
-        """ processing (transformation) of integer in string representation to its binary repr """
+        """ processing (transformation) of integer in string representation
+        to its binary repr """
         hex_value = '0x%s' % value
         int_value = int(hex_value, 16)
         bin_value = bin(int_value)

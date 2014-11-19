@@ -29,15 +29,17 @@ class Bur(object):
 
     def get_flights(self):
         while self.bytes_counter < self.file_len - self.frame_size:
-            if self.start is True:
+            if self.start:
                 #p = self.dat.tell()
                 check_word = [ord(each) for each in self.dat.read(4)]
                 if check_word == self.end_check:
                     self.dat.seek(-4, 1)
-                    check_end = [ord(each) for each in self.dat.read(self.frame_size)]
+                    check_end = [ord(each) for each in
+                                 self.dat.read(self.frame_size)]
                     self.bytes_counter += self.frame_size
                     if check_end == self.end_pattern:
-                        self.flights_end.append(self.bytes_counter - self.frame_size)
+                        self.flights_end.append(self.bytes_counter -
+                                                self.frame_size)
                         self.start = False
                         self.bytes_counter = self.dat.tell()
                 else:
@@ -59,12 +61,14 @@ class Bur(object):
             self.flights_end.append(self.file_len)
         i = 0
         while i < len(self.flights_start):
-            self.flight_intervals.append((self.flights_start[i], self.flights_end[i]))
+            self.flight_intervals.append((self.flights_start[i],
+                                          self.flights_end[i]))
             i += 1
 
     def get_durations(self):
         for each in self.flight_intervals:
-            duration = ((each[1] - each[0]) / self.frame_size) * self.frame_duration
+            duration = ((each[1] - each[0]) / self.frame_size) * \
+                       self.frame_duration
             self.durations.append(duration)
 
     def get_date_time(self):
@@ -77,12 +81,15 @@ class Bur(object):
         - month is recorded only at frame where seconds == 4
         - day is recorded only at frame where seconds == 5
         In order to get stable time -> find 'middle flight time'
-        and then get start and end flight time knowing amount of frames in flight"""
+        and then get start and end flight time
+        knowing amount of frames in flight"""
         datetime_reference_table = {}
         for each in self.flight_intervals:
-            frames_in_flight = (each[1] - each[0]) / self.frame_size  # amount of frames in flight
+            # amount of frames in flight
+            frames_in_flight = (each[1] - each[0]) / self.frame_size
             frame_half_flight = frames_in_flight / 2  # amount of frames in half
-            middle_flight_index = each[0] + frame_half_flight * self.frame_size  # byte
+            # byte
+            middle_flight_index = each[0] + frame_half_flight * self.frame_size
             self.dat.seek(middle_flight_index, 0)
             # one minute is 60 frames
             seconds_N = 0
@@ -116,7 +123,8 @@ class Bur(object):
         """ Perform change by place bytes and obtain string binary representation """
         switch_data = [(str(bin(ord(data[1])))[2:]).rjust(8, "0"),
                        (str(bin(ord(data[0])))[2:]).rjust(8, "0")]
-        data_str = "".join('1' if x == '0' else '0' for x in (switch_data[0] + switch_data[1]))
+        data_str = "".join('1' if x == '0' else '0' for x in (switch_data[0] +
+                                                              switch_data[1]))
         return data_str
 
     def convert_in_ord(self, data):
