@@ -3,6 +3,7 @@ from airbus import A320
 import win32api
 from tester import TesterU32
 from msrp import MSRP12
+from header_frames import HeaderFrameSearchWrite
 
 QAR_TYPES = {0: "MSRP-12",  # An26
              14: "Tester-2",  # An32
@@ -52,7 +53,6 @@ class Flight:
             self.get_flight()
             self.make_flight()
 
-
     def get_flight(self):
         """ get the whole flight from source file """
         header = 128
@@ -100,13 +100,11 @@ class Flight:
                 a320 = A320(tmp_file_name, target_file_name, 768, 192, self.progress_bar,
                             self.path_to_save, self.flag)
             elif self.qar_type == "Tester-2":  # an32
-                tester = TesterU32(tmp_file_name, target_file_name, self.progress_bar,
-                                   self.path_to_save, self.flag)
+                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name, self.progress_bar,
+                                   self.path_to_save, self.flag, ["255", "127"], 0)
             elif self.qar_type == "MSRP-12":  # an32
-                tester = MSRP12(tmp_file_name, target_file_name, self.progress_bar,
-                                   self.path_to_save, self.flag)
-
-
+                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name, self.progress_bar,
+                                   self.path_to_save, self.flag, ["255"], 384)
 
     def prepare_cf_file(self):
         """ Prepares Compact Flash file

@@ -2,11 +2,14 @@
 import os
 
 
-class TesterU32(object):
+class HeaderFrameSearchWrite(object):
 
-    """ Perform frames check -> save only valid frames"""
+    """ record monstr header as it is;
+        search for frames and write them
+        same algorithm for MSRP-12 and TesterU3-2 but with different syncwords"""
 
-    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag):
+    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag,
+                 syncword, shift_after_header):
         self.tmp_file_name = tmp_file_name
         self.target_file_name = target_file_name
         self.progress_bar = progress_bar
@@ -14,14 +17,21 @@ class TesterU32(object):
         self.flag = flag
         self.file_end = False
         self.frame_size = 512  # bytes
-        self.syncword_one = ["255", "127"]  # FF7F
+        self.syncword_one = syncword
+        #self.sw_byte_amount = sw_bytes
+        #self.syncword_one = ["255", "127"]  # FF7F TesterU3-2
+        #self.syncword_one = ["255"]  # FF MSRP12
         #self.syncword_two = ["255", "126"]  # FF7E
+
         self.source = open(self.tmp_file_name, "rb")
         name = (r"%s" % self.path_to_save + r"\\" + r"%s" % self.target_file_name)
         self.target_file = open(name, "wb")
         self.bytes_counter = 0
         self.source_len = os.stat(self.tmp_file_name).st_size
         self.record_header()
+        #self.source.seek(384, 0) shift after header for MSRP-12
+        if shift_after_header:
+            self.source.seek(shift_after_header, 0)
         self.record_data()
         self.source.close()
         self.target_file.close()
@@ -56,38 +66,53 @@ class TesterU32(object):
                     break
 
     def find_syncword(self):
+        byte_amount = len(self.syncword_one)  # 2 or 1
         while self.bytes_counter < self.source_len - self.frame_size:
             #p2 = self.source.tell()
-            byte_one = self.source.read(1)
-            byte_two = self.source.read(1)
-            try:
-                syncword = [str(ord(byte_one)), str(ord(byte_two))]
-            except TypeError:  # end of file
-                self.file_end = True
-                break
+            syncword = []
+            for each in self.syncword_one:
+                byte_one = self.source.read(1)
+                #byte_two = self.source.read(1)
+                try:
+                    syncword.append(str(ord(byte_one)))
+                except TypeError:  # end of file
+                    self.file_end = True
+                    break
             #if syncword == self.syncword_one or syncword == self.syncword_two:
             if syncword == self.syncword_one:
-                self.source.seek(-2, 1)
+                self.source.seek(-byte_amount, 1)
                 #p4 = self.source.tell()
                 return True
             else:
-                self.source.seek(-1, 1)
-                self.bytes_counter += 1
+                # in case of 2 byte syncword we need to go back one byte
+                # in case of 1 byte syncword we don`t need to go back
+                # correspondingly in case of 2 byte sw - we increase bytes_counter
+                # in case of 1 byte sw we don`t increase bytes_counter
+                ppppppp4 = self.source.tell()
+                self.source.seek(-(byte_amount - 1), 1)
+                ppppppp5 = self.source.tell()
+                self.bytes_counter += (byte_amount - 1)
+                ppppppp6 = self.source.tell()
 
     def check_frame(self):
+        byte_amount = len(self.syncword_one)  # 2 or 1
+        syncword = []
         #p3 = self.source.tell()
         self.source.seek(self.frame_size, 1)
         #pppp4 = self.source.tell()
-        byte_one = self.source.read(1)
-        byte_two = self.source.read(1)
-        if byte_one == "" or byte_two == "":
-            return False
-        syncword = [str(ord(byte_one)), str(ord(byte_two))]
-        #if syncword == self.syncword_one or syncword == self.syncword_two:
+
+        for each in self.syncword_one:
+            byte_one = self.source.read(1)
+            #byte_two = self.source.read(1)
+            if byte_one == "":
+                self.file_end = True
+                return
+                # return False
+            else:
+                syncword.append(str(ord(byte_one)))
         if syncword == self.syncword_one:
             #pp4 = self.source.tell()
-            self.source.seek(-(self.frame_size + 2), 1)
+            self.source.seek(-(self.frame_size + byte_amount), 1)
+            #self.bytes_counter += self.frame_size
             #pp5 = self.source.tell()
             return True
-
-
