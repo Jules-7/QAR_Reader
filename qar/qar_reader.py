@@ -340,6 +340,9 @@ class MyFrame(wx.Frame):
         self.Show()
         event_result(self, self.on_open_file)
         self.SetSizer(self.sizer)
+        print(self.__module__)
+        print(self.__dict__)
+        print(self.__bases__)
 
     def create_status_bar(self):
         # Create StatusBar in the bottom of the window

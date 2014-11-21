@@ -67,7 +67,6 @@ import time
 monstr = 'MONSTR'
 
 
-
 class Initialize(object):
 
     def __init__(self, path, qar_type, date, time_val, flight_n, qar_n):
@@ -81,7 +80,7 @@ class Initialize(object):
         self.qar_n = qar_n  # number of QAR
         self.flight_n = flight_n  # flight number
         self.clu_2_size = 32768 / 2  # bytes -> one cluster
-        self.clu_3_size = 1015234560  # bytes
+        self.clu_3_size = 962592768  # 1015234560  # bytes
         self.clu_2 = self.path + "CLU_0002.dat"
         self.clu_3 = self.path + "CLU_0003.dat"
         self.qars = {'A320 - QAR':           [255, 1],
@@ -95,10 +94,17 @@ class Initialize(object):
                      'QAR-4700':             [76, 1]}
         self.headers = []
         self.get_day_time()
+        print("got day and time")
         self.get_qar_and_flight()
+        print("got qar and flight numbers")
         self.get_frame_frequency()
+        print("got frame frequency")
+        start = time.clock()
         self.check_path()
-        self.write_header()
+        print("checked paths")
+        #self.write_header()
+        end = time.clock()
+        print(end-start)
 
 
     def check_path(self):
@@ -106,6 +112,7 @@ class Initialize(object):
         if not check_clu_2:
             clu_2 = open(self.clu_2, "w+")
             clu_2.close()
+        self.write_header()
         check_clu_3 = os.path.isfile(self.clu_3)
         if not check_clu_3:
             start = time.clock()
@@ -117,7 +124,7 @@ class Initialize(object):
         else:
             os.chmod(self.clu_3, stat.S_IWRITE)  # change mode for writing
             self.dat = open(self.clu_3, "r+")
-            self.index = 0
+            self.index = 524288
             self.file_len = os.stat(self.clu_3).st_size
             self.find_flights()
             self.clear_clu_3()
@@ -250,6 +257,7 @@ class Initialize(object):
                 dat_int = int(each, 2)
                 dat_write = (struct.pack("i", dat_int))[:1]
                 dat_2.write(dat_write)
+            print("header is written")
 
     def clear_clu_3(self):
         """ Clearing means overwrite only first byte of each header with 0,
@@ -286,6 +294,8 @@ class Initialize(object):
     def find_flights(self):
         """ find all flights indexes """
         while self.index < self.file_len:
+            if self.index == 1000000 or self.index == 5000000:
+                print(self.index)
             if self.index == 524288:
                 self.dat.seek(524288)
                 self.is_flight()
