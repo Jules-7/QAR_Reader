@@ -7,20 +7,25 @@ class Bur(object):
     def __init__(self, path):
         self.path = path
         self.dat = open(path, "rb")
+        # in order to avoid header and starting "noises"
+        self.dat.seek(12800, 0)
         self.file_len = os.stat(path).st_size
         self.qar_type = "BUR-92"
-        self.start = True
-        self.flights_start = [0]
+        self.start = False
+        self.syncword_one = [0, 0]
+        self.flights_start = []
         self.flights_end = []
         self.flight_intervals = []
         self.durations = []
         self.start_date = []
         self.end_date = []
-        self.bytes_counter = 0
+        # in order to avoid header and starting "noises"
+        self.bytes_counter = 12800
         self.frame_size = 512  # byte
         self.frame_duration = 1  # sec
         self.end_check = [255] * 4
         self.end_pattern = [255] * self.frame_size
+        self.find_start()
         self.get_flights()
         self.get_flight_intervals()
         self.get_durations()
@@ -56,20 +61,49 @@ class Bur(object):
                     self.dat.seek(self.frame_size - 4, 1)
                     self.bytes_counter += self.frame_size
 
+    def find_start(self):
+        while not self.start:
+            byte_one = self.dat.read(1)
+            byte_two = self.dat.read(1)
+            syncword = [ord(byte_one), ord(byte_two)]
+            #p1 = self.dat.tell()
+            if syncword == self.syncword_one:
+                self.start = True
+                self.flights_start.append(self.bytes_counter)
+                self.dat.seek(-2, 1)
+            else:
+                self.dat.seek(-1, 1)
+                self.bytes_counter += 1
+
     def get_flight_intervals(self):
+        """ according to end pattern """
         if (len(self.flights_start)) > (len(self.flights_end)):
             self.flights_end.append(self.file_len)
         i = 0
         while i < len(self.flights_start):
-            self.flight_intervals.append((self.flights_start[i],
-                                          self.flights_end[i]))
+            try:
+                self.flight_intervals.append((self.flights_start[i],
+                                              self.flights_end[i]))
+            except IndexError:
+                self.flight_intervals.append((self.flights_start[i],
+                                              self.file_len))
             i += 1
 
     def get_durations(self):
-        for each in self.flight_intervals:
-            duration = ((each[1] - each[0]) / self.frame_size) * \
-                       self.frame_duration
-            self.durations.append(duration)
+        i = 0
+        while i < len(self.flight_intervals):
+            interval = self.flight_intervals[i]
+        #for each in self.flight_intervals:
+            duration = ((interval[1] - interval[0]) / self.frame_size) * \
+                        self.frame_duration
+            # if flight is of frame size - it`s not flight
+            if duration == 1:
+                self.flight_intervals.remove(interval)
+                del self.flights_start[i]
+                del self.flights_end[i]
+            else:
+                self.durations.append(duration)
+                i += 1
 
     def get_date_time(self):
         """ time and date are recorded at the beginning of each frame
@@ -95,6 +129,7 @@ class Bur(object):
             seconds_N = 0
             while seconds_N < 60:
                 one_frame = self.dat.read(self.frame_size)
+                pp2 = self.dat.tell
                 sec = self.convert_data(one_frame[2:4])
                 sec_ord = self.convert_in_ord(sec)
                 if sec_ord == 3:  # at 3d second year is recorded as date channel
