@@ -7,7 +7,8 @@ MONSTR = 'MONSTR'
 CLUSTER = 32768  # cluster size in bytes
 COUNTER_INCREMENT = float(4294967295)
 QAR_TYPES = {0: "msrp12",  # An26
-             14: "testerU32",  # An32
+             11: "bur3",  # an74
+             14: "testerU32",  # An32, an72
              70: "Compact Flash",  # A320
              71: "QAR-B747",
              72: "bur92",  # An148

@@ -9,8 +9,10 @@ ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
                   341: ["an148", "bur92"],
                   351: ["an32", "testerU32"],
                   361: ["an26", "msrp12"],
-                  371: ["an72", "testerU32"]}
-MONSTR_HEADER_TYPES = [321, 351, 361, 371]
+                  371: ["an72", "testerU32"],
+                  381: ["an74", "bur3"],
+                  0:   ["NA", "NA"]}
+MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 0]
 OWN_HEADER_TYPES = [322]
 NO_HEADER_TYPES = [331, 341]
 

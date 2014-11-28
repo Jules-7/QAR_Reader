@@ -1,5 +1,6 @@
 from SAAB340 import SAAB
 from airbus import A320
+from bur3 import Bur3
 import win32api
 from tester import TesterU32
 from msrp import MSRP12
@@ -52,6 +53,10 @@ class Flight:
             self.make_flight()
         elif self.flag == "an26_msrp12":
             self.get_flight()
+            self.make_flight()
+        elif self.flag == "an74_bur3":
+            self.get_flight()
+            self.prepare_bur3_file()
             self.make_flight()
 
     def get_flight(self):
@@ -112,11 +117,16 @@ class Flight:
                                                 self.path_to_save,
                                                 self.flag, ["255", "127"], 0)
 
-            elif self.qar_type == "msrp12":  # an32
+            elif self.qar_type == "msrp12":  # an26
                 tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name,
                                                 self.progress_bar,
                                                 self.path_to_save,
                                                 self.flag, ["255"], 384)
+            elif self.qar_type == "bur3":  # an74
+                bur = Bur3(tmp_file_name, target_file_name,
+                                                self.progress_bar,
+                                                self.path_to_save,
+                                                self.flag, ["011111111"], 512)
 
     def prepare_cf_file(self):
         """ Prepares Compact Flash file
@@ -137,8 +147,9 @@ class Flight:
             bytes_counter += cluster
 
     def save_flight(self):
-        """save flight as it is in file"""
+        """ save flight as it is in file """
         new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + ".inf", "wb")
         new_file.write(self.flight)
 
-
+    def prepare_bur3_file(self):
+        pass
