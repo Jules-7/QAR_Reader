@@ -112,7 +112,7 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "qar_VDR":
+        if self.flag == "a320_qar" or self.flag == "s340_qar":
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
         elif self.flag == "a320_cf":

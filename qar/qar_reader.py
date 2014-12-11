@@ -15,18 +15,22 @@ from formatting import FormatCompactFlash
 - allows to save flight as raw data or as flight according
 to QAR type"""
 
-ACCESS = {1: ["admin", "admin"],
-          10: ["yanair"],
-          11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05']}
+ACCESS = {1: ["admin", "admin", (700, 500)],
+          10: ["yanair", " ", (600, 500)],
+          11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
+          12: ["VCH", u'В/Ч №2269', (600, 500)]}
 
 # admin
-USER = 1
+USER = 12
 
 # YanAir
 #USER = 10
 
 # title for window depending on USER
 WIN_TITLE = ACCESS[USER][1]
+
+# size of main window
+SIZE = ACCESS[USER][2]
 
 # Button definitions
 ID_START = wx.NewId()
@@ -84,6 +88,12 @@ class MyPanel(wx.Panel):
         self.qar_type = data.qar_type
         self.selected_flight = []
         self.selected_parent_set = []
+        #self.ctrl_pressed = 0
+        self.key_board = wx.KeyboardState()
+        #self.Bind(wx.EVT_CHAR_HOOK, self.on_key)
+        #self.Bind(wx.EVT_KEY_DOWN, self.ctrl_down)
+        #self.Bind(wx.EVT_KEY_UP, self.ctrl_up)
+
         # list of items with scroll
         self.list_ctrl = wx.ListCtrl(self,
                                      style=wx.LC_REPORT
@@ -132,20 +142,62 @@ class MyPanel(wx.Panel):
         self.SetSizer(sizer)
 
     #----------------------------------------------------------------------
+
+    #def on_key(self, event):
+        #if event.GetKeyCode() == wx.WXK_CONTROL:
+            #self.ctrl_pressed = 1
+            #event.Skip()
+        #else:
+            #self.ctrl_pressed = 0
+            #event.Skip()
+
+
+    #def ctrl_down(self, event):
+        #print("in down event")
+        #if event.Modifiers() == wx.WXK_CONTROL:
+            #self.ctrl_pressed = 1
+            #print("ctrl down")
+        #event.Skip()
+        #print("enabling multiple choice")
+        #self.multiple_choice = True
+        #key_code = event.GetKeyCode()
+        #print(key_code)
+
+    #def ctrl_up(self, event):
+        #print("in up event")
+        #if event.Modifiers() == wx.WXK_CONTROL:
+            #self.ctrl_pressed = 0
+            #print("ctrl up")
+        #event.Skip()
+
     def on_item_selected(self, event):
         """ at row selection - index is returned
         using that index search for flight from flights_dict
         and pass it for processing """
+        self.selected_parent_set = []
+        self.parent.selected = []
         #-------- Ensures multiple flights selection -----------
-        self.selected_flight.append(event.m_itemIndex)
+        flight_number = self.list_ctrl.GetFirstSelected()
+        self.selected_flight = [flight_number]
+        while True:
+            # check for another flight been chosen
+            # in GetNextSelected(flight_number) -> flight number
+            # is given in order to look after this number
+            item = self.list_ctrl.GetNextSelected(flight_number)
+            if item == -1:  # nor next choice
+                break
+            else:
+                flight_number = item
+                self.selected_flight.append(flight_number)
+        #print(self.selected_flight)
         for each in self.selected_flight:
             self.selected_parent_set.append(self.flights_dict[each])
         chosen_flights = [each[0] for each in self.selected_parent_set]
-        unique_elements = list(set(chosen_flights))
-        for element in unique_elements:
-            for choice in self.selected_parent_set:
-                if element == choice[0]:
-                    self.parent.selected.append(choice)
+        #print(chosen_flights)
+        #print(self.selected_parent_set)
+        for choice in self.selected_parent_set:
+            self.parent.selected.append(choice)
+        #print(self.parent.selected)
         self.parent.progress_bar.Hide()
 
 
@@ -313,7 +365,7 @@ QAR_TYPES = {0: "msrp12",  # An26
              74: "QAR-4100",
              75: "QAR-4120",
              76: "QAR-4700",
-             254: "QAR SAAB",
+             254: "QAR SAAB",  # S340
              255: "QAR-R"}
 
 
@@ -321,9 +373,11 @@ class MyFrame(wx.Frame):
 
     """"""
 
+
+
     def __init__(self):
         wx.Frame.__init__(self, None, wx.ID_ANY,
-                          "QAR Reader  %s" % WIN_TITLE, size=(600, 500))
+                          "QAR Reader  %s" % WIN_TITLE, size=SIZE)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.create_status_bar()
         self.chosen_acft_type = None  # means both acft type and data source type
@@ -334,7 +388,9 @@ class MyFrame(wx.Frame):
                                 351: ["an32", "testerU32"],
                                 361: ["an26", "msrp12"],
                                 371: ["an72", "testerU32"],
-                                381: ["an74", "bur3"]}
+                                381: ["an74", "bur3"],
+                                391: ["s340", "qar"],
+                                401: ["b737", "qar"]}
 
         self.selected = []  # flights selected from list
         self.create_file_menu()
@@ -426,19 +482,19 @@ class MyFrame(wx.Frame):
             menubar.Append(b747menu, "&B747")
 
         if ACCESS[USER][0] == "admin":
+            menubar.Append(an26menu, "&AN26")
+
+        if ACCESS[USER][0] == "admin":
             menubar.Append(an32menu, "&AN32")
 
         if ACCESS[USER][0] == "admin":
-            menubar.Append(an26menu, "&AN26")
+            menubar.Append(an72menu, "&AN72")
+
+        if ACCESS[USER][0] == "admin":
+            menubar.Append(an74menu, "&AN74")
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
             menubar.Append(an148menu, "&AN148")
-
-        if ACCESS[USER][0] == "admin":
-             menubar.Append(an72menu, "&AN72")
-
-        if ACCESS[USER][0] == "admin":
-             menubar.Append(an74menu, "&AN74")
 
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
@@ -491,31 +547,37 @@ class MyFrame(wx.Frame):
         self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((30, 30))
         #at executable creation -> place images to the same folder and change path
-        self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
-        self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
+        #self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         #self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.png'))
+            self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
+            self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('E:/b747.png'))
+            self.toolbar.AddLabelTool(141, "B737", wx.Bitmap('E:/b737.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('E:/an32.png'))
+            self.toolbar.AddLabelTool(148, "B747", wx.Bitmap('E:/b747.bmp'))
+
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+            self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('E:/an26.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('E:/an26.png'))
+            self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('E:/an32.bmp'))
 
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('E:/an72.png'))
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+            self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('E:/an72.bmp'))
 
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(146, "AN72", wx.Bitmap('E:/an74.png'))
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+            self.toolbar.AddLabelTool(146, "AN74", wx.Bitmap('E:/an74.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
-            self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.png'))
+            self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.bmp'))
+
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('E:/s340.bmp'))
 
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -524,11 +586,13 @@ class MyFrame(wx.Frame):
         #self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
         self.toolbar.SetToolLongHelp(140, "A320. Choose data source.")
         self.toolbar.SetToolLongHelp(141, "B747. Choose data source.")
-        self.toolbar.SetToolLongHelp(142, "AN148. Choose data source.")
-        self.toolbar.SetToolLongHelp(143, "AN32. Choose data source.")
-        self.toolbar.SetToolLongHelp(144, "AN26. Choose data source.")
-        self.toolbar.SetToolLongHelp(145, "AN72. Choose data source.")
-        self.toolbar.SetToolLongHelp(146, "AN74. Choose data source.")
+        self.toolbar.SetToolLongHelp(142, u"Aн148. Choose data source.")
+        self.toolbar.SetToolLongHelp(143, u"Aн32. Choose data source.")
+        self.toolbar.SetToolLongHelp(144, u"Aн26. Choose data source.")
+        self.toolbar.SetToolLongHelp(145, u"Aн72. Choose data source.")
+        self.toolbar.SetToolLongHelp(146, u"Aн74. Choose data source.")
+        self.toolbar.SetToolLongHelp(147, "S340. Choose data source.")
+        self.toolbar.SetToolLongHelp(148, "B737. Choose data source.")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -543,6 +607,8 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.an26_button, id=144)
         self.Bind(wx.EVT_MENU, self.an72_button, id=145)
         self.Bind(wx.EVT_MENU, self.an74_button, id=146)
+        self.Bind(wx.EVT_MENU, self.s340_button, id=147)
+        self.Bind(wx.EVT_MENU, self.b737_button, id=148)
 
     #---- At acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
@@ -572,6 +638,12 @@ class MyFrame(wx.Frame):
 
     def an74_qar_chosen(self, event):
         self.chosen_acft_type = 381
+
+    def s340_qar_chosen(self, event):
+        self.chosen_acft_type = 391
+
+    def b737_qar_chosen(self, event):
+        self.chosen_acft_type = 401
 
     #---------------------------------------------------------------------
     #---- At acft and data type selection via TOOLBAR -> -------
@@ -605,7 +677,7 @@ class MyFrame(wx.Frame):
 
     def an148_button(self, event):
         self.chosen_acft_type = 341
-        name = "AN148"
+        name = u"Aн148"
         choices = [u"БУР-92 А-05"]
         option = self.make_choice_window(name, choices)
         if option == u"БУР-92 А-05":
@@ -616,10 +688,10 @@ class MyFrame(wx.Frame):
 
     def an32_button(self, event):
         self.chosen_acft_type = 351
-        name = "AN32"
-        choices = [u"Tester Y3-2"]
+        name = u"Aн32"
+        choices = [u"Тестер У3-2"]
         option = self.make_choice_window(name, choices)
-        if option == u"Tester Y3-2":
+        if option == u"Тестер У3-2":
             self.chosen_acft_type = 351
         if option:
             # choose path to file
@@ -627,10 +699,10 @@ class MyFrame(wx.Frame):
 
     def an26_button(self, event):
         self.chosen_acft_type = 361
-        name = "AN26"
-        choices = ["MSRP12"]
+        name = u"Aн26"
+        choices = [u"МСРП-12"]
         option = self.make_choice_window(name, choices)
-        if option == "MSRP12":
+        if option == u"МСРП-12":
             self.chosen_acft_type = 361
         if option:
             # choose path to file
@@ -638,10 +710,10 @@ class MyFrame(wx.Frame):
 
     def an72_button(self, event):
         self.chosen_acft_type = 371
-        name = "AN72"
-        choices = [u"Tester Y3-2"]
+        name = u"Aн72"
+        choices = [u"Тестер У3-2"]
         option = self.make_choice_window(name, choices)
-        if option == u"Tester Y3-2":
+        if option == u"Тестер У3-2":
             self.chosen_acft_type = 371
         if option:
             # choose path to file
@@ -649,11 +721,33 @@ class MyFrame(wx.Frame):
 
     def an74_button(self, event):
         self.chosen_acft_type = 381
-        name = "AN74"
+        name = u"Aн74"
         choices = [u"БУР-3"]
         option = self.make_choice_window(name, choices)
         if option == u"БУР-3":
             self.chosen_acft_type = 381
+        if option:
+            # choose path to file
+            self.on_choose_file()
+
+    def s340_button(self, event):
+        self.chosen_acft_type = 391
+        name = "S340"
+        choices = [u"QAR"]
+        option = self.make_choice_window(name, choices)
+        if option == u"QAR":
+            self.chosen_acft_type = 391
+        if option:
+            # choose path to file
+            self.on_choose_file()
+
+    def b737_button(self, event):
+        self.chosen_acft_type = 401
+        name = "B737"
+        choices = ['QAR']
+        option = self.make_choice_window(name, choices)
+        if option == "QAR":
+            self.chosen_acft_type = 401
         if option:
             # choose path to file
             self.on_choose_file()
@@ -731,10 +825,13 @@ class MyFrame(wx.Frame):
         else:
             self.statusbar.SetStatusText("All flights are downloaded", 0)
             # display aircraft and recorder type
-            self.statusbar.SetStatusText(u"%s-%s" %
-                                         (self.acft_data_types[self.chosen_acft_type][0],
-                                         self.acft_data_types[self.chosen_acft_type][1]),
-                                         1)
+            try:
+                self.statusbar.SetStatusText(u"%s-%s" %
+                                            (self.acft_data_types[self.chosen_acft_type][0],
+                                             self.acft_data_types[self.chosen_acft_type][1]),
+                                             1)
+            except KeyError:
+                self.statusbar.SetStatusText(u" -%s" % self.qar_type, 1)
 
         self.sizer.Add(panel)
         self.sizer.Layout()
@@ -805,28 +902,29 @@ class MyFrame(wx.Frame):
             acft = self.acft_data_types[self.chosen_acft_type][0]
         try:
             for each in self.selected:  # [flight_interval, index, date, qar]
-                if each in self.saved_flights:
-                    pass
+                #if each in self.saved_flights:
+                    #pass
+                #else:
+                # get flight start and end indexes
+                separator = each[0].find(':')  # flight_interval
+                start = int(each[0][:separator])
+                end = int(each[0][separator + 1:])
+                # as in list indexes go from 0
+                flight_index = each[1] + 1
+                flight_date = each[2]
+                flight_qar = each[3]
+                if acft:
+                    flight_acft = acft
                 else:
-                    # get flight start and end indexes
-                    separator = each[0].find(':')  # flight_interval
-                    start = int(each[0][:separator])
-                    end = int(each[0][separator + 1:])
-                    # as in list indexes go from 0
-                    flight_index = each[1] + 1
-                    flight_date = each[2]
-                    flight_qar = each[3]
-                    if acft:
-                        flight_acft = acft
-                    else:
-                        flight_acft = None
-                    #print(flight_acft)
-                    name = self.form_name(mode, flight_index, flight_acft,
-                                          flight_qar, flight_date)
-                    #print(self.qar_type)
-                    f = Flight(self.progress_bar, start, end, self.q.path, name,
-                               self.qar_type,self.path_to_save, self.flag)
-                    self.saved_flights.append(each)
+                    flight_acft = None
+                #print(flight_acft)
+                name = self.form_name(mode, flight_index, flight_acft,
+                                        flight_qar, flight_date)
+                #print(self.qar_type)
+                f = Flight(self.progress_bar, start, end, self.q.path, name,
+                            self.qar_type, self.path_to_save, self.flag)
+                #self.saved_flights.append(each)
+                #self.selected.remove(each)
         except AttributeError:  # save button was pressed, but no file was opened before
             self.warning("Open file with flights to process first")
             return

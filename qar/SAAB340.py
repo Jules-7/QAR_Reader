@@ -11,7 +11,7 @@ class SAAB(PrepareData):
                  frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file):
         PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
                              subframe, progress_bar, path_to_save, flag)
-        self.flag = flag + "_VDR"
+        self.flag = flag
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         # make export of parametric info to tmp param file

@@ -35,25 +35,32 @@ class Flight:
         self.path_to_save = path_to_save
         self.flag = flag
         self.qar_type = qar_type
+
         if self.flag == "a320_cf":
             self.prepare_cf_file()
             self.make_flight()
+
         elif self.flag == "b747_qar" or self.flag == "an148_bur92":
             self.get_flight()
             self.save_flight()
-        elif self.flag == "qar":
+
+        elif self.flag == "qar" or self.flag == "s340_qar":
             self.get_flight()
             self.make_flight()
+
         elif self.flag == "a320_qar":
             self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
+
         elif self.flag == "an32_testerU32" or self.flag == "an72_testerU32":
             self.get_flight()
             self.make_flight()
+
         elif self.flag == "an26_msrp12":
             self.get_flight()
             self.make_flight()
+
         elif self.flag == "an74_bur3":
             self.get_flight()
             self.prepare_bur3_file()
