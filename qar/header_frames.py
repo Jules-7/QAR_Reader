@@ -24,18 +24,32 @@ class HeaderFrameSearchWrite(object):
         #self.syncword_one = ["255"]  # FF MSRP12
         #self.syncword_two = ["255", "126"]  # FF7E
 
+        self.progress_bar.Show()
+
         self.source = open(self.tmp_file_name, "rb")
         name = (r"%s" % self.path_to_save + r"\\" + r"%s" % self.target_file_name)
         self.target_file = open(name, "wb")
+
+        self.progress_bar.SetValue(5)
+
         self.bytes_counter = 0
         self.source_len = os.stat(self.tmp_file_name).st_size
         self.record_header()
+        self.progress_bar.SetValue(15)
         #self.source.seek(384, 0) shift after header for MSRP-12
         if shift_after_header:
             self.source.seek(shift_after_header, 0)
+        self.progress_bar.SetValue(25)
+
         self.record_data()
+
+        self.progress_bar.SetValue(85)
+
         self.source.close()
         self.target_file.close()
+
+        self.progress_bar.SetValue(95)
+
 
     def record_header(self):
         header = self.source.read(128)

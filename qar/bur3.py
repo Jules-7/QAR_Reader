@@ -19,10 +19,16 @@ class Bur3(object):
         self.source = open(tmp_file_name, "rb")
         self.target_file_name = target_file_name
         self.progress_bar = progress_bar
+
+        self.progress_bar.Show()
+
         self.path_to_save = path_to_save
         name = (r"%s" % self.path_to_save + r"\\" + r"%s" % self.target_file_name)
         #name_txt = (r"%s" % self.path_to_save + r"\\" + r"result_an74.txt")
         self.target_file = open(name, "wb")
+
+        self.progress_bar.SetValue(5)
+
         #self.target_txt = open(name_txt, "w")
         self.source_size = os.stat(tmp_file_name).st_size
         self.flag = flag
@@ -39,10 +45,24 @@ class Bur3(object):
         self.bit_counter = 0
 
         self.record_header()
+
+        self.progress_bar.SetValue(15)
+
         self.convert_to_ord()
+
+        self.progress_bar.SetValue(25)
+
         self.convert_to_harvard()
+
+        self.progress_bar.SetValue(35)
+
         self.get_data_as_str()
+
+        self.progress_bar.SetValue(45)
+
         self.record_data()
+
+        self.progress_bar.SetValue(85)
         #self.target_file.close()
         #self.target_txt.close()
 

@@ -88,11 +88,6 @@ class MyPanel(wx.Panel):
         self.qar_type = data.qar_type
         self.selected_flight = []
         self.selected_parent_set = []
-        #self.ctrl_pressed = 0
-        self.key_board = wx.KeyboardState()
-        #self.Bind(wx.EVT_CHAR_HOOK, self.on_key)
-        #self.Bind(wx.EVT_KEY_DOWN, self.ctrl_down)
-        #self.Bind(wx.EVT_KEY_UP, self.ctrl_up)
 
         # list of items with scroll
         self.list_ctrl = wx.ListCtrl(self,
@@ -123,8 +118,12 @@ class MyPanel(wx.Panel):
                                     data.start_date[index].time())
             end_date = "%s %s" % (data.end_date[index].strftime('%d.%m.%Y'),
                                   data.end_date[index].time())
-            duration = time.strftime('%H h %M m %S s',
-                                     time.gmtime(data.durations[index]))
+            seconds = data.durations[index]
+            m, sec = divmod(seconds, 60)
+            hours, minutes = divmod(m, 60)
+            duration = "%02d h %02d m %02d s" % (hours, minutes, sec)
+            #duration = time.strftime('%d h %02d m %02 s',% (h, m, s)
+                                     #time.gmtime())
             #InsertStringItem provides creation of next string
             #without it impossible to create list
             self.list_ctrl.InsertStringItem(index, str(index + 1))
@@ -142,34 +141,6 @@ class MyPanel(wx.Panel):
         self.SetSizer(sizer)
 
     #----------------------------------------------------------------------
-
-    #def on_key(self, event):
-        #if event.GetKeyCode() == wx.WXK_CONTROL:
-            #self.ctrl_pressed = 1
-            #event.Skip()
-        #else:
-            #self.ctrl_pressed = 0
-            #event.Skip()
-
-
-    #def ctrl_down(self, event):
-        #print("in down event")
-        #if event.Modifiers() == wx.WXK_CONTROL:
-            #self.ctrl_pressed = 1
-            #print("ctrl down")
-        #event.Skip()
-        #print("enabling multiple choice")
-        #self.multiple_choice = True
-        #key_code = event.GetKeyCode()
-        #print(key_code)
-
-    #def ctrl_up(self, event):
-        #print("in up event")
-        #if event.Modifiers() == wx.WXK_CONTROL:
-            #self.ctrl_pressed = 0
-            #print("ctrl up")
-        #event.Skip()
-
     def on_item_selected(self, event):
         """ at row selection - index is returned
         using that index search for flight from flights_dict
@@ -192,7 +163,7 @@ class MyPanel(wx.Panel):
         #print(self.selected_flight)
         for each in self.selected_flight:
             self.selected_parent_set.append(self.flights_dict[each])
-        chosen_flights = [each[0] for each in self.selected_parent_set]
+        #chosen_flights = [each[0] for each in self.selected_parent_set]
         #print(chosen_flights)
         #print(self.selected_parent_set)
         for choice in self.selected_parent_set:
@@ -390,7 +361,9 @@ class MyFrame(wx.Frame):
                                 371: ["an72", "testerU32"],
                                 381: ["an74", "bur3"],
                                 391: ["s340", "qar"],
-                                401: ["b737", "qar"]}
+                                401: ["b737", "qar"],
+                                402: ["b737", "fdr"],
+                                403: ["b737", "4700"]}
 
         self.selected = []  # flights selected from list
         self.create_file_menu()
@@ -426,7 +399,7 @@ class MyFrame(wx.Frame):
             Access (visibility) of each option
             in file_menu and tool_bar is the same """
         filemenu = wx.Menu()
-        choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
+        #choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             initialize = filemenu.Append(wx.ID_ANY, "&Initialize", " Initialize QAR")
@@ -500,7 +473,7 @@ class MyFrame(wx.Frame):
 
         #--------- Bindings of buttons/commands with methods
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
-        self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
+        #self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
 
 
         self.Bind(wx.EVT_TOOL, self.save_flight, id=134)  # bind with toolbar
@@ -556,10 +529,10 @@ class MyFrame(wx.Frame):
             self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(141, "B737", wx.Bitmap('E:/b737.bmp'))
+            self.toolbar.AddLabelTool(148, "B737", wx.Bitmap('E:/b737.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(148, "B747", wx.Bitmap('E:/b747.bmp'))
+            self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('E:/b747.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
             self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('E:/an26.bmp'))
@@ -744,10 +717,14 @@ class MyFrame(wx.Frame):
     def b737_button(self, event):
         self.chosen_acft_type = 401
         name = "B737"
-        choices = ['QAR']
+        choices = ['QAR', "FDR", "4700"]
         option = self.make_choice_window(name, choices)
         if option == "QAR":
             self.chosen_acft_type = 401
+        elif option == "FDR":
+            self.chosen_acft_type = 402
+        elif option == "4700":
+            self.chosen_acft_type = 403
         if option:
             # choose path to file
             self.on_choose_file()
@@ -893,6 +870,7 @@ class MyFrame(wx.Frame):
     def save(self, mode):
         self.get_path_to_save()
         self.progress_bar.Show()
+        self.statusbar.SetStatusText("Saving...", 0)
         if self.chosen_acft_type is None:
             self.flag = "qar"
             acft = None
@@ -923,13 +901,14 @@ class MyFrame(wx.Frame):
                 #print(self.qar_type)
                 f = Flight(self.progress_bar, start, end, self.q.path, name,
                             self.qar_type, self.path_to_save, self.flag)
+
                 #self.saved_flights.append(each)
                 #self.selected.remove(each)
         except AttributeError:  # save button was pressed, but no file was opened before
             self.warning("Open file with flights to process first")
             return
         self.selected = []
-        self.statusbar.SetStatusText("Saving...", 0)
+
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Flight is saved", 0)
 
