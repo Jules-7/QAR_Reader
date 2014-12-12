@@ -50,7 +50,7 @@ class MonstrHeader():
         if self.flights_start:
             self.get_flight_intervals()
             # count durations by frames
-            if self.info == "a320" or self.info == "an26":
+            if self.info == "a320_qar" or self.info == "an26_msrp12" or self.info == "b737_4700":
                 self.get_durations_optional(self.info)
             else:
                 # count durations using QAR header -> processor time
@@ -129,8 +129,9 @@ class MonstrHeader():
         """ for these aircraft types flight duration is counted by frames,
         not by counter value from header"""
         # frame duration for aircraft type in sec
-        acft_frame_duration = {"a320": 4,  # 1 frame - 4 sec
-                               "an26": 0.5}
+        acft_frame_duration = {"a320_qar": 4,  # 1 frame - 4 sec
+                               "an26_msrp12": 0.5,
+                               "b737_4700": 4}
         frame_duration = acft_frame_duration[acft]
         i = 0
         for each in self.start_date:

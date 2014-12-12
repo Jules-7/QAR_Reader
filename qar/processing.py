@@ -17,8 +17,8 @@ class PrepareData(object):
         self.bytes_counter = 0
         self.mix_type = None
         self.frame_len = frame_len
-        self.subframe_len = subframe_len
-        self.progress_bar = progress_bar
+        self.subframe_len = subframe_len  # in bytes
+        self.progress_bar = progress_bar  # in bytes
         self.flag = flag
 
     def record_data(self):
@@ -112,7 +112,7 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "s340_qar":
+        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700":
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
         elif self.flag == "a320_cf":

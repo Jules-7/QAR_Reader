@@ -21,7 +21,7 @@ ACCESS = {1: ["admin", "admin", (700, 500)],
           12: ["VCH", u'В/Ч №2269', (600, 500)]}
 
 # admin
-USER = 12
+USER = 1
 
 # YanAir
 #USER = 10

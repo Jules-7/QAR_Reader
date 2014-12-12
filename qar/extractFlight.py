@@ -2,8 +2,7 @@ from SAAB340 import SAAB
 from airbus import A320
 from bur3 import Bur3
 import win32api
-from tester import TesterU32
-from msrp import MSRP12
+from boeing import B737
 from header_frames import HeaderFrameSearchWrite
 
 QAR_TYPES = {0: "msrp12",  # An26
@@ -64,6 +63,11 @@ class Flight:
         elif self.flag == "an74_bur3":
             self.get_flight()
             self.prepare_bur3_file()
+            self.make_flight()
+
+        elif self.flag == "b737_4700":
+            self.qar_type = self.flag
+            self.get_flight()
             self.make_flight()
 
     def get_flight(self):
@@ -134,6 +138,11 @@ class Flight:
                                                 self.progress_bar,
                                                 self.path_to_save,
                                                 self.flag, ["011111111"], 512)
+
+            # 768 - bytes in frame, 192 - bytes in subframe
+            elif self.qar_type == "b737_4700":
+                b737 = B737(tmp_file_name, target_file_name, 768, 192,
+                            self.progress_bar, self.path_to_save, self.flag)
 
     def prepare_cf_file(self):
         """ Prepares Compact Flash file
