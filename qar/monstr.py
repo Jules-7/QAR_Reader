@@ -118,7 +118,9 @@ class MonstrHeader():
 
             bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
             frames_in_flight = bytes_in_flight / bytes_in_frame
-            duration_in_sec = frames_in_flight / frame_rate
+            # difference may be not whole number,
+            # not to get seconds as decimal fraction -> round it
+            duration_in_sec = round(frames_in_flight / frame_rate)
             end = self.start_date[i] + datetime.timedelta(seconds=duration_in_sec)
             self.end_date.append(end)
             #duration = time.strftime('%H h %M m %S s', time.gmtime(duration_in_sec))
@@ -126,7 +128,7 @@ class MonstrHeader():
             i += 1
 
     def get_durations_optional(self, acft):
-        """ for these aircraft types flight duration is counted by frames,
+        """ for these aircraft types at which flight duration is counted by frames,
         not by counter value from header"""
         # frame duration for aircraft type in sec
         acft_frame_duration = {"a320_qar": 4,  # 1 frame - 4 sec
@@ -138,7 +140,9 @@ class MonstrHeader():
             bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
             bytes_in_frame = 768
             frames_in_flight = bytes_in_flight / bytes_in_frame
-            duration_in_sec = frames_in_flight * frame_duration
+            # difference may be not whole number,
+            # not to get seconds as decimal fraction -> round it
+            duration_in_sec = round(frames_in_flight * frame_duration)
             end = each + datetime.timedelta(seconds=duration_in_sec)
             self.end_date.append(end)
             self.durations.append(duration_in_sec)
@@ -203,7 +207,7 @@ class MonstrHeader():
             self.check_if_current_date(header)
 
     def check_if_current_date(self, header):
-        """ check if current date has already been written in header """
+        """ check if current date has already been written to header """
         curr_year_ord = (hex(ord(header[64])))[2:]
         if curr_year_ord == '0':
             self.add_current_date = True
@@ -226,9 +230,19 @@ class MonstrHeader():
                                              header[115], header[114]))
         if curr_counter < self.init_counter:
             curr_counter += COUNTER_INCREMENT
-            diff = (curr_counter - self.init_counter)/256
+        # difference may be not whole number,
+        # not to get seconds as decimal fraction -> round it
+        diff = round((curr_counter - self.init_counter)/256)
+
+        '''if curr_counter < self.init_counter:
+            curr_counter += COUNTER_INCREMENT
+            # difference may be not whole number,
+            # not to get seconds as decimal fraction -> round it
+            diff = round((curr_counter - self.init_counter)/256)
         else:
-            diff = (curr_counter - self.init_counter)/256
+            # difference may be not whole number,
+            # not to get seconds as decimal fraction -> round it
+            diff = round((curr_counter - self.init_counter)/256)'''
         start_date = (self.init_date + datetime.timedelta(seconds=diff))
         self.start_date.append(start_date)
         year = start_date.strftime("%y")

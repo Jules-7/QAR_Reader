@@ -16,7 +16,7 @@ from formatting import FormatCompactFlash
 to QAR type"""
 
 ACCESS = {1: ["admin", "admin", (700, 500)],
-          10: ["yanair", " ", (600, 500)],
+          10: ["yanair", "YanAir", (600, 500)],
           11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
           12: ["VCH", u'В/Ч №2269', (600, 500)]}
 
@@ -549,7 +549,7 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
             self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.bmp'))
 
-        if ACCESS[USER][0] == "admin":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('E:/s340.bmp'))
 
         #--------- HELP for toolbar bitmaps -----------------------------
