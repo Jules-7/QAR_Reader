@@ -25,7 +25,9 @@ class MonstrHeader():
     """ - find flights
         - check headers
         - extract information from headers
-        - provide with all technical/additional information    """
+        - provide with all technical/additional information
+
+        COMPLETE HEADER DESCRIPTION IN initialization.py """
 
     def __init__(self, path, info=None):
         self.path = path
@@ -62,9 +64,11 @@ class MonstrHeader():
             # if it has not been written before
             # in bytes: 70, 72, 74, 76, 78, 80
             # symmetrically + 2 lines (16 columns) to date of initialization
-            if self.add_current_date:  # True means it is necessary
-            # to write current date to header
-                self.add_date_to_header()
+        self.check_dates()
+        if self.add_current_date:  # True means it is necessary
+        # to write current date to header
+            self.add_date_to_header()
+
 
     def is_flight(self):
         """ check for MONSTR and if so record header """
@@ -245,14 +249,18 @@ class MonstrHeader():
             diff = round((curr_counter - self.init_counter)/256)'''
         start_date = (self.init_date + datetime.timedelta(seconds=diff))
         self.start_date.append(start_date)
+        year, month, day, hour, minute, second = self.str_date_repr(start_date)
+        self.start_date_str_repr.append([year, month, day,
+                                         hour, minute, second])
+
+    def str_date_repr(self, start_date):
         year = start_date.strftime("%y")
         month = start_date.strftime("%m")
         day = start_date.strftime("%d")
         hour = start_date.strftime("%H")
         minute = start_date.strftime("%M")
         second = start_date.strftime("%S")
-        self.start_date_str_repr.append([year, month, day,
-                                         hour, minute, second])
+        return year, month, day, hour, minute, second
 
     def process_counter(self, *args):
         """ processing (transformation) of hex value to decimal """
@@ -323,3 +331,28 @@ class MonstrHeader():
         bin_value = bin(int_value)
         return bin_value
 
+    def check_dates(self):
+        """ in case calendar/clock is out of order,
+            date becomes less than previous one.
+            in this case processor timer is reset to zero.
+            during this check in case datetime is less than previous one,
+            flight start/end datetime is set to 2014.0.0 0:0:0 """
+        checked_start_dates = [self.start_date[0]]
+        i = 0
+        while i <= len(self.start_date):
+            try:
+                if self.start_date[i] > self.start_date[i+1]:
+                    zero_date = datetime.datetime(year=2014, month=1, day=1,
+                                                  hour=0, minute=0, second=0)
+                    checked_start_dates.append(zero_date)
+                    self.end_date[i+1] = zero_date
+                    # flight start datetime data prepared to be written into header
+                    year, month, day, hour, minute, second = self.str_date_repr(zero_date)
+                    self.start_date_str_repr[i+1] = [year, month, day,
+                                                     hour, minute, second]
+                else:
+                    checked_start_dates.append(self.start_date[i+1])
+            except IndexError:
+                break
+            i += 1
+        self.start_date = checked_start_dates

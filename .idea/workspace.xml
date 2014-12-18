@@ -26,21 +26,9 @@
       <file leaf-file-name="qar_reader.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="8" selection-start="703" selection-end="703" vertical-scroll-proportion="0.0" vertical-offset="263" max-vertical-offset="10076">
+            <state line="326" column="0" selection-start="12921" selection-end="12921" vertical-scroll-proportion="0.0" vertical-offset="6051" max-vertical-offset="20130">
               <folding>
-                <element signature="e#21#44#0" expanded="true" />
-                <element signature="e#1123#1336#0" expanded="false" />
-                <element signature="e#1412#2132#0" expanded="false" />
-                <element signature="e#2234#6499#0" expanded="false" />
-                <element signature="e#6544#6830#0" expanded="false" />
-                <element signature="e#6875#12922#0" expanded="false" />
-                <element signature="e#14850#15427#0" expanded="false" />
-                <element signature="e#15469#20383#0" expanded="false" />
-                <element signature="e#29583#29713#0" expanded="false" />
-                <element signature="e#29828#30711#0" expanded="false" />
-                <element signature="e#30828#32183#0" expanded="false" />
-                <element signature="e#32278#32947#0" expanded="false" />
-                <element signature="e#33016#33810#0" expanded="false" />
+                <element signature="e#11540#12859#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -49,7 +37,7 @@
       <file leaf-file-name="splitter.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/splitter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="45" selection-start="335" selection-end="335" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1320">
+            <state line="23" column="20" selection-start="801" selection-end="801" vertical-scroll-proportion="0.0" vertical-offset="198" max-vertical-offset="1320">
               <folding />
             </state>
           </provider>
@@ -58,28 +46,23 @@
       <file leaf-file-name="initialization.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/qar/initialization.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="45" selection-start="717" selection-end="717" vertical-scroll-proportion="0.0" vertical-offset="132" max-vertical-offset="6732">
+            <state line="19" column="68" selection-start="809" selection-end="809" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6732">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="monstr.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="monstr.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/qar/monstr.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="127" column="18" selection-start="4865" selection-end="4865" vertical-scroll-proportion="0.0" vertical-offset="2376" max-vertical-offset="7150">
+            <state line="322" column="43" selection-start="13086" selection-end="13086" vertical-scroll-proportion="0.11982249" vertical-offset="6057" max-vertical-offset="6908">
               <folding>
-                <element signature="e#8517#8706#0" expanded="false" />
+                <element signature="e#6024#6877#0" expanded="false" />
+                <element signature="e#8588#8777#0" expanded="false" />
+                <element signature="e#8823#9125#0" expanded="false" />
+                <element signature="e#11174#11327#0" expanded="false" />
+                <element signature="e#13154#13386#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="setup.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/qar/setup.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="48" selection-start="848" selection-end="848" vertical-scroll-proportion="0.3911111" vertical-offset="132" max-vertical-offset="1386">
-              <folding />
             </state>
           </provider>
         </entry>
@@ -121,7 +104,6 @@
         <option value="$PROJECT_DIR$/qar/formatting.py" />
         <option value="$PROJECT_DIR$/qar/msrp.py" />
         <option value="$PROJECT_DIR$/qar/initialization.py" />
-        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/qar/SAAB340.py" />
         <option value="$PROJECT_DIR$/qar/bur_92.py" />
         <option value="$PROJECT_DIR$/qar/header_frames.py" />
@@ -131,8 +113,9 @@
         <option value="$PROJECT_DIR$/qar/boeing.py" />
         <option value="$PROJECT_DIR$/qar/extractFlight.py" />
         <option value="$PROJECT_DIR$/qar/qar_reader.py" />
-        <option value="$PROJECT_DIR$/qar/monstr.py" />
         <option value="$PROJECT_DIR$/qar/setup.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/qar/monstr.py" />
       </list>
     </option>
   </component>
@@ -717,8 +700,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.monstr" />
-        <item index="1" class="java.lang.String" itemvalue="Python.test (1)" />
+        <item index="0" class="java.lang.String" itemvalue="Python.test (1)" />
+        <item index="1" class="java.lang.String" itemvalue="Python.monstr" />
         <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in TesterU32 (1)" />
         <item index="3" class="java.lang.String" itemvalue="Python.qarReader_prod_v2" />
         <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in TesterU32" />
@@ -753,8 +736,8 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1040" extended-state="0" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1296" height="1040" extended-state="1" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13062099" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -764,16 +747,16 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30625686" sideWeight="0.7728356" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2248394" sideWeight="0.1125" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22941822" sideWeight="0.8875" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21405049" sideWeight="0.8875" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37458926" sideWeight="0.22716442" order="2" side_tool="true" content_ui="tabs" x="-4" y="729" width="1280" height="308" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930845" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32976446" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -827,11 +810,6 @@
           <line>38</line>
           <option name="timeStamp" value="282" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/monstr.py</url>
-          <line>78</line>
-          <option name="timeStamp" value="283" />
-        </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
@@ -844,19 +822,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="23" column="0" selection-start="601" selection-end="601" vertical-scroll-proportion="0.0" vertical-offset="506" max-vertical-offset="13200">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -906,19 +872,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="325" column="61" selection-start="12697" selection-end="12697" vertical-scroll-proportion="0.0" vertical-offset="7150" max-vertical-offset="17226">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -944,19 +898,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="484" column="23" selection-start="20497" selection-end="20497" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="17358">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -977,19 +919,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="728" column="50" selection-start="29165" selection-end="29165" vertical-scroll-proportion="0.0" vertical-offset="12144" max-vertical-offset="14080">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1013,19 +943,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="7" selection-start="541" selection-end="541" vertical-scroll-proportion="0.0" vertical-offset="264" max-vertical-offset="13464">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1085,11 +1003,6 @@
         <state line="66" column="67" selection-start="2438" selection-end="2596" vertical-scroll-proportion="1.194879" vertical-offset="612" max-vertical-offset="2244" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="14" selection-start="454" selection-end="454" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="440" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/qar/msrp.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="35" selection-start="256" selection-end="256" vertical-scroll-proportion="0.0" vertical-offset="72" max-vertical-offset="1980" />
@@ -1146,9 +1059,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/boeing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="258" column="51" selection-start="9876" selection-end="9876" vertical-scroll-proportion="0.44592592" vertical-offset="5331" max-vertical-offset="6006">
-          <folding />
-        </state>
+        <state line="258" column="51" selection-start="9876" selection-end="9876" vertical-scroll-proportion="0.44592592" vertical-offset="5331" max-vertical-offset="6006" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
@@ -1160,66 +1071,61 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/processing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="179" column="39" selection-start="9000" selection-end="9000" vertical-scroll-proportion="0.7540741" vertical-offset="3429" max-vertical-offset="5082">
-          <folding />
-        </state>
+        <state line="179" column="39" selection-start="9000" selection-end="9000" vertical-scroll-proportion="0.7540741" vertical-offset="3429" max-vertical-offset="5082" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/airbus.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="42" selection-start="614" selection-end="614" vertical-scroll-proportion="0.4888889" vertical-offset="0" max-vertical-offset="792">
+        <state line="16" column="42" selection-start="614" selection-end="614" vertical-scroll-proportion="0.4888889" vertical-offset="0" max-vertical-offset="792" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="48" selection-start="848" selection-end="848" vertical-scroll-proportion="0.0" vertical-offset="418" max-vertical-offset="1386">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/initialization.py">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="45" selection-start="717" selection-end="717" vertical-scroll-proportion="0.0" vertical-offset="132" max-vertical-offset="6732">
+        <state line="2" column="8" selection-start="31" selection-end="31" vertical-scroll-proportion="0.06386067" vertical-offset="0" max-vertical-offset="689">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/splitter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="45" selection-start="335" selection-end="335" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1320">
+        <state line="23" column="20" selection-start="801" selection-end="801" vertical-scroll-proportion="0.0" vertical-offset="198" max-vertical-offset="1320">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/initialization.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="68" selection-start="809" selection-end="809" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6732">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="8" selection-start="703" selection-end="703" vertical-scroll-proportion="0.0" vertical-offset="263" max-vertical-offset="10076">
+        <state line="326" column="0" selection-start="12921" selection-end="12921" vertical-scroll-proportion="0.0" vertical-offset="6051" max-vertical-offset="20130">
           <folding>
-            <element signature="e#21#44#0" expanded="true" />
-            <element signature="e#1123#1336#0" expanded="false" />
-            <element signature="e#1412#2132#0" expanded="false" />
-            <element signature="e#2234#6499#0" expanded="false" />
-            <element signature="e#6544#6830#0" expanded="false" />
-            <element signature="e#6875#12922#0" expanded="false" />
-            <element signature="e#14850#15427#0" expanded="false" />
-            <element signature="e#15469#20383#0" expanded="false" />
-            <element signature="e#29583#29713#0" expanded="false" />
-            <element signature="e#29828#30711#0" expanded="false" />
-            <element signature="e#30828#32183#0" expanded="false" />
-            <element signature="e#32278#32947#0" expanded="false" />
-            <element signature="e#33016#33810#0" expanded="false" />
+            <element signature="e#11540#12859#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/monstr.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="127" column="18" selection-start="4865" selection-end="4865" vertical-scroll-proportion="0.0" vertical-offset="2376" max-vertical-offset="7150">
+        <state line="322" column="43" selection-start="13086" selection-end="13086" vertical-scroll-proportion="0.11982249" vertical-offset="6057" max-vertical-offset="6908">
           <folding>
-            <element signature="e#8517#8706#0" expanded="false" />
+            <element signature="e#6024#6877#0" expanded="false" />
+            <element signature="e#8588#8777#0" expanded="false" />
+            <element signature="e#8823#9125#0" expanded="false" />
+            <element signature="e#11174#11327#0" expanded="false" />
+            <element signature="e#13154#13386#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="48" selection-start="848" selection-end="848" vertical-scroll-proportion="0.3911111" vertical-offset="132" max-vertical-offset="1386">
-          <folding />
         </state>
       </provider>
     </entry>
