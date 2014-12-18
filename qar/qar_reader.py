@@ -838,7 +838,6 @@ class MyFrame(wx.Frame):
         self.q = WorkerThread(self, self.path, self.flag)
 
     def on_choose_cf(self, event):  # choose compact flash
-        # In this case we include a "New directory" button.
         dlg = wx.DirDialog(self, "Choose a directory:",
                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         # If the user selects OK, then we process the dialog's data.
@@ -851,6 +850,19 @@ class MyFrame(wx.Frame):
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
+        self.progress_bar.SetValue(15)
+        self.progress_bar.SetValue(20)
+
+        dlg_save = wx.DirDialog(self, "Choose directory to safe flight copy",
+                                style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+        if dlg_save.ShowModal() == wx.ID_OK:
+            path_save = u"%s" % dlg_save.GetPath()
+            self.path += '__save__'
+            self.path += path_save
+            print(self.path)
+        else:
+            return
+
         self.progress_bar.Pulse()
 
         self.statusbar.SetStatusText("Downloading...", 0)
