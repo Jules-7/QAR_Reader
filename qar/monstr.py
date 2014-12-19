@@ -43,7 +43,7 @@ class MonstrHeader():
         self.time = []
         self.qar_type = None
         self.init_date = None
-        self.add_current_date = False
+        #self.add_current_date = True
         self.start_date = []
         self.start_date_str_repr = []
         self.durations = []
@@ -65,9 +65,9 @@ class MonstrHeader():
             # in bytes: 70, 72, 74, 76, 78, 80
             # symmetrically + 2 lines (16 columns) to date of initialization
         self.check_dates()
-        if self.add_current_date:  # True means it is necessary
+        #if self.add_current_date:  # True means it is necessary
         # to write current date to header
-            self.add_date_to_header()
+        self.add_date_to_header()
 
 
     def is_flight(self):
@@ -205,10 +205,10 @@ class MonstrHeader():
         # convert to int
         self.init_date = datetime.datetime(int(init_year), int(init_month), int(init_day),
                                            int(init_hour), int(init_minute), int(init_second))
-        if not self.add_current_date:
+        #if not self.add_current_date:
             # if False -> we need to check has current date been written or not
             # if True -> current date has been written in header
-            self.check_if_current_date(header)
+            #self.check_if_current_date(header)
 
     def check_if_current_date(self, header):
         """ check if current date has already been written to header """
