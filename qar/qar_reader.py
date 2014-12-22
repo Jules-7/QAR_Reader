@@ -122,8 +122,6 @@ class MyPanel(wx.Panel):
             m, sec = divmod(seconds, 60)
             hours, minutes = divmod(m, 60)
             duration = "%02d h %02d m %02d s" % (hours, minutes, sec)
-            #duration = time.strftime('%d h %02d m %02 s',% (h, m, s)
-                                     #time.gmtime())
             #InsertStringItem provides creation of next string
             #without it impossible to create list
             self.list_ctrl.InsertStringItem(index, str(index + 1))
@@ -155,20 +153,15 @@ class MyPanel(wx.Panel):
             # in GetNextSelected(flight_number) -> flight number
             # is given in order to look after this number
             item = self.list_ctrl.GetNextSelected(flight_number)
-            if item == -1:  # nor next choice
+            if item == -1:  # no next choice
                 break
             else:
                 flight_number = item
                 self.selected_flight.append(flight_number)
-        #print(self.selected_flight)
         for each in self.selected_flight:
             self.selected_parent_set.append(self.flights_dict[each])
-        #chosen_flights = [each[0] for each in self.selected_parent_set]
-        #print(chosen_flights)
-        #print(self.selected_parent_set)
         for choice in self.selected_parent_set:
             self.parent.selected.append(choice)
-        #print(self.parent.selected)
         self.parent.progress_bar.Hide()
 
 
@@ -344,8 +337,6 @@ class MyFrame(wx.Frame):
 
     """"""
 
-
-
     def __init__(self):
         wx.Frame.__init__(self, None, wx.ID_ANY,
                           "QAR Reader  %s" % WIN_TITLE, size=SIZE)
@@ -374,9 +365,6 @@ class MyFrame(wx.Frame):
         self.Show()
         event_result(self, self.on_open_file)
         self.SetSizer(self.sizer)
-        #print(self.__module__)
-        #print(self.__dict__)
-        #print(self.__bases__)
 
     def create_status_bar(self):
         # Create StatusBar in the bottom of the window
@@ -399,7 +387,6 @@ class MyFrame(wx.Frame):
             Access (visibility) of each option
             in file_menu and tool_bar is the same """
         filemenu = wx.Menu()
-        #choose_file = filemenu.Append(301, "&Choose", " Choose file to open")
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             initialize = filemenu.Append(wx.ID_ANY, "&Initialize", " Initialize QAR")
@@ -471,10 +458,9 @@ class MyFrame(wx.Frame):
 
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
-        #--------- Bindings of buttons/commands with methods
+        #--------- Bind buttons/commands with methods
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
         #self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
-
 
         self.Bind(wx.EVT_TOOL, self.save_flight, id=134)  # bind with toolbar
         self.Bind(wx.EVT_MENU, self.save_flight, save_file)  # bind with filemenu
@@ -488,6 +474,7 @@ class MyFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.on_choose_cf, choose_cf)
             self.Bind(wx.EVT_MENU, self.a320_qar_chosen, a320_qar)
             self.Bind(wx.EVT_TOOL, self.a320_cf_chosen, a320_cf)
+
         # filemenu
 
         if ACCESS[USER][0] == "admin":
@@ -520,7 +507,6 @@ class MyFrame(wx.Frame):
         self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((30, 30))
         #at executable creation -> place images to the same folder and change path
-        #self.toolbar.AddLabelTool(133, 'Open', wx.Bitmap('E:/open_folder.png'))
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
         #self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
 
@@ -570,7 +556,7 @@ class MyFrame(wx.Frame):
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
 
-        # binding for toolbar
+        # bind toolbar
         self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
         self.Bind(wx.EVT_MENU, self.a320_button, id=140)
@@ -633,8 +619,7 @@ class MyFrame(wx.Frame):
             self.chosen_acft_type = 321
         elif option == "Compact Flash":
             self.chosen_acft_type = 322
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def b747_button(self, event):
@@ -644,8 +629,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == "QAR":
             self.chosen_acft_type = 331
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def an148_button(self, event):
@@ -655,8 +639,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"БУР-92 А-05":
             self.chosen_acft_type = 341
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def an32_button(self, event):
@@ -666,8 +649,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"Тестер У3-2":
             self.chosen_acft_type = 351
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def an26_button(self, event):
@@ -677,8 +659,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"МСРП-12":
             self.chosen_acft_type = 361
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def an72_button(self, event):
@@ -688,8 +669,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"Тестер У3-2":
             self.chosen_acft_type = 371
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def an74_button(self, event):
@@ -699,8 +679,7 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"БУР-3":
             self.chosen_acft_type = 381
-        if option:
-            # choose path to file
+        if option:  # choose path to file
             self.on_choose_file()
 
     def s340_button(self, event):

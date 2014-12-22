@@ -50,7 +50,6 @@ class HeaderFrameSearchWrite(object):
 
         self.progress_bar.SetValue(95)
 
-
     def record_header(self):
         header = self.source.read(128)
         self.bytes_counter += 128
@@ -62,17 +61,13 @@ class HeaderFrameSearchWrite(object):
                 break
             sw = self.find_syncword()
             while sw:
-                #p1 = self.source.tell()
                 checked = self.check_frame()
                 if checked:
-                    #pp1 = self.source.tell()
                     frame = self.source.read(self.frame_size)
-                    #pp2 = self.source.tell()
                     self.target_file.write(frame)
                     self.bytes_counter += self.frame_size
                     # -2 as we already know that first two bytes are syncword
                     #self.source.seek(-(self.frame_size - 2), 1)
-                    #pp3 = self.source.tell()
                 else:
                     # need to include those bytes which have been read,
                     # but not included
@@ -84,51 +79,37 @@ class HeaderFrameSearchWrite(object):
     def find_syncword(self):
         byte_amount = len(self.syncword_one)  # 2 or 1
         while self.bytes_counter < self.source_len - self.frame_size:
-            #p2 = self.source.tell()
             syncword = []
             for each in self.syncword_one:
                 byte_one = self.source.read(1)
-                #byte_two = self.source.read(1)
                 try:
                     syncword.append(str(ord(byte_one)))
                 except TypeError:  # end of file
                     self.file_end = True
                     break
-            #if syncword == self.syncword_one or syncword == self.syncword_two:
             if syncword == self.syncword_one:
                 self.source.seek(-byte_amount, 1)
-                #p4 = self.source.tell()
                 return True
             else:
                 # in case of 2 byte syncword we need to go back one byte
                 # in case of 1 byte syncword we don`t need to go back
                 # correspondingly in case of 2 byte sw - we increase bytes_counter
                 # in case of 1 byte sw we don`t increase bytes_counter
-                ppppppp4 = self.source.tell()
                 self.source.seek(-(byte_amount - 1), 1)
-                ppppppp5 = self.source.tell()
                 self.bytes_counter += (byte_amount - 1)
-                ppppppp6 = self.source.tell()
 
     def check_frame(self):
         byte_amount = len(self.syncword_one)  # 2 or 1
         syncword = []
-        #p3 = self.source.tell()
         self.source.seek(self.frame_size, 1)
-        #pppp4 = self.source.tell()
 
         for each in self.syncword_one:
             byte_one = self.source.read(1)
-            #byte_two = self.source.read(1)
             if byte_one == "":
                 self.file_end = True
                 return
-                # return False
             else:
                 syncword.append(str(ord(byte_one)))
         if syncword == self.syncword_one:
-            #pp4 = self.source.tell()
             self.source.seek(-(self.frame_size + byte_amount), 1)
-            #self.bytes_counter += self.frame_size
-            #pp5 = self.source.tell()
             return True

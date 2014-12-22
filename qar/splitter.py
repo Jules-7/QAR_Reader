@@ -17,8 +17,8 @@ ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
                   402: ["b737", "fdr"],
                   403: ["b737", "4700"]}
 MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 391, 403]
-OWN_HEADER_TYPES = [322]
-NO_HEADER_TYPES = [331, 341]
+OWN_HEADER_TYPES = [322, 402]
+NO_HEADER_TYPES = [331, 341, 401]
 
 
 class Split(object):
@@ -29,8 +29,10 @@ class Split(object):
     def __init__(self, path, flag):
         self.path = path
         self.flag = flag
+        print(self.flag)
         self.acft_fdr_type = "%s_%s" % (ACFT_FDR_TYPES[flag][0],
                                         ACFT_FDR_TYPES[flag][1])
+        print(self.acft_fdr_type)
         self.result = None
         self.define_file_opening()
 
@@ -47,8 +49,8 @@ class Split(object):
         self.result = qar
 
     def open_with_own_header(self, path, flag):
-        if flag == 322:
-            self.result = CompactFlash(path)
+        if flag == 322 or flag == 402:
+            self.result = CompactFlash(path, self.acft_fdr_type)
 
     def open_with_no_header(self, path, flag):
         if flag == 331:  # boeing

@@ -22,12 +22,12 @@ class CompactFlash(object):
     13: month   (as it is)
     14: year    (last two digits as it is) """
 
-    def __init__(self, path):
+    def __init__(self, path, qar_type):
         self.header_len = 32  # Bytes
         self.frame_len = 768  # Bytes
         self.cluster_size = 8192
         self.frame_duration = 2  # sec
-        self.qar_type = "a320_cf"
+        self.qar_type = qar_type
         save_option = "__save__"
         self.path_save = None
         self.compact_flash_size = 500400*512  # 512MB
@@ -41,6 +41,7 @@ class CompactFlash(object):
         self.durations = []  # flights durations
         self.time = []
         self.end_date = []  # flights end date
+        self.current_flight = None
         if save_option in path:
             sep_path = path.find(save_option)
             self.path = path[:sep_path]
@@ -85,8 +86,8 @@ class CompactFlash(object):
 
     def find_start(self):
         while self.bytes_counter < self.source_len - self.cluster_size:
-            sw = self.find_syncword()
-            if sw:
+            flights_start = self.find_syncword()
+            if flights_start:
                 break
 
     def find_syncword(self):
@@ -100,8 +101,15 @@ class CompactFlash(object):
                 except TypeError:  # end of file
                     break
             if syncword == self.syncword_one:
-                self.source.seek(-(self.cluster_size + byte_amount), 1)
-                self.bytes_counter -= self.cluster_size
+                # add start and header of first flight
+                current_pos = self.source.tell()
+                self.flights_start.append(self.bytes_counter)
+                self.source.seek(-byte_amount, 1)
+                self.headers.append(self.source.read(self.header_len))
+                flight = self.headers[0][3]
+                flight_num = int('0' + (hex(ord(flight)))[2:])
+                self.current_flight = flight_num
+                self.source.seek(-self.header_len, 1)
                 return True
             else:
                 # in case of 2 byte syncword we need to go back one byte
@@ -112,27 +120,25 @@ class CompactFlash(object):
     def find_flights(self):
         """ Using header pattern and notion that headers are written
         at the start of each 8KB cluster find all flights` starts.
-        Before start flight header a chunk of zeros
-        (of different size) is present
-        In case the first header in file does not have zeroes before it,
-        it means that this header is not the first one in that flight.
-        Such flight is not accepted as a flight"""
-        while self.bytes_counter < self.source_len - self.cluster_size - 16:
-            self.source.seek(self.cluster_size, 1)
+        Distinguish flights by their flight numbers -> 2-3 bytes"""
+        for each_index in range(self.flights_start[0]+self.cluster_size, self.source_len, self.cluster_size):
+            self.source.seek(each_index, 0)
             self.bytes_counter += self.cluster_size
             next_byte = self.source.read(1)
             try:
                 if (ord(next_byte) == self.header_pattern[0] and
                         ord(self.source.read(1)) == self.header_pattern[1]):
-                    # check previous 48 bytes
-                    self.source.seek(-50, 1)
-                    prev_48_bytes = self.source.read(48)
-                    prev_bytes_list = [ord(each) for each in prev_48_bytes]
-                    end_pattern = [0]*48
-                    if prev_bytes_list == end_pattern:  # if all zeros
+                    # check flight number
+                    self.source.seek(1, 1)
+                    flight = self.source.read(1)
+                    flight_num = ord(flight)
+                    if flight_num == self.current_flight:
+                        pass
+                    else:
                         self.flights_start.append(self.bytes_counter)
+                        self.source.seek(each_index, 0)  # amount of syncword in bytes
                         self.headers.append(self.source.read(self.header_len))
-                        self.source.seek(-self.header_len, 1)
+                        self.current_flight = flight_num
             except TypeError:  # no more bytes with data -> empty bytes at the end
                 break
 
@@ -213,16 +219,11 @@ class CompactFlash(object):
         for each in duration_cluster:
             duration_time = ((each * self.cluster_size) / self.frame_len) * \
                             self.frame_duration  # in sec
-            #duration_sec = time.strftime('%H h %M m %S s', time.gmtime(duration_time))
             self.durations.append(duration_time)
-            #self.durations_int.append(duration_time)
         #------ Calculate duration for last flight ---------
         last_dur = self.flight_intervals[-1][1] - self.flight_intervals[-1][0]  # Bytes
         dur = (last_dur / self.frame_len) * self.frame_duration
-        #duration_sec = time.strftime('%H h %M m %S s', time.gmtime(dur))
-        #self.durations.append(duration_sec)
         self.durations.append(dur)
-        #self.durations_int.append(dur)
 
     def get_flights_end(self):
         i = 0
@@ -230,4 +231,3 @@ class CompactFlash(object):
             flight_end = self.start_date[i] + datetime.timedelta(seconds=int(self.durations[i]))
             self.end_date.append(flight_end)
             i += 1
-        print(len(self.end_date))
