@@ -85,11 +85,13 @@ class PrepareData(object):
                     break
                 self.bytes_counter += self.frame_len
                 self.bytes_counter -= 4
-                check_next_sw = [frame[(self.frame_len + 4) - 4],
-                                 frame[(self.frame_len + 4) - 3],
-                                 frame[(self.frame_len + 4) - 2],
-                                 frame[(self.frame_len + 4) - 1]]
-
+                try:
+                    check_next_sw = [frame[(self.frame_len + 4) - 4],
+                                     frame[(self.frame_len + 4) - 3],
+                                     frame[(self.frame_len + 4) - 2],
+                                     frame[(self.frame_len + 4) - 1]]
+                except IndexError:  # end of data
+                    break
                 mixed_words = self.mix_syncword(check_next_sw)
                 # perform syncword mixing according to mix scheme
                 if mixed_words[self.mix_type] == self.sw_one:  # if its ok
