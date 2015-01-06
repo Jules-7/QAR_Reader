@@ -15,9 +15,10 @@ class Bur3(object):
     """ Data (Arinc 717) is written as durations (zeros and ones) """
 
     def __init__(self, tmp_file_name, target_file_name,
-                 progress_bar, path_to_save, flag, sw, frame):
+                 progress_bar, path_to_save, flag, sw, frame, mode):
         self.source = open(tmp_file_name, "rb")
         self.target_file_name = target_file_name
+        self.mode = mode
         self.progress_bar = progress_bar
 
         self.progress_bar.Show()
@@ -60,7 +61,10 @@ class Bur3(object):
 
         self.progress_bar.SetValue(45)
 
-        self.record_data()
+        if self.mode == "code":  # record as it is with no frame check
+            self.record_code()
+        else:
+            self.record_data()
 
         self.progress_bar.SetValue(85)
         #self.target_file.close()
@@ -143,3 +147,11 @@ class Bur3(object):
                 data_to_write = struct.pack("i", str_to_int)
                 self.target_file.write(data_to_write[:1])
             i += 12
+
+    def record_code(self):
+        while self.bit_counter < len(self.str_data):
+            frame = self.str_data[self.bit_counter:self.bit_counter +
+                                                           self.frame_in_bits]
+            self.bit_counter += self.frame_in_bits
+            self.write_frame(frame)
+            self.start_index = self.bit_counter

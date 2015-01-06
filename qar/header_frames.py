@@ -5,7 +5,7 @@ import os
 class HeaderFrameSearchWrite(object):
 
     """ record monstr header as it is;
-        search for frames and write them
+        search for frames and write them.
         same algorithm for MSRP-12 and TesterU3-2
         but with different syncwords"""
 
@@ -19,6 +19,7 @@ class HeaderFrameSearchWrite(object):
         self.file_end = False
         self.frame_size = 512  # bytes
         self.syncword_one = syncword
+        self.end_pattern = [255] * 16
         #self.sw_byte_amount = sw_bytes
         #self.syncword_one = ["255", "127"]  # FF7F TesterU3-2
         #self.syncword_one = ["255"]  # FF MSRP12
@@ -56,9 +57,10 @@ class HeaderFrameSearchWrite(object):
         self.target_file.write(header)
 
     def record_data(self):
-        while self.bytes_counter < self.source_len - self.frame_size:
-            if self.file_end:
-                break
+        #while self.bytes_counter < self.source_len - self.frame_size:
+        while not self.file_end:
+            #if self.file_end:
+                #break
             sw = self.find_syncword()
             while sw:
                 checked = self.check_frame()
@@ -99,6 +101,7 @@ class HeaderFrameSearchWrite(object):
                 self.bytes_counter += (byte_amount - 1)
 
     def check_frame(self):
+        """ check syncword and absence of 'end pattern' """
         byte_amount = len(self.syncword_one)  # 2 or 1
         syncword = []
         self.source.seek(self.frame_size, 1)
@@ -112,4 +115,21 @@ class HeaderFrameSearchWrite(object):
                 syncword.append(str(ord(byte_one)))
         if syncword == self.syncword_one:
             self.source.seek(-(self.frame_size + byte_amount), 1)
+
+            # read frame and check for end pattern
+            frame = self.source.read(self.frame_size)
+            counter = 0
+            for each in frame:
+                if ord(each) == 255:
+                    counter += 1
+                else:
+                    counter = 0
+                if counter == 16:
+                    self.source.seek(-self.frame_size, 1)
+                    self.file_end = True
+
+                    #print("found end pattern")
+                    return False
+
+            self.source.seek(-self.frame_size, 1)
             return True

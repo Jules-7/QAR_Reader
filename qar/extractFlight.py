@@ -62,10 +62,21 @@ class Flight:
 
         elif self.flag == "an74_bur3":
             self.get_flight()
-            self.prepare_bur3_file()
+            self.make_flight()
+
+        elif self.flag == "an74_bur3_code":
+            self.qar_type = "bur3_code"
+            self.get_flight()
             self.make_flight()
 
         elif self.flag == "b737_4700":
+            self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "b737_qar":
+            self.save_raw()
+
+        elif self.flag == "b737_dfdr_980":
             self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
@@ -137,12 +148,23 @@ class Flight:
                 bur = Bur3(tmp_file_name, target_file_name,
                                                 self.progress_bar,
                                                 self.path_to_save,
-                                                self.flag, ["011111111"], 512)
+                                                self.flag, ["011111111"], 512, mode="ord")
+
+            elif self.qar_type == "bur3_code":  # an74
+                bur = Bur3(tmp_file_name, "code_" + target_file_name,
+                                                self.progress_bar,
+                                                self.path_to_save,
+                                                self.flag, ["011111111"], 512, mode="code")
 
             # 768 - bytes in frame, 192 - bytes in subframe
             elif self.qar_type == "b737_4700":
                 b737 = B737(tmp_file_name, target_file_name, 768, 192,
                             self.progress_bar, self.path_to_save, self.flag)
+
+            elif self.qar_type == "b737_dfdr_980":
+                b737 = B737(tmp_file_name, target_file_name, 384, 96,
+                            self.progress_bar, self.path_to_save, self.flag)
+                # file -> cop_centr_head
 
     def prepare_cf_file(self):
         """ Prepares Compact Flash file
@@ -169,3 +191,12 @@ class Flight:
 
     def prepare_bur3_file(self):
         pass
+
+    def save_raw(self):  # b737_qar
+        source = open(self.path, "rb").read()
+        slash = self.path.rfind("\\")
+        dot = self.path.rfind('.')
+        name_of_file = self.path[slash:dot]
+        new_file = open(r"%s" % self.path_to_save + str(name_of_file) + ".inf", "wb")
+        new_file.write(source)
+        new_file.close()

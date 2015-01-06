@@ -351,9 +351,10 @@ class MyFrame(wx.Frame):
                                 361: ["an26", "msrp12"],
                                 371: ["an72", "testerU32"],
                                 381: ["an74", "bur3"],
+                                382: ["an74", "bur3_code"],
                                 391: ["s340", "qar"],
                                 401: ["b737", "qar"],
-                                402: ["b737", "fdr"],
+                                402: ["b737", "dfdr_980"],
                                 403: ["b737", "4700"]}
 
         self.selected = []  # flights selected from list
@@ -508,7 +509,6 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolBitmapSize((30, 30))
         #at executable creation -> place images to the same folder and change path
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
-        #self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
@@ -538,11 +538,14 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('E:/s340.bmp'))
 
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
+
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
         self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
         self.toolbar.SetToolLongHelp(134, "Save chosen flight")
-        #self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
+        self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
         self.toolbar.SetToolLongHelp(140, "A320. Choose data source.")
         self.toolbar.SetToolLongHelp(141, "B747. Choose data source.")
         self.toolbar.SetToolLongHelp(142, u"Aн148. Choose data source.")
@@ -558,6 +561,7 @@ class MyFrame(wx.Frame):
 
         # bind toolbar
         self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
+        self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
         self.Bind(wx.EVT_MENU, self.a320_button, id=140)
         self.Bind(wx.EVT_MENU, self.b747_button, id=141)
@@ -675,10 +679,12 @@ class MyFrame(wx.Frame):
     def an74_button(self, event):
         self.chosen_acft_type = 381
         name = u"Aн74"
-        choices = [u"БУР-3"]
+        choices = [u"БУР-3", u"БУР-3 код"]
         option = self.make_choice_window(name, choices)
         if option == u"БУР-3":
             self.chosen_acft_type = 381
+        elif option == u"БУР-3 код":
+            self.chosen_acft_type = 382
         if option:  # choose path to file
             self.on_choose_file()
 
@@ -696,17 +702,29 @@ class MyFrame(wx.Frame):
     def b737_button(self, event):
         self.chosen_acft_type = 401
         name = "B737"
-        choices = ['QAR', "FDR", "4700"]
+        choices = ["QAR", "DFDR 980", "4700"]
         option = self.make_choice_window(name, choices)
-        if option == "QAR":
+        if option == "QAR":  # save this file with extension .inf to target place
             self.chosen_acft_type = 401
-        elif option == "FDR":
+            dlg = wx.FileDialog(self, "Choose a file:",
+                                style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+            if dlg.ShowModal() == wx.ID_OK:
+                self.path = u"%s" % dlg.GetPath()
+            else:  # user press Cancel
+                return
+            if self.path:
+                self.get_path_to_save()
+                qar_type = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
+                                      self.acft_data_types[self.chosen_acft_type][1])
+                self.flag = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
+                                       self.acft_data_types[self.chosen_acft_type][1])
+                flight = Flight(self.progress_bar, start=None, end=None, path=self.path, name=None,
+                                qar_type=qar_type, path_to_save=self.path_to_save, flag=self.flag)
+        elif option == "DFDR 980":
             self.chosen_acft_type = 402
+            self.on_choose_file()
         elif option == "4700":
             self.chosen_acft_type = 403
-        if option:
-            # choose path to file
-            self.on_choose_file()
 
     def make_choice_window(self, name, choices):
         dlg = wx.SingleChoiceDialog(self, '', name,
@@ -797,7 +815,7 @@ class MyFrame(wx.Frame):
 
     def on_choose_file(self):
         """ Open a file"""
-        dlg = wx.FileDialog(self, "Choose a directory:",
+        dlg = wx.FileDialog(self, "Choose a file:",
                             style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         if dlg.ShowModal() == wx.ID_OK:
             self.path = u"%s" % dlg.GetPath()
@@ -926,7 +944,7 @@ class MyFrame(wx.Frame):
         # This is done by getting the path data from the dialog - BEFORE
         # we destroy it.
         if save_dialog.ShowModal() == wx.ID_OK:
-            self.path_to_save = save_dialog.GetPath()
+            self.path_to_save = u"%s" % save_dialog.GetPath()
         else:
             return
         save_dialog.Destroy()

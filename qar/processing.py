@@ -14,6 +14,7 @@ class PrepareData(object):
                                r"%s" % param_file_name, "wb")
         self.sw_one = "001001000111"  # syncword one
         self.sw_two = "010110111000"  # syncword two
+        #self.sw_two = "101001000111"  # actually its syncword three
         self.bytes_counter = 0
         self.mix_type = None
         self.frame_len = frame_len
@@ -112,7 +113,8 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700":
+        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700" or\
+            self.flag == "b737_300_dfdr_980":
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
         elif self.flag == "a320_cf":
@@ -153,10 +155,13 @@ class PrepareData(object):
                     frame = self.source_file[self.bytes_counter:
                                              self.bytes_counter + self.frame_len]
                     self.bytes_counter += self.frame_len
-                    next_frame_search = [frame[self.frame_len - 4],
-                                         frame[self.frame_len - 3],
-                                         frame[self.frame_len - 2],
-                                         frame[self.frame_len - 1]]
+                    try:
+                        next_frame_search = [frame[self.frame_len - 4],
+                                             frame[self.frame_len - 3],
+                                             frame[self.frame_len - 2],
+                                             frame[self.frame_len - 1]]
+                    except IndexError:
+                        break
                     next_subframe_search = [frame[self.subframe_len - 4],
                                             frame[self.subframe_len - 3],
                                             frame[self.subframe_len - 2],
