@@ -115,8 +115,7 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700" or\
-            self.flag == "b737_300_dfdr_980":
+        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700":
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
         elif self.flag == "a320_cf":
@@ -162,7 +161,7 @@ class PrepareData(object):
                                              frame[self.frame_len - 3],
                                              frame[self.frame_len - 2],
                                              frame[self.frame_len - 1]]
-                    except IndexError:
+                    except IndexError:  # end of data
                         break
                     next_subframe_search = [frame[self.subframe_len - 4],
                                             frame[self.subframe_len - 3],
@@ -173,6 +172,7 @@ class PrepareData(object):
 
                     if frame_sw_variants[i] == self.sw_one and \
                             subframe_sw_variants[i] == self.sw_two:
+                    #if frame_sw_variants[i] == self.sw_one:
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
                         self.mix_type = i

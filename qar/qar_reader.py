@@ -9,7 +9,9 @@ from datetime import datetime
 from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
-"""this module:
+""" This module contains:
+
+
 - creates window for choosing of file with flights
 - displays all flights in file
 - allows to save flight as raw data or as flight according
@@ -40,12 +42,12 @@ EVT_RESULT_ID = wx.NewId()
 
 
 def event_result(win, func):
-    """Define Result Event."""
+    """ Define Result Event """
     win.Connect(-1, -1, EVT_RESULT_ID, func)
 
 
 class ResultEvent(wx.PyEvent):
-    """Simple event to carry arbitrary result data."""
+    """ Simple event to carry arbitrary result data """
     def __init__(self, data):
         """Init Result Event."""
         wx.PyEvent.__init__(self)
@@ -54,9 +56,9 @@ class ResultEvent(wx.PyEvent):
 
 
 class WorkerThread(Thread):  # Thread class that executes processing
-    """Worker Thread Class."""
+    """ Worker Thread Class """
     def __init__(self, notify_window, path, flag):
-        """Init Worker Thread Class."""
+        """ Init Worker Thread Class """
         Thread.__init__(self)
         self._notify_window = notify_window
         self._want_abort = 0
@@ -67,7 +69,7 @@ class WorkerThread(Thread):  # Thread class that executes processing
         self.start()
 
     def run(self):
-        """Run Worker Thread."""
+        """ Run Worker Thread """
         # This is the code executing in the new thread
         s = Split(self.path, self.flag)
         q = s.result
@@ -78,8 +80,9 @@ class WorkerThread(Thread):  # Thread class that executes processing
 
 ########################################################################
 class MyPanel(wx.Panel):
+
     """ Panel to display flights in main window """
-    #----------------------------------------------------------------------
+
     def __init__(self, parent, data, path):
         wx.Panel.__init__(self, parent)
 
@@ -103,7 +106,7 @@ class MyPanel(wx.Panel):
 
         index = 0
         self.flights_dict = {}
-        # in case there are no flights in file
+        # in case there are no flights in the file
         if not data.flight_intervals:
             self.no_flights = True
         else:
@@ -122,15 +125,15 @@ class MyPanel(wx.Panel):
             m, sec = divmod(seconds, 60)
             hours, minutes = divmod(m, 60)
             duration = "%02d h %02d m %02d s" % (hours, minutes, sec)
-            #InsertStringItem provides creation of next string
-            #without it impossible to create list
+            # InsertStringItem provides creation of the next string
+            # without it it is impossible to create the list
             self.list_ctrl.InsertStringItem(index, str(index + 1))
             self.list_ctrl.SetStringItem(index, 1, str(data.flights_start[index]))
             self.list_ctrl.SetStringItem(index, 2, start_date)
             self.list_ctrl.SetStringItem(index, 3, end_date)
             self.list_ctrl.SetStringItem(index, 4, duration)
 
-            #associate index of row with particular flight
+            # associate index of the row with a particular flight
             self.flights_dict[index] = [flight, index, start_date, self.qar_type]
             index += 1
 
@@ -138,11 +141,10 @@ class MyPanel(wx.Panel):
         sizer.Add(self.list_ctrl, 0, wx.ALL | wx.EXPAND)
         self.SetSizer(sizer)
 
-    #----------------------------------------------------------------------
     def on_item_selected(self, event):
-        """ at row selection - index is returned
-        using that index search for flight from flights_dict
-        and pass it for processing """
+        """ At the row selection - an index is returned
+        using that index -> search the flight from the flights_dict
+        and pass it for the processing """
         self.selected_parent_set = []
         self.parent.selected = []
         #-------- Ensures multiple flights selection -----------
@@ -150,7 +152,7 @@ class MyPanel(wx.Panel):
         self.selected_flight = [flight_number]
         while True:
             # check for another flight been chosen
-            # in GetNextSelected(flight_number) -> flight number
+            # in GetNextSelected(flight_number) -> the flight number
             # is given in order to look after this number
             item = self.list_ctrl.GetNextSelected(flight_number)
             if item == -1:  # no next choice
@@ -217,10 +219,10 @@ class InitializationPanel(wx.Panel):
         time_txt = wx.StaticText(self, -1, " and time ", (2, 50))
         time_input = wx.TextCtrl(self, -1, size=(140, -1))
         time_input.SetValue('%s' % time_now)
-        flight_N_txt = wx.StaticText(self, -1, "Insert flight number", (2, 50))
-        self.flight_N = wx.TextCtrl(self, -1, size=(140, -1))
-        qar_N_txt = wx.StaticText(self, -1, "Insert QAR number", (2, 50))
-        self.qar_N = wx.TextCtrl(self, -1, size=(140, -1))
+        flight_num_txt = wx.StaticText(self, -1, "Insert flight number", (2, 50))
+        self.flight_num = wx.TextCtrl(self, -1, size=(140, -1))
+        qar_num_txt = wx.StaticText(self, -1, "Insert QAR number", (2, 50))
+        self.qar_num = wx.TextCtrl(self, -1, size=(140, -1))
         ok_button = wx.Button(self, id=1111, label="Ok")
         cancel_button = wx.Button(self, id=2222, label="Cancel")
 
@@ -229,8 +231,8 @@ class InitializationPanel(wx.Panel):
         path_sizer = wx.BoxSizer(wx.HORIZONTAL)
         qar_type_sizer = wx.BoxSizer(wx.HORIZONTAL)
         date_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        flight_N_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        qar_N_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        flight_num_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        qar_num_sizer = wx.BoxSizer(wx.HORIZONTAL)
         buttons_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         #element to add, proportion, apply border to side, width of border
@@ -246,11 +248,11 @@ class InitializationPanel(wx.Panel):
         date_sizer.Add(time_txt, 2, wx.ALL, 5)
         date_sizer.Add(time_input, 3, wx.ALL, 5)
 
-        flight_N_sizer.Add(flight_N_txt, 0, wx.ALL, 5)
-        flight_N_sizer.Add(self.flight_N, 1, wx.ALL | wx.EXPAND, 5)
+        flight_num_sizer.Add(flight_num_txt, 0, wx.ALL, 5)
+        flight_num_sizer.Add(self.flight_num, 1, wx.ALL | wx.EXPAND, 5)
 
-        qar_N_sizer.Add(qar_N_txt, 0, wx.ALL, 5)
-        qar_N_sizer.Add(self.qar_N, 0, wx.ALL, 5)
+        qar_num_sizer.Add(qar_num_txt, 0, wx.ALL, 5)
+        qar_num_sizer.Add(self.qar_num, 0, wx.ALL, 5)
 
         buttons_sizer.Add(ok_button, 0, wx.ALL, 5)
         buttons_sizer.Add(cancel_button, 0, wx.ALL, 5)
@@ -260,8 +262,8 @@ class InitializationPanel(wx.Panel):
         general_sizer.Add(path_sizer, 0, wx.ALL | wx.EXPAND, 5)
         general_sizer.Add(qar_type_sizer, 0, wx.ALL | wx.EXPAND, 5)
         general_sizer.Add(date_sizer, 0, wx.ALL | wx.EXPAND, 5)
-        general_sizer.Add(flight_N_sizer, 0, wx.ALL | wx.EXPAND, 5)
-        general_sizer.Add(qar_N_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(flight_num_sizer, 0, wx.ALL | wx.EXPAND, 5)
+        general_sizer.Add(qar_num_sizer, 0, wx.ALL | wx.EXPAND, 5)
         general_sizer.Add(buttons_sizer, 0, wx.ALL | wx.CENTER, 5)
 
         self.SetSizer(general_sizer)
@@ -287,12 +289,12 @@ class InitializationPanel(wx.Panel):
 
     def on_ok(self, event):
         try:
-            flight_n = self.flight_N.GetValue()
+            flight_n = self.flight_num.GetValue()
             self.flight_n = flight_n
         except AttributeError:
             self.flight_n = None
         try:
-            qar_n = self.qar_N.GetValue()
+            qar_n = self.qar_num.GetValue()
             self.qar_n = qar_n
         except AttributeError:
             self.qar_n = None
@@ -335,7 +337,7 @@ QAR_TYPES = {0: "msrp12",  # An26
 
 class MyFrame(wx.Frame):
 
-    """"""
+    """ Main frame that contains everything """
 
     def __init__(self):
         wx.Frame.__init__(self, None, wx.ID_ANY,
@@ -343,7 +345,7 @@ class MyFrame(wx.Frame):
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.create_status_bar()
         self.chosen_acft_type = None  # means both acft type and data source type
-        self.acft_data_types = {321: ["a320", "qar"],  # A320
+        self.acft_data_types = {321: ["a320", "qar"],
                                 322: ["a320", "cf"],
                                 331: ["b747", "qar"],
                                 341: ["an148", "bur92"],
@@ -357,7 +359,7 @@ class MyFrame(wx.Frame):
                                 402: ["b737", "dfdr_980"],
                                 403: ["b737", "4700"]}
 
-        self.selected = []  # flights selected from list
+        self.selected = []  # flights selected from the list
         self.create_file_menu()
         self.create_tool_bar()
         self.saved_flights = []  # flights which are already processed and saved
@@ -370,7 +372,7 @@ class MyFrame(wx.Frame):
     def create_status_bar(self):
         # Create StatusBar in the bottom of the window
         self.statusbar = self.CreateStatusBar()
-        # Set number of fields in statusbar
+        # Set number of fields for statusbar
         self.statusbar.SetFieldsCount(3)
         self.statusbar.SetStatusWidths([-2, -1, 200])
 
@@ -435,7 +437,7 @@ class MyFrame(wx.Frame):
         menubar = wx.MenuBar()  # Creating the menubar
         menubar.Append(filemenu, "&File")  # Adding the "filemenu" to the MenuBar
         menubar.Append(savemenu, "&Save")  # Adding the "savemenu" to the MenuBar
-
+        '''
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             menubar.Append(a320menu, "&A320")
 
@@ -455,11 +457,11 @@ class MyFrame(wx.Frame):
             menubar.Append(an74menu, "&AN74")
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
-            menubar.Append(an148menu, "&AN148")
+            menubar.Append(an148menu, "&AN148")'''
 
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
-        #--------- Bind buttons/commands with methods
+        #--------- Bind buttons/commands with the methods
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
         #self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
 
@@ -502,8 +504,8 @@ class MyFrame(wx.Frame):
             Check of user ensures display of this user options
             Access (visibility) of each option
             in file_menu and tool_bar is the same """
-        # do not use this at window reload -> toolbar is not a=show at first and
-        # then it appears on top of flights data
+        # do not use this at window reload -> toolbar is not shown at first and
+        # then it appears on the top of the flights` data
         #self.toolbar = wx.ToolBar(self, -1)
         self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((30, 30))
@@ -546,15 +548,15 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
         self.toolbar.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
-        self.toolbar.SetToolLongHelp(140, "A320. Choose data source.")
-        self.toolbar.SetToolLongHelp(141, "B747. Choose data source.")
-        self.toolbar.SetToolLongHelp(142, u"Aн148. Choose data source.")
-        self.toolbar.SetToolLongHelp(143, u"Aн32. Choose data source.")
-        self.toolbar.SetToolLongHelp(144, u"Aн26. Choose data source.")
-        self.toolbar.SetToolLongHelp(145, u"Aн72. Choose data source.")
-        self.toolbar.SetToolLongHelp(146, u"Aн74. Choose data source.")
-        self.toolbar.SetToolLongHelp(147, "S340. Choose data source.")
-        self.toolbar.SetToolLongHelp(148, "B737. Choose data source.")
+        self.toolbar.SetToolLongHelp(140, "A320. Choose data source")
+        self.toolbar.SetToolLongHelp(141, "B747. Choose data source")
+        self.toolbar.SetToolLongHelp(142, u"Aн148. Choose data source")
+        self.toolbar.SetToolLongHelp(143, u"Aн32. Choose data source")
+        self.toolbar.SetToolLongHelp(144, u"Aн26. Choose data source")
+        self.toolbar.SetToolLongHelp(145, u"Aн72. Choose data source")
+        self.toolbar.SetToolLongHelp(146, u"Aн74. Choose data source")
+        self.toolbar.SetToolLongHelp(147, "S340. Choose data source")
+        self.toolbar.SetToolLongHelp(148, "B737. Choose data source")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -573,7 +575,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.s340_button, id=147)
         self.Bind(wx.EVT_MENU, self.b737_button, id=148)
 
-    #---- At acft and data type selection via FILEMENU -> -------
+    #---- At the acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
     def a320_qar_chosen(self, event):
         self.chosen_acft_type = 321
@@ -609,12 +611,12 @@ class MyFrame(wx.Frame):
         self.chosen_acft_type = 401
 
     #---------------------------------------------------------------------
-    #---- At acft and data type selection via TOOLBAR -> -------
+    #---- At the acft and data type selection via TOOLBAR -> -------
     #---- When acft type ChoiceDialog is already opened ------------------
-    #---- -> at picking type its value is stored -------------------------
+    #---- -> at type picking its value is stored -------------------------
     def a320_button(self, event):
-        #---- In case acft type bitmap is pressed -> assign value of QAR --
-        #---- as it is already marked in ChoiceDialog (as it first) -------
+        #---- In case teh acft type bitmap is pressed -> assign value of QAR --
+        #---- as it is already marked in the ChoiceDialog (as it is the first)
         self.chosen_acft_type = 321
         name = "A320"
         choices = ['QAR', 'Compact Flash']
@@ -623,7 +625,7 @@ class MyFrame(wx.Frame):
             self.chosen_acft_type = 321
         elif option == "Compact Flash":
             self.chosen_acft_type = 322
-        if option:  # choose path to file
+        if option:  # choose a path to file
             self.on_choose_file()
 
     def b747_button(self, event):
@@ -725,13 +727,14 @@ class MyFrame(wx.Frame):
             self.on_choose_file()
         elif option == "4700":
             self.chosen_acft_type = 403
+            self.on_choose_file()
 
     def make_choice_window(self, name, choices):
         dlg = wx.SingleChoiceDialog(self, '', name,
                                     choices, wx.CHOICEDLG_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             option = dlg.GetStringSelection()
-        else:  # Cancel button is pressed
+        else:  # Cancel button has been pressed
             return False
         dlg.Destroy()
         return option
@@ -742,14 +745,14 @@ class MyFrame(wx.Frame):
 
     #------------------------------------------------------------------
     def initialization(self, event):
-        """ Flash initialization """
+        """ Display initialization options for a flash-card """
         window = InitializationFrame()
         # Show initialization window
         window.Show(True)
 
     #------------------------------------------------------------------
     def formatting(self, event):
-        """ Flash formatting """
+        """ Perform formatting of a flash-card"""
         dlg = wx.DirDialog(self, "Choose a Compact Flash:",
                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         # If the user selects OK, then we process the dialog's data.
@@ -771,7 +774,7 @@ class MyFrame(wx.Frame):
     #------------------------------------------------------------------
 
     def on_open_file(self, event):
-        """Show Result status"""
+        """ Show Result status """
         self.q = event.data
         self.qar_type = self.q.qar_type
         self.DestroyChildren()
@@ -791,6 +794,7 @@ class MyFrame(wx.Frame):
 
         self.create_tool_bar()
 
+        # at this point separate thread starts and perform processing
         panel = MyPanel(self, self.q, self.q.path)
 
         if panel.no_flights:
@@ -814,7 +818,7 @@ class MyFrame(wx.Frame):
         self.Destroy()
 
     def on_choose_file(self):
-        """ Open a file"""
+        """ Open a file """
         dlg = wx.FileDialog(self, "Choose a file:",
                             style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         if dlg.ShowModal() == wx.ID_OK:
@@ -889,9 +893,6 @@ class MyFrame(wx.Frame):
             acft = self.acft_data_types[self.chosen_acft_type][0]
         try:
             for each in self.selected:  # [flight_interval, index, date, qar]
-                #if each in self.saved_flights:
-                    #pass
-                #else:
                 # get flight start and end indexes
                 separator = each[0].find(':')  # flight_interval
                 start = int(each[0][:separator])
@@ -906,13 +907,11 @@ class MyFrame(wx.Frame):
                     flight_acft = None
                 #print(flight_acft)
                 name = self.form_name(mode, flight_index, flight_acft,
-                                        flight_qar, flight_date)
+                                      flight_qar, flight_date)
                 #print(self.qar_type)
                 f = Flight(self.progress_bar, start, end, self.q.path, name,
-                            self.qar_type, self.path_to_save, self.flag)
+                           self.qar_type, self.path_to_save, self.flag)
 
-                #self.saved_flights.append(each)
-                #self.selected.remove(each)
         except AttributeError:  # save button was pressed, but no file was opened before
             self.warning("Open file with flights to process first")
             return

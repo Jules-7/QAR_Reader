@@ -4,6 +4,7 @@ from bur3 import Bur3
 import win32api
 from boeing import B737
 from header_frames import HeaderFrameSearchWrite
+from harvard_digital import DigitalHarvard
 
 QAR_TYPES = {0: "msrp12",  # An26
              14: "testerU32",  # An32, An72
@@ -20,9 +21,9 @@ QAR_TYPES = {0: "msrp12",  # An26
 
 class Flight:
 
-    """this class takes start and end indexes of flight
-    and make either RAW file or send data further
-    to be processed according to QAR type"""
+    """ This class takes start and end indexes of the flight
+        and make either a RAW file or pass data further
+        to be processed according to the QAR type """
 
     def __init__(self, gui_progress, start, end, path, name,
                  qar_type, path_to_save, flag):
@@ -70,6 +71,7 @@ class Flight:
             self.make_flight()
 
         elif self.flag == "b737_4700":
+            self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -157,8 +159,9 @@ class Flight:
                                                 self.flag, ["011111111"], 512, mode="code")
 
             # 768 - bytes in frame, 192 - bytes in subframe
+            # for now data is recorded in length (Harvard coding)
             elif self.qar_type == "b737_4700":
-                b737 = B737(tmp_file_name, target_file_name, 768, 192,
+                b737 = DigitalHarvard(tmp_file_name, target_file_name, 768, 192,
                             self.progress_bar, self.path_to_save, self.flag)
 
             elif self.qar_type == "b737_dfdr_980":

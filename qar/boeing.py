@@ -10,7 +10,7 @@ class Boeing(object):
     def __init__(self, path):
         self.path = path
         self.data = None
-        self.flight_len = None
+        self.data_len = None
         self.flights_start = []
         self.flights_end = []
         self.flight_intervals = []
@@ -36,7 +36,7 @@ class Boeing(object):
             try:
                 end = self.flights_end[i]
             except IndexError:
-                end = self.flight_len
+                end = self.data_len
             self.flight_intervals.append((start, end))
             i += 1
 
@@ -96,7 +96,7 @@ class B747(Boeing):
     def __init__(self, path):
         Boeing.__init__(self, path)
         self.data = open(self.path, 'rb')
-        self.flight_len = os.stat(self.path).st_size
+        self.data_len = os.stat(self.path).st_size
         self.qar_type = "b747_qar"
         self.init_date = None
         self.subframe_len = 128
@@ -299,7 +299,7 @@ class Boeing737DFDR980(Boeing):
         self.end_pattern = [0] * 20
         self.start_pattern = [255] * 20
         self.data = open(self.path, "rb").read()
-        self.flight_len = os.stat(self.path).st_size
+        self.data_len = os.stat(self.path).st_size
         self.qar_type = "b737_dfdr_980"
         self.start_index = None
         self.init_date = None
@@ -307,10 +307,11 @@ class Boeing737DFDR980(Boeing):
         self.record_end_index = False
         self.subframe_len = 128
         self.frame_len = 512
-        self.frame_duration = 4  # sec
+        self.frame_duration = 5  # sec
 
         self.find_start()
         self.find_flights()
+        self.correct_flights_starts()
         self.get_flight_intervals()
         self.get_durations()
         self.get_date_time()
@@ -361,25 +362,69 @@ class Boeing737DFDR980(Boeing):
                 self.bytes_counter += 40
                 return
 
+    def correct_flights_starts(self):
+        """ At the end of a record plenty zeroes may be present (up to 200).
+            In such case, algorithm of flight end and start detection
+            will catch them and include as flights beginnings.
+            If this is a case -> difference between flights start
+            will be about 60 bytes (according to current algorithm).
+            That`s why check of differences between starts
+            must be performed """
+        #i = 0
+        #while i < len(self.flights_start)-1:
+            #if self.flights_start[i+1] - self.flights_start[i] <= 40000:
+                #del self.flights_start[i+1]
+            #else:
+                #i += 1
+        #if self.data_len - self.flights_start[-1] <= self.frame_len:
+            #del self.flights_start[-1]
+        # at switching to engine generator - power surge appears
+        # it cases appearance of bunch of zeroes after that
+        # thus causing absence of data (zeroes) after right engine is started
+        # and after its turn off
+        # in order to count this case ->
+        # first: if difference between two starts is less or equal 80000 Bytes ->
+        # do not take the second index as new flight start
+        # the small parts (less than 10 min) contain engines turn off and on
+        # second: include small parts both - before and after flight main part
+        # thus resulting in flight containing engines turn off from previous flight
+        # at record beginning and engines turn on from next flight at record
+        # ending
+        self.starts = []
+        self.ends = []
+        i = 0
+        while i < len(self.flights_start)-1:
+            if self.flights_start[i+1] - self.flights_start[i] <= 80000:
+                self.starts.append(self.flights_start[i])
+                try:
+                    if self.flights_start[i+3] - self.flights_start[i+2] <= 80000:
+                        self.ends.append(self.flights_start[i+3])
+                    else:
+                        self.ends.append(self.flights_start[i+2])
+                except IndexError:
+                    self.ends.append(self.data_len)
+                i += 2
+            else:
+                self.starts.append(self.flights_start[i])
+                self.ends.append(self.flights_start[i+1])
+                i += 1
+        self.flights_start = self.starts
+
     def get_flight_intervals(self):
         i = 0
-        while i < len(self.flights_start):
-            start = self.flights_start[i]
-            try:
-                end = self.flights_start[i+1]
-            except IndexError:
-                end = self.flight_len
-            self.flight_intervals.append((start, end))
+        while i < len(self.starts):
+            self.flight_intervals.append((self.starts[i], self.ends[i]))
             i += 1
+        print(self.flight_intervals)
 
     def get_date_time(self):
         # no date and time yet
         date = datetime.datetime(year=2015,
-                                month=1,
-                                day=1,
-                                hour=0,
-                                minute=0,
-                                second=0)
+                                 month=1,
+                                 day=1,
+                                 hour=0,
+                                 minute=0,
+                                 second=0)
         for each in self.flight_intervals:
             self.start_date.append(date)
             self.end_date.append(date)
