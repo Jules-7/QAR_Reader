@@ -104,10 +104,10 @@ class PrepareData(object):
                         for each in mix_next_words:
                             # convert binary string to int
                             value = int(each, 2)
-                            # int takes 4 byte, but we need only first
+                            # int takes 4 byte, but we need only first one
                             to_write = (struct.pack("i", value))[:1]
                             # as the rest are 0s in our case, because
-                            # we supply only 8 bits (one byte)
+                            # we input only 8 bits (one byte)
                             self.param_file.write(to_write)
                 else:  # if its not a syncword -> search for it
                     self.bytes_counter -= self.frame_len
@@ -176,6 +176,7 @@ class PrepareData(object):
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
                         self.mix_type = i
+                        break
                         #------------------------------------------------------
                         #print("found mix type")
                         #print("mix type is # %s" % self.mix_type)

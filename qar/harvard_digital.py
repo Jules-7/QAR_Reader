@@ -15,7 +15,7 @@ class DigitalHarvard:
 
     def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
                  progress_bar, path_to_save, flag):
-        self.zero = 40  # min number of bytes(length) that determines zero
+        self.zero = 20  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")

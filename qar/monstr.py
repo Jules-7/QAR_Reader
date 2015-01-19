@@ -69,7 +69,6 @@ class MonstrHeader():
         # to write current date to header
             self.add_date_to_header()
 
-
     def is_flight(self):
         """ check for MONSTR and if so record header """
         flight = self.dat.read(6)

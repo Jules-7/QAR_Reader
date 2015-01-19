@@ -235,7 +235,7 @@ class B747(Boeing):
             hours_checked = self.check_hours(hour_digit_one, hour_digit_two)
 
             #for no we have no data -> create list of None for each date
-            middle_date = datetime.datetime(year=2014,
+            middle_date = datetime.datetime(year=2015,
                                             month=1,
                                             day=1,
                                             hour=hours_checked,
@@ -304,14 +304,15 @@ class Boeing737DFDR980(Boeing):
         self.start_index = None
         self.init_date = None
         self.end_flag = False
+        self.data_start = None
         self.record_end_index = False
-        self.subframe_len = 128
-        self.frame_len = 512
+        self.subframe_len = 96
+        self.frame_len = 384
         self.frame_duration = 5  # sec
 
         self.find_start()
-        self.find_flights()
-        self.correct_flights_starts()
+        #self.find_flights()
+        #self.correct_flights_starts()
         self.get_flight_intervals()
         self.get_durations()
         self.get_date_time()
@@ -330,16 +331,25 @@ class Boeing737DFDR980(Boeing):
             self.bytes_counter += 1
             if i == 20:
                 break  # found FF FF FF ...
-        c = 0
+        # find start of data after FF FF FF ...
         for each in self.data[self.bytes_counter:]:
-            if ord(each) == 0:
-                c += 1
+            if ord(each) != 255:
+                self.bytes_counter += 1
+                self.data_start = self.bytes_counter
+                break
             else:
-                c = 0
-            self.bytes_counter += 1
-            if c == 20:
-                self.flights_start.append(self.bytes_counter)
-                break  # found first set of 00 00 00 ...
+                self.bytes_counter += 1
+        self.flights_start.append(self.data_start)
+        #c = 0
+        #for each in self.data[self.bytes_counter:]:
+            #if ord(each) == 0:
+                #c += 1
+            #else:
+                #c = 0
+            #self.bytes_counter += 1
+            #if c == 20:
+                #self.flights_start.append(self.bytes_counter)
+                #break  # found first set of 00 00 00 ...
 
     def find_flights(self):
         """ find all flights starts """
@@ -393,38 +403,41 @@ class Boeing737DFDR980(Boeing):
         self.starts = []
         self.ends = []
         i = 0
-        while i < len(self.flights_start)-1:
-            if self.flights_start[i+1] - self.flights_start[i] <= 80000:
-                self.starts.append(self.flights_start[i])
-                try:
-                    if self.flights_start[i+3] - self.flights_start[i+2] <= 80000:
-                        self.ends.append(self.flights_start[i+3])
-                    else:
-                        self.ends.append(self.flights_start[i+2])
-                except IndexError:
-                    self.ends.append(self.data_len)
-                i += 2
-            else:
-                self.starts.append(self.flights_start[i])
-                self.ends.append(self.flights_start[i+1])
-                i += 1
-        self.flights_start = self.starts
+        while i <= len(self.flights_start)-1:
+            try:
+                if self.flights_start[i+1] - self.flights_start[i] <= 80000:
+                    self.starts.append(self.flights_start[i])
+                    try:
+                        if self.flights_start[i+3] - self.flights_start[i+2] <= 80000:
+                            self.ends.append(self.flights_start[i+3])
+                        else:
+                            self.ends.append(self.flights_start[i+2])
+                    except IndexError:  # no further flights
+                        self.ends.append(self.data_len)
+                    i += 2
+                else:
+                    self.starts.append(self.flights_start[i])
+                    self.ends.append(self.flights_start[i+1])
+                    i += 1
+                self.flights_start = self.starts
+            except IndexError:  # only one flight start
+                self.starts.append(self.data_start)
+                self.ends.append(self.data_len)
+                self.flights_start = self.starts
+                #print self.starts, self.ends
+                break
 
     def get_flight_intervals(self):
-        i = 0
-        while i < len(self.starts):
-            self.flight_intervals.append((self.starts[i], self.ends[i]))
-            i += 1
-        print(self.flight_intervals)
+        #i = 0
+        #while i < len(self.starts):
+            #self.flight_intervals.append((self.starts[i], self.ends[i]))
+            #i += 1
+        #print(self.flight_intervals)
+        #take all flights as a whole record from data start till data end
+        self.flight_intervals.append((self.flights_start[0], self.data_len))
 
     def get_date_time(self):
-        # no date and time yet
-        date = datetime.datetime(year=2015,
-                                 month=1,
-                                 day=1,
-                                 hour=0,
-                                 minute=0,
-                                 second=0)
+        date = datetime.datetime.now()
         for each in self.flight_intervals:
             self.start_date.append(date)
             self.end_date.append(date)

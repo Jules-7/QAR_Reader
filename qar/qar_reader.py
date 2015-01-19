@@ -23,10 +23,7 @@ ACCESS = {1: ["admin", "admin", (700, 500)],
           12: ["VCH", u'В/Ч №2269', (600, 500)]}
 
 # admin
-USER = 1
-
-# YanAir
-#USER = 10
+USER = 10
 
 # title for window depending on USER
 WIN_TITLE = ACCESS[USER][1]
@@ -118,9 +115,9 @@ class MyPanel(wx.Panel):
                 flight = str(data.flight_intervals[index][0]) + ":" + str(0)
 
             start_date = "%s %s" % (data.start_date[index].strftime('%d.%m.%Y'),
-                                    data.start_date[index].time())
+                                    data.start_date[index].strftime('%H:%M:%S'))
             end_date = "%s %s" % (data.end_date[index].strftime('%d.%m.%Y'),
-                                  data.end_date[index].time())
+                                  data.end_date[index].strftime('%H:%M:%S'))
             seconds = data.durations[index]
             m, sec = divmod(seconds, 60)
             hours, minutes = divmod(m, 60)
@@ -510,38 +507,38 @@ class MyFrame(wx.Frame):
         self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((30, 30))
         #at executable creation -> place images to the same folder and change path
-        self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('E:/save.png'))
+        self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('save.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('E:/open_CF.png'))
-            self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('E:/a320.bmp'))
+            self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('open_CF.png'))
+            self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('a320.bmp'))
+
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
+            self.toolbar.AddLabelTool(148, "B737", wx.Bitmap('b737.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(148, "B737", wx.Bitmap('E:/b737.bmp'))
+            self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('b747.bmp'))
+
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+            self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('an26.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('E:/b747.bmp'))
+            self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('an32.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
-            self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('E:/an26.bmp'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('E:/an32.bmp'))
+            self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('an72.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
-            self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('E:/an72.bmp'))
-
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
-            self.toolbar.AddLabelTool(146, "AN74", wx.Bitmap('E:/an74.bmp'))
+            self.toolbar.AddLabelTool(146, "AN74", wx.Bitmap('an74.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
-            self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('E:/an148.bmp'))
+            self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('an148.bmp'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('E:/s340.bmp'))
+            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('s340.bmp'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('E:/save_raw.png'))
+            self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
 
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -704,7 +701,10 @@ class MyFrame(wx.Frame):
     def b737_button(self, event):
         self.chosen_acft_type = 401
         name = "B737"
-        choices = ["QAR", "DFDR 980", "4700"]
+        if ACCESS[USER][0] == "admin":
+            choices = ["QAR", "DFDR 980", "4700"]
+        elif ACCESS[USER][0] == "yanair":
+            choices = ["DFDR 980"]
         option = self.make_choice_window(name, choices)
         if option == "QAR":  # save this file with extension .inf to target place
             self.chosen_acft_type = 401
