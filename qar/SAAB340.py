@@ -8,16 +8,19 @@ class SAAB(PrepareData):
                                file with data being processed """
 
     def __init__(self,  tmp_file_name, param_file_name,
-                 frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file):
+                 frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file, qar_type):
         PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
-                             subframe, progress_bar, path_to_save, flag)
-        self.flag = flag
+                             subframe, progress_bar, path_to_save, flag, qar_type)
+        #self.flag = flag
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         # make export of parametric info to tmp param file
-        self.export_param_saab(tmp_file_name, tmp_bin_file)
-        # just created tmp parametric file
-        self.source_file = (open(tmp_bin_file, "rb")).read()
+        if tmp_bin_file:
+            self.export_param_saab(tmp_file_name, tmp_bin_file)
+            # just created tmp parametric file
+            self.source_file = (open(tmp_bin_file, "rb")).read()
+        else:
+            self.source_file = (open(tmp_file_name, "rb")).read()
         # size of tmp parametric file
         self.param_file_end = len(self.source_file)
         self.progress_bar.SetValue(15)
@@ -28,13 +31,10 @@ class SAAB(PrepareData):
         self.scheme_search()
         self.progress_bar.SetValue(45)
         self.record_data()
-        self.progress_bar.SetValue(95)
-
-        #os.remove(tmp_file_name)
-        #os.remove(tmp_bin_file)
+        self.progress_bar.SetValue(100)
 
     def export_param_saab(self, tmp_file_name, tmp_bin_name):
-        """ Extract only parametric data into tmp file """
+        """ Extract only parametric data into tmp bin file """
         data = open(tmp_file_name, "rb")
         source = data.read()  # flight
         # tmp file with parametric data

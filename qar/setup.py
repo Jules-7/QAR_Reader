@@ -11,7 +11,9 @@ ACCESS = {1: ["admin", "admin", ['b747.bmp',
                                  'an74.bmp',
                                  's340.bmp',
                                  'b737.bmp',
-                                 'open_CF.png']],
+                                 'open_CF.png',
+                                 'save_raw.png',
+                                 '12_16.png']],
           10: ["yanair", "YanAir", ['a320.bmp', 
                                     's340.bmp',
                                     'open_CF.png',
@@ -46,7 +48,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 setup(name=u"QAR Reader %s" % ACCESS[USER][1],
-      version="0.2",
+      version="0.13",
       description="QAR reader application",
       options={"build_exe": build_exe_options},
       executables=[Executable("qar_reader.py")])

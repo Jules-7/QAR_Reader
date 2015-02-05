@@ -9,6 +9,7 @@ from datetime import datetime
 from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
+from converter import TwelveToSixteen
 """ This module contains:
 
 
@@ -17,13 +18,13 @@ from formatting import FormatCompactFlash
 - allows to save flight as raw data or as flight according
 to QAR type"""
 
-ACCESS = {1: ["admin", "admin", (700, 500)],
+ACCESS = {1: ["admin", "admin", (800, 500)],
           10: ["yanair", "YanAir", (600, 500)],
           11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
           12: ["VCH", u'В/Ч №2269', (600, 500)]}
 
 # admin
-USER = 10
+USER = 1
 
 # title for window depending on USER
 WIN_TITLE = ACCESS[USER][1]
@@ -351,7 +352,8 @@ class MyFrame(wx.Frame):
                                 371: ["an72", "testerU32"],
                                 381: ["an74", "bur3"],
                                 382: ["an74", "bur3_code"],
-                                391: ["s340", "qar"],
+                                391: ["s340", "qar_sound"],
+                                3911: ["s340", "qar_no_sound"],
                                 401: ["b737", "qar"],
                                 402: ["b737", "dfdr_980"],
                                 403: ["b737", "4700"]}
@@ -540,6 +542,9 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
 
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
+
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
         self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
@@ -571,6 +576,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.an74_button, id=146)
         self.Bind(wx.EVT_MENU, self.s340_button, id=147)
         self.Bind(wx.EVT_MENU, self.b737_button, id=148)
+        self.Bind(wx.EVT_MENU, self.twelve_to_sixteen, id=149)
 
     #---- At the acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
@@ -690,10 +696,14 @@ class MyFrame(wx.Frame):
     def s340_button(self, event):
         self.chosen_acft_type = 391
         name = "S340"
-        choices = [u"QAR"]
+        choices = [u"QAR(with sound)", u"QAR(no sound)"]
         option = self.make_choice_window(name, choices)
-        if option == u"QAR":
+        if option == u"QAR(with sound)":
             self.chosen_acft_type = 391
+            self.qar_type = "qar_sound"
+        elif option == u"QAR(no sound)":
+            self.chosen_acft_type = 3911
+            self.qar_type = "qar_no_sound"
         if option:
             # choose path to file
             self.on_choose_file()
@@ -720,8 +730,9 @@ class MyFrame(wx.Frame):
                                       self.acft_data_types[self.chosen_acft_type][1])
                 self.flag = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
                                        self.acft_data_types[self.chosen_acft_type][1])
-                flight = Flight(self.progress_bar, start=None, end=None, path=self.path, name=None,
-                                qar_type=qar_type, path_to_save=self.path_to_save, flag=self.flag)
+                flight = Flight(self.progress_bar, start=None, end=None, path=self.path,
+                                name=None, qar_type=qar_type,
+                                path_to_save=self.path_to_save, flag=self.flag)
         elif option == "DFDR 980":
             self.chosen_acft_type = 402
             self.on_choose_file()
@@ -819,35 +830,21 @@ class MyFrame(wx.Frame):
 
     def on_choose_file(self):
         """ Open a file """
-        dlg = wx.FileDialog(self, "Choose a file:",
-                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
-        if dlg.ShowModal() == wx.ID_OK:
-            self.path = u"%s" % dlg.GetPath()
-        else:  # user pressed Cancel
-            return
+        self.get_path_to_file()
 
-        self.progress_bar.Show()
-        self.progress_bar.SetValue(10)
-        self.progress_bar.Pulse()
-
-        self.statusbar.SetStatusText("Downloading...", 0)
-        dlg.Destroy()
         if self.chosen_acft_type is None:
             self.flag = 0
         else:
             self.flag = self.chosen_acft_type
         self.q = WorkerThread(self, self.path, self.flag)
 
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(10)
+        self.progress_bar.Pulse()
+        self.statusbar.SetStatusText("Downloading...", 0)
+
     def on_choose_cf(self, event):  # choose compact flash
-        dlg = wx.DirDialog(self, "Choose a directory:",
-                           style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
-        # If the user selects OK, then we process the dialog's data.
-        # This is done by getting the path data from the dialog - BEFORE
-        # we destroy it.
-        if dlg.ShowModal() == wx.ID_OK:
-            self.path = u"%s" % dlg.GetPath()
-        else:
-            return
+        self.get_path_to_dir()
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
@@ -867,7 +864,7 @@ class MyFrame(wx.Frame):
         self.progress_bar.Pulse()
 
         self.statusbar.SetStatusText("Downloading...", 0)
-        dlg.Destroy()
+
         try:
             self.flag = 322
             self.q = WorkerThread(self, self.path, self.flag)
@@ -905,20 +902,29 @@ class MyFrame(wx.Frame):
                     flight_acft = acft
                 else:
                     flight_acft = None
-                #print(flight_acft)
                 name = self.form_name(mode, flight_index, flight_acft,
                                       flight_qar, flight_date)
-                #print(self.qar_type)
                 f = Flight(self.progress_bar, start, end, self.q.path, name,
                            self.qar_type, self.path_to_save, self.flag)
 
         except AttributeError:  # save button was pressed, but no file was opened before
-            self.warning("Open file with flights to process first")
+            self.warning("Open file with flights to process")
             return
         self.selected = []
 
-        self.progress_bar.SetValue(100)
+        #self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Flight is saved", 0)
+
+    def twelve_to_sixteen(self, event):
+        """ Transform data recorded as 12 bits word into 16 bits data;
+            take what is and just add convert all data (no check for header)"""
+        self.get_path_to_file()
+        self.get_path_to_save()
+        self.progress_bar.Show()
+        self.statusbar.SetStatusText("Converting...", 0)
+        convert = TwelveToSixteen(self.path, self.path_to_save, self.progress_bar)
+        self.progress_bar.SetValue(100)
+        self.statusbar.SetStatusText("Conversion is finished", 0)
 
     def warning(self, message, caption='Warning!'):
         dlg = wx.MessageDialog(self, message, caption, wx.OK | wx.ICON_WARNING)
@@ -928,6 +934,10 @@ class MyFrame(wx.Frame):
     def form_name(self, rec_type, index, acft, qar, date):
         cor_date = re.sub(r":", r"_", date)
         no_space_date = str(cor_date).replace(" ", "_")
+        if acft == "a320":
+            qar = "qar"
+        elif acft == "s340":
+            qar = "qar"
         name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(no_space_date)
         if rec_type == "flight":
             return name
@@ -947,6 +957,27 @@ class MyFrame(wx.Frame):
         else:
             return
         save_dialog.Destroy()
+
+    def get_path_to_file(self):
+        dlg = wx.FileDialog(self, "Choose a file:",
+                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.path = u"%s" % dlg.GetPath()
+        else:  # user pressed Cancel
+            return
+        dlg.Destroy()
+
+    def get_path_to_dir(self):
+        dlg = wx.DirDialog(self, "Choose a directory:",
+                           style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if dlg.ShowModal() == wx.ID_OK:
+            self.path = u"%s" % dlg.GetPath()
+        else:
+            return
+        dlg.Destroy()
 
 #----------------------------------------------------------------------
 # runs the script

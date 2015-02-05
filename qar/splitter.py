@@ -1,5 +1,5 @@
 from monstr import MonstrHeader
-from boeing import Boeing, Boeing737DFDR980
+from boeing import Boeing, Boeing737DFDR980, B747
 from bur_92 import Bur
 from compactFlash import CompactFlash
 
@@ -13,11 +13,12 @@ ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
                   381: ["an74", "bur3"],
                   382: ["an74", "bur3_code"],
                   0:   ["NA", "NA"],
-                  391: ["s340", "qar"],
+                  391: ["s340", "qar_sound"],
+                  3911: ["s340", "qar_no_sound"],
                   401: ["b737", "qar"],
                   402: ["b737", "dfdr_980"],
                   403: ["b737", "4700"]}
-MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 382, 391, 403]
+MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 382, 391, 3911, 403]
 OWN_HEADER_TYPES = [322]
 NO_HEADER_TYPES = [331, 341, 401, 402]
 
@@ -32,6 +33,8 @@ class Split(object):
         self.flag = flag
         self.acft_fdr_type = "%s_%s" % (ACFT_FDR_TYPES[flag][0],
                                         ACFT_FDR_TYPES[flag][1])
+        self.acft = ACFT_FDR_TYPES[flag][0]
+        self.qar = ACFT_FDR_TYPES[flag][1]
         self.result = None
         self.define_file_opening()
 
@@ -53,8 +56,8 @@ class Split(object):
 
     def open_with_no_header(self, path, flag):
         if flag == 331:  # boeing
-            self.result = Boeing(path)
+            self.result = B747(path, self.acft, self.qar)
         elif flag == 341:  # bur92
             self.result = Bur(path)
         elif flag == 402:  # boeing 737-dfdr-980
-            self.result = Boeing737DFDR980(path)
+            self.result = Boeing737DFDR980(path, self.acft, self.qar)

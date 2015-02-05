@@ -7,7 +7,7 @@ class Boeing(object):
 
     """ Common attributes and methods for Boeing flights to be displayed """
 
-    def __init__(self, path):
+    def __init__(self, path, acft, qar=None):
         self.path = path
         self.data = None
         self.data_len = None
@@ -17,7 +17,8 @@ class Boeing(object):
         self.headers = []
         self.date = []
         self.time = []
-        self.qar_type = None
+        self.acft = acft
+        self.qar_type = qar
         self.init_date = None
         self.durations = []
         self.bytes_counter = 0
@@ -55,7 +56,7 @@ class Boeing(object):
         i = 0
         for each in self.start_date:
             duration = self.durations[i]  # seconds
-            print(duration)
+            #print(duration)
             end_date = each + datetime.timedelta(seconds=duration)
             self.end_date.append(end_date)
             i += 1
@@ -93,11 +94,11 @@ class B747(Boeing):
     """ Boeing 747-200
         Search flights and data integrity check """
 
-    def __init__(self, path):
-        Boeing.__init__(self, path)
+    def __init__(self, path, acft, qar):
+        Boeing.__init__(self, path, acft, qar)
         self.data = open(self.path, 'rb')
         self.data_len = os.stat(self.path).st_size
-        self.qar_type = "b747_qar"
+        #self.qar_type = "b747_qar"
         self.init_date = None
         self.subframe_len = 128
         self.frame_len = 512
@@ -293,14 +294,15 @@ class Boeing737DFDR980(Boeing):
     """ Boeing 737 DFDR 980
         Find flights to display"""
 
-    def __init__(self, path):
-        Boeing.__init__(self, path)
+    def __init__(self, path, acft, fdr):
+        Boeing.__init__(self, path, acft, fdr)
         self.path = path
         self.end_pattern = [0] * 20
         self.start_pattern = [255] * 20
         self.data = open(self.path, "rb").read()
         self.data_len = os.stat(self.path).st_size
-        self.qar_type = "b737_dfdr_980"
+        #self.acft = acft
+        #self.qar_type = fdr
         self.start_index = None
         self.init_date = None
         self.end_flag = False

@@ -44,12 +44,17 @@ class Flight:
             self.get_flight()
             self.save_flight()
 
-        elif self.flag == "qar" or self.flag == "s340_qar":
+        elif self.flag == "qar":
+            self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "s340_qar_sound" or self.flag == "s340_qar_no_sound":
+            #self.qar_type = "qar"
             self.get_flight()
             self.make_flight()
 
         elif self.flag == "a320_qar":
-            self.qar_type = self.flag
+            #self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -71,7 +76,7 @@ class Flight:
             self.make_flight()
 
         elif self.flag == "b737_4700":
-            self.qar_type = self.flag
+            #self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -79,7 +84,7 @@ class Flight:
             self.save_raw()
 
         elif self.flag == "b737_dfdr_980":
-            self.qar_type = self.flag
+            #self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -106,6 +111,7 @@ class Flight:
         else:
             data.seek(self.start)
             length = self.end - self.start
+            #print("length is ", length)
             self.flight = data.read(length)
 
     def make_flight(self):
@@ -122,18 +128,28 @@ class Flight:
             target_file_name = str(self.name) + ".inf"
             # tmp_bin_file -> interim file with parametric data for SAAB
             # pass it to SAAB only
-            tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
+
             new_file = open(tmp_file_name, "wb")
             new_file.write(self.flight)
+            new_file.close()
 
-            if self.qar_type == "QAR SAAB":
+            if self.flag == "s340_qar_sound":
+                # tmp_bin_file is used for storing parametric information
+                # extracted from source
+                # used for qar with sound only
+                tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
                 saab = SAAB(tmp_file_name, target_file_name, 384, 96,
                             self.progress_bar, self.path_to_save,
-                            self.flag, tmp_bin_file)
+                            self.flag, tmp_bin_file, self.qar_type)
 
-            elif self.qar_type == "a320_qar" or self.qar_type == "a320_cf":
+            elif self.flag == "s340_qar_no_sound":
+                saab = SAAB(tmp_file_name, target_file_name, 384, 96,
+                            self.progress_bar, self.path_to_save,
+                            self.flag, None, self.qar_type)
+
+            elif self.flag == "a320_qar" or self.flag == "a320_cf":
                 a320 = A320(tmp_file_name, target_file_name, 768, 192,
-                            self.progress_bar, self.path_to_save, self.flag)
+                            self.progress_bar, self.path_to_save, self.flag, self.qar_type)
 
             elif self.qar_type == "testerU32":  # an32, an72
                 tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name,
@@ -160,11 +176,11 @@ class Flight:
 
             # 768 - bytes in frame, 192 - bytes in subframe
             # for now data is recorded in length (Harvard coding)
-            elif self.qar_type == "b737_4700":
+            elif self.flag == "b737_4700":
                 b737 = DigitalHarvard(tmp_file_name, target_file_name, 768, 192,
                             self.progress_bar, self.path_to_save, self.flag)
 
-            elif self.qar_type == "b737_dfdr_980":
+            elif self.flag == "b737_dfdr_980":
                 b737 = B737(tmp_file_name, target_file_name, 384, 96,
                             self.progress_bar, self.path_to_save, self.flag)
                 # file -> cop_centr_head

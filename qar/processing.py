@@ -3,10 +3,12 @@ import struct
 
 class PrepareData(object):
 
-    """ This module holds basic methods for frames search"""
+    """ This module holds basic methods for frames search
+        A320, SAAB340
+    """
 
     def __init__(self, tmp_file_name, param_file_name, frame_len,
-                 subframe_len, progress_bar, path_to_save, flag):
+                 subframe_len, progress_bar, path_to_save, flag, qar_type):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
         # target parametric file ".inf"
@@ -21,6 +23,7 @@ class PrepareData(object):
         self.subframe_len = subframe_len  # in bytes
         self.progress_bar = progress_bar  # in bytes
         self.flag = flag
+        self.qar_type = qar_type
 
     def record_data(self):
         """ perform recording of valid frames only """
@@ -115,7 +118,8 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "s340_qar" or self.flag == "b737_4700":
+        if self.flag == "a320_qar" or self.flag == "s340_qar_sound" \
+                or self.flag == "s340_qar_no_sound" or self.flag == "b737_4700":
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
         elif self.flag == "a320_cf":
@@ -145,6 +149,10 @@ class PrepareData(object):
 
             if mixed_words is None:
                 break
+            elif mixed_words == ["111111111111"] * 8:  # found end pattern
+                self.bytes_counter = self.param_file_end
+                break
+
             del search_bytes[0]  # remove first byte -> ensure shift by byte
 
             i = 0
