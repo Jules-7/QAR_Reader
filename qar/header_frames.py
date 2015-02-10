@@ -19,7 +19,8 @@ class HeaderFrameSearchWrite(object):
         self.file_end = False
         self.frame_size = 512  # bytes
         self.syncword_one = syncword
-        self.end_pattern = [255] * self.frame_size
+        self.end_pattern_ff = [255] * self.frame_size
+        self.end_pattern_zeroes = ['0'] * self.frame_size
         #self.sw_byte_amount = sw_bytes
         #self.syncword_one = ["255", "127"]  # FF7F TesterU3-2
         #self.syncword_one = ["255"]  # FF MSRP12
@@ -37,14 +38,12 @@ class HeaderFrameSearchWrite(object):
         self.bytes_counter = 0
         self.source_len = os.stat(self.tmp_file_name).st_size
         self.record_header()
-        #print("recorded header")
         self.progress_bar.SetValue(15)
         if shift_after_header:
             self.source.seek(shift_after_header, 0)
         self.progress_bar.SetValue(25)
 
         self.record_data()
-        #print("recorded data")
         self.progress_bar.SetValue(85)
 
         self.source.close()
@@ -113,7 +112,7 @@ class HeaderFrameSearchWrite(object):
                 #print(self.source_len)
                 self.source.seek(-(byte_amount - 1), 1)
                 self.bytes_counter += (byte_amount - 1)
-                checked_bytes -= 1
+                #checked_bytes -= 1
                 self.source_position = self.source.tell()
             if checked_bytes >= self.frame_size:
                 self.source_position = self.source.tell()
@@ -146,22 +145,34 @@ class HeaderFrameSearchWrite(object):
         return False
 
     def check_for_not_end_pattern(self):
-        # as an end pattern (one frame of FF) is not necessarily within one frame
-        # starting from the index we check,
-        # we should check two frames, so this pattern will definitely be inside
-        self.source_position = self.source.tell()
-        frame = self.source.read(self.frame_size * 2)
-        self.source_position = self.source.tell()
-        counter = 0
-        for each in frame:
-            if ord(each) == 255:
-                counter += 1
-            else:
-                counter = 0
-            if counter == self.frame_size:
-                self.source.seek(-self.frame_size, 1)
+        while self.bytes_counter < self.source_len:
+            # as an end pattern (one frame of FF) is not necessarily within one frame
+            # starting from the index we check,
+            # we should check two frames, so this pattern will definitely be inside
+            self.source_position = self.source.tell()
+            frame = self.source.read(self.frame_size * 2)
+            self.bytes_counter += self.frame_size * 2
+            if self.bytes_counter > self.source_len:
                 self.file_end = True
                 return False
-        self.source.seek(-(self.frame_size * 2), 1)
-        self.source_position = self.source.tell()
-        return True
+            frame_str = [str(ord(each)) for each in frame]
+            if frame_str == self.end_pattern_zeroes:
+                self.file_end = True
+                return False
+            self.source_position = self.source.tell()
+            counter = 0
+            for each in frame:
+                if ord(each) == 255:
+                    counter += 1
+                else:
+                    counter = 0
+                if counter == self.frame_size:
+                    self.source.seek(-self.frame_size, 1)
+                    self.file_end = True
+                    return False
+            self.source.seek(-(self.frame_size * 2), 1)
+            self.bytes_counter -= self.frame_size * 2
+            self.source_position = self.source.tell()
+            return True
+        self.file_end = True
+        return

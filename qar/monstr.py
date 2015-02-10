@@ -3,9 +3,10 @@ import os
 import struct
 import datetime
 
-MONSTR = 'MONSTR'
-CLUSTER = 32768  # cluster size in bytes
+MONSTR = 'MONSTR'  # monstr header start indicator
+CLUSTER = 32768  # cluster size in bytes 32 * 1024
 COUNTER_INCREMENT = float(4294967295)
+HEADER_SIZE = 128  # B
 QAR_TYPES = {0: "msrp12",  # An26
              11: "bur3",  # an74
              14: "testerU32",  # An32, an72
@@ -35,30 +36,33 @@ class MonstrHeader():
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
         self.index = 0  #524288  # index of records beginning in bytes
-        self.cluster = 32 * 1024  # size of cluster in bytes
         self.flights_start = []
         self.flight_intervals = []
         self.headers = []
         self.date = []
         self.time = []
-        #self.qar_type = None
+        self.qar_type = None
         self.init_date = None
-        #self.add_current_date = False
         self.start_date = []
         self.start_date_str_repr = []
         self.durations = []
         self.end_date = []
+        self.corrupted_header = []
+
         self.find_flights()
         if self.flights_start:
             self.get_flight_intervals()
+            if self.corrupted_header:
+                self.correct_flight_intervals()
             # count durations by frames
             if self.info == "a320_qar" or self.info == "an26_msrp12" or self.info == "b737_4700"\
-                    or self.info == "s340_qar_sound" or self.info == "s340_qar_no_sound":
+                    or self.info == "s340_qar_sound" or self.info == "s340_qar_no_sound" \
+                    or self.info == "an74_bur3" or self.info == "an74_bur3_code":
                 self.get_durations_optional(self.info)
             else:
                 # count durations using QAR header -> processor time
                 self.get_durations()
-            #self.get_qar_type()
+            self.get_qar_type()
             self.dat.close()
         self.check_dates()
         # additional
@@ -67,9 +71,6 @@ class MonstrHeader():
         # in bytes: 70, 72, 74, 76, 78, 80
         # symmetrically + 2 lines (16 columns) to date of initialization
         self.add_date_to_header()
-        #if self.add_current_date:  # True means it is necessary
-        # to write current date to header
-            #self.add_date_to_header()
 
     def is_flight(self):
         """ check for MONSTR and if so record header """
@@ -77,13 +78,17 @@ class MonstrHeader():
         if flight == MONSTR:
             header = self.dat.read(122)
             check = self.check_header(header)
-            if check:
+            if check:  # header is valid
                 if not self.init_date:
                     self.get_initial_date(header)
                 self.flights_start.append(self.index)
                 self.get_current_date(header)
                 self.headers.append(header)
-        self.index += self.cluster
+            else:  # header is not valid
+                # but we need to take it as an end of previous flight
+                self.corrupted_header.append((self.flights_start[-1], self.index))
+                #print(self.corrupted_header)
+        self.index += CLUSTER
 
     def find_flights(self):
         """ find all flights indexes """
@@ -98,13 +103,87 @@ class MonstrHeader():
             self.is_flight()
 
     def get_flight_intervals(self):
+
+        """ different types have different end patterns
+            determination of flight end according to acft_qar_type """
+
+        # bur3 flight ends either by zeroes or by next header
+        # last flight ends either by zeroes or by file end
+        if self.info == "an74_bur3_code" or self.info == "a320_qar" \
+                or self.info == "an26_msrp12" or self.info == "s340_qar_sound":
+            #if self.info == "an74_bur3"
+            i = 0
+            for each in self.flights_start:
+                try:  # current header index and next one
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.flights_start[i+1]))
+                except IndexError:  # last flight(header) -> no more headers after that
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.get_flight_end(self.flights_start[i],
+                                                                      self.file_len)))
+                i += 1
+
+        elif self.info == "an74_bur3":
+            i = 0
+            for each in self.flights_start:
+                try:  # current header index and next one
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.flights_start[i+1]))
+                except IndexError:  # last flight(header) -> no more headers after that
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.file_len))
+                i += 1
+
+        # msrp12 flights end by header
+        # testerU32 flights end by FF*512
+        # s340-qar flights end by FF*20 or 00*20 or header
+        elif self.info == "an32_testerU32"\
+                or self.info == "an72_testerU32" \
+                or self.info == "s340_qar_no_sound":
+            #or self.info == "b737_4700"
+            i = 0
+            for each in self.flights_start:
+                try:
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.get_flight_end(self.flights_start[i],
+                                                                      self.flights_start[i+1])))
+                except IndexError:  # last flight(header) -> no more headers after that
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.get_flight_end(self.flights_start[i],
+                                                                      self.file_len)))
+                i += 1
+
+        else:  # for other qar types
+            i = 0
+            for each in self.flights_start:
+                try:
+                    self.flight_intervals.append((self.flights_start[i],
+                                                 self.flights_start[i+1]))
+                except IndexError:  # last flight(header) -> no more headers after that
+                    self.flight_intervals.append((self.flights_start[i],
+                                                      self.get_flight_end(self.flights_start[i],
+                                                                          self.file_len)))
+                i += 1
+        #print(self.flight_intervals)
+
+    def correct_flight_intervals(self):
+
+        """ in case we have corrupted headers -> they do not define valid flight
+            but they indicate the real end of previous flight
+            that`s why we need to take them as real flights ends at flights intervals"""
+
         i = 0
-        for each in self.flights_start:
-            self.flight_intervals.append((self.flights_start[i],
-                                          self.get_flight_end(self.flights_start[i])))
+        for start, end in self.flight_intervals[:-2]:
+            for start_cor, end_cor in self.corrupted_header:
+                if start == start_cor:
+                    self.flight_intervals[i] = (start, end_cor)
             i += 1
+        #print(self.flight_intervals)
 
     def get_durations(self):
+
+        """ duration is counted using data specified in header """
+
         i = 0
         byte = 8
         for each in self.headers:
@@ -131,14 +210,24 @@ class MonstrHeader():
             i += 1
 
     def get_durations_optional(self, acft):
-        """ for these aircraft types at which flight duration is counted by frames,
-            not by counter value from header """
+
+        """ duration is counted by frames, not by counter value from header
+
+            BUR3 - data is stored in Harvard coding -> not ARINC
+            as data is to be processed and reduced in volume, to get approximate
+            duration -> 1 frame (384B) count as 0.12 sec, although actually
+            its 1 frame - 1 sec """
+
         # frame duration for aircraft type in sec and frame size in bytes
         acft_frame_duration = {"a320_qar": [4, 768],    # 1 frame - 4 sec
-                               "an26_msrp12": [0.5, 768],
+                               "an26_msrp12": [0.5, 512],
                                "b737_4700": [4, 768],
-                               "s340_qar_sound": [1, 96],
-                               "s340_qar_no_sound": [1, 96]}
+                               "s340_qar_sound": [0.03, 384],
+                               "s340_qar_no_sound": [1, 384],
+                               "an74_bur3": [0.12, 384],
+                               "an74_bur3_code": [0.12, 384],
+                               "an32_testerU32": [1, 512],
+                               "an72_testerU32": [1, 512]}
         frame_duration = acft_frame_duration[acft][0]
         bytes_in_frame = acft_frame_duration[acft][1]
         i = 0
@@ -153,32 +242,52 @@ class MonstrHeader():
             self.durations.append(duration_in_sec)
             i += 1
 
-    def get_flight_end(self, start):
-        """ flight end is determined by either set of 00 or FF """
-        header = 128
-        self.dat.seek(start + header)
-        check_twenty = []
-        counter = 0
-        end_sign_ff = ['255'] * 20
-        end_sign_zeroes = ['0'] * 20
-        while True:
+    def get_flight_end(self, start, end):
+
+        """ flight end is determined by either set of 00 or FF of different length
+            depending of qar type"""
+
+        self.dat.seek(start + HEADER_SIZE)
+        pattern_size = 20
+        bytes_counter = 0
+
+        if self.info == "an26_msrp12" or self.info == "an32_testerU32" \
+                or self.info == "an72_testerU32":
+            pattern_size = 512
+
+        elif self.info == "an74_bur3" or self.info == "an74_bur3_code":
+            pattern_size = 384  # bytes in frame
+
+        elif self.info == "a320_qar":
+            pattern_size = 768
+
+        elif self.info == "b737_4700":
+            pattern_size = 768*2
+
+        end_sign_ff = ['255'] * pattern_size
+        end_sign_zeroes = ['0'] * pattern_size
+
+        while bytes_counter < end:
             next_byte = self.dat.read(1)
             if next_byte == "":
-                return start + counter
-            counter += 1
+                return start + bytes_counter
+            bytes_counter += 1
             if ord(next_byte) == 0 or ord(next_byte) == 255:
-                next_twenty_byte = self.dat.read(20)
-                counter += 20
-                for each in next_twenty_byte:
-                    check_twenty.append(str(ord(each)))
-                if check_twenty == end_sign_ff or check_twenty == end_sign_zeroes:
+                bytes_to_check = [str(ord(each)) for each in self.dat.read(pattern_size)]
+                bytes_counter += pattern_size
+                if bytes_to_check == end_sign_ff or bytes_to_check == end_sign_zeroes:
+                    bytes_counter -= pattern_size
                     break
                 else:
-                    check_twenty = []
-        return start + counter
+                    bytes_to_check = []
+                    self.dat.seek(-(pattern_size/2), 1)
+                    bytes_counter -= pattern_size/2
+        return start + bytes_counter
 
     def get_initial_date(self, header):
+
         """ initial date is written in header as it is (by exact value we can see) """
+
         init_year = '20' + (hex(ord(header[32])))[2:]
 
         init_month = '0' + (hex(ord(header[34])))[2:] if \
@@ -205,31 +314,26 @@ class MonstrHeader():
         # convert to int
         self.init_date = datetime.datetime(int(init_year), int(init_month), int(init_day),
                                            int(init_hour), int(init_minute), int(init_second))
-        if not self.add_current_date:
-            # if False -> we need to check has current date been written or not
-            # if True -> current date has been written in header
-            self.check_if_current_date(header)
-
-    def check_if_current_date(self, header):
-        """ check if current date has already been written to header """
-        curr_year_ord = (hex(ord(header[64])))[2:]
-        if curr_year_ord == '0':
-            self.add_current_date = True
 
     def check_header(self, header):
-        """ if header is corrupted - filled with ff
-        we don`t take it into account"""
-        corrupted = '0xff' * 16
-        to_check = ''
+
+        """ if header is corrupted - filled with ff -
+            we don`t take it as valid flight start """
+
+        counter = 0
         for each in header:
-            to_check += hex(ord(each))
-        if corrupted in to_check:
-            return False
-        else:
-            return True
+            if ord(each) == 255:
+                counter += 1
+            else:
+                counter = 0
+            if counter == 16:
+                return False
+        return True
 
     def get_current_date(self, header):
+
         """ flight start date """
+
         curr_counter = (self.process_counter(header[117], header[116],
                                              header[115], header[114]))
         if curr_counter < self.init_counter:
@@ -254,6 +358,9 @@ class MonstrHeader():
                                          hour, minute, second])
 
     def str_date_repr(self, start_date):
+
+        """ date in string format """
+
         year = start_date.strftime("%y")
         month = start_date.strftime("%m")
         day = start_date.strftime("%d")
@@ -263,7 +370,9 @@ class MonstrHeader():
         return year, month, day, hour, minute, second
 
     def process_counter(self, *args):
+
         """ processing (transformation) of hex value to decimal """
+
         counter = '0x'
         for each in args:
             if len((hex(ord(each)))[2:]) == 1:
@@ -280,8 +389,10 @@ class MonstrHeader():
                 self.qar_type = value
 
     def add_date_to_header(self):
-        """ add each flight start date to its header  inside CLU-0003.DAT file
-        by overwriting empty bytes """
+
+        """ add each flight start date to its header inside CLU-0003.DAT file
+            by overwriting empty bytes """
+
         #current_date_bytes = [70, 72, 74, 76, 78, 80]
         with open(self.path, "r+") as source:
             i = 0
@@ -324,19 +435,23 @@ class MonstrHeader():
                 i += 1
 
     def get_hex_repr(self, value):
+
         """ processing (transformation) of integer in string representation
-        to its binary repr """
+            to its binary repr """
+
         hex_value = '0x%s' % value
         int_value = int(hex_value, 16)
         bin_value = bin(int_value)
         return bin_value
 
     def check_dates(self):
+
         """ in case calendar/clock is out of order,
             date becomes less than previous one.
             in this case processor timer is reset to zero.
             during this check in case datetime is less than previous one,
             flight start/end datetime is set to 2014.0.0 0:0:0 """
+
         checked_start_dates = [self.start_date[0]]
         i = 0
         while i <= len(self.start_date):

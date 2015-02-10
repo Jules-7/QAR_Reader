@@ -1,6 +1,7 @@
 import struct
 from bur3 import Bur3
 import os
+import binascii
 
 
 class DigitalHarvard:
@@ -15,12 +16,12 @@ class DigitalHarvard:
 
     def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
                  progress_bar, path_to_save, flag):
-        self.zero = 35  # min number of bytes(length) that determines zero
+        self.zero = 5  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")
         self.header_size = 128
-        self.sequence = 100  # sequence of bytes to determine average
+        self.sequence = 1000  # sequence of bytes to determine average
         self.start = 0
         self.stop = 0
         self.syncword = "001001000111"
@@ -58,7 +59,7 @@ class DigitalHarvard:
         self.get_data_as_str()
         self.progress_bar.SetValue(85)
 
-        #self.record_data()
+        self.record_data()
         self.progress_bar.SetValue(100)
 
     def write_header(self):
@@ -70,6 +71,7 @@ class DigitalHarvard:
         self.average = summa/self.sequence
         # go back by sequence length -> to get at the data beginning
         self.source.seek(128, 0)
+        print(self.average)
 
     def count_upper(self, data, upper_part):
         """count number of bytes above average level"""
@@ -118,6 +120,7 @@ class DigitalHarvard:
 
     def convert_to_arinc(self):
         """Convert to arinc (zeros and ones) by lengths"""
+        self.hex_str = ''
         i = 0
         while i < len(self.lengths):
             if self.lengths[i] >= self.zero:  # zero check
@@ -127,19 +130,31 @@ class DigitalHarvard:
                 self.flight_harvard.append("1")
                 i += 2
             #if len(self.flight_harvard) == 8:
-                #self.write_result_in_bin()
+                #byte_to_str = ''.join(self.flight_harvard)
+                #str_to_int = int(byte_to_str, 2)
+                #chr_from_int = chr(str_to_int)
+                #self.target_file.write(chr_from_int)
                 #self.flight_harvard = []
+        #self.write_result_in_bin()
 
     def write_result_in_bin(self):
         """write result in binary format"""
-        byte_to_str = ''.join(self.flight_harvard)
-        str_to_int = int(byte_to_str, 2)
-        data = struct.pack("i", str_to_int)
-        self.target_file.write(data[:1])
+        #byte_to_str = ''.join(self.flight_harvard)
+        #str_to_int = int(byte_to_str, 2)
+        #chr_from_int = chr(str_to_int)
+        #hex_from_int = hex(str_to_int)
+        #chr_from_hex = chr(hex_from_int)
+        #int_from_chr = ord(chr_from_hex)
+        #hex_from_chr = hex(chr_from_hex)
+        #hex_from_int = hex(int_from_chr)
+        #data = struct.pack("i", str_to_int)
+
+        #hex_data = binascii.hexlify(data)
+        self.target_file.write(self.hex_str)
 
     def get_data_as_str(self):
         self.str_data = ''.join(self.flight_harvard)
-        self.target_file.write(self.str_data)
+        #self.target_file.write(self.str_data)
 
     def record_data(self):
         while self.flight:

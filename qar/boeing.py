@@ -68,11 +68,11 @@ class B737(PrepareData):
         scheme search, frames check, data record """
 
     def __init__(self, tmp_file_name, param_file_name, frame, subframe,
-                 progress_bar, path_to_save, flag):
+                 progress_bar, path_to_save, flag, qar_type):
         PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
-                             subframe, progress_bar, path_to_save, flag)
+                             subframe, progress_bar, path_to_save, flag, qar_type)
         self.progress_bar.Show()
-        self.qar_type = flag
+        self.qar_type = qar_type
         self.progress_bar.SetValue(5)
         source = open(tmp_file_name, "rb")
         # just created tmp parametric file

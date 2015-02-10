@@ -28,5 +28,5 @@ class A320(PrepareData):
         self.record_data()
         self.progress_bar.SetValue(85)
         source.close()
-        self.progress_bar.SetValue(95)
+        self.progress_bar.SetValue(100)
         #os.remove(tmp_file_name)

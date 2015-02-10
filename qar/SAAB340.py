@@ -5,7 +5,7 @@ import os
 class SAAB(PrepareData):
 
     """ SAAB - 340. Creation of parametric
-                               file with data being processed """
+        file with data being processed """
 
     def __init__(self,  tmp_file_name, param_file_name,
                  frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file, qar_type):
@@ -34,7 +34,9 @@ class SAAB(PrepareData):
         self.progress_bar.SetValue(100)
 
     def export_param_saab(self, tmp_file_name, tmp_bin_name):
+
         """ Extract only parametric data into tmp bin file """
+
         data = open(tmp_file_name, "rb")
         source = data.read()  # flight
         # tmp file with parametric data

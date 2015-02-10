@@ -6,18 +6,6 @@ from boeing import B737
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import DigitalHarvard
 
-QAR_TYPES = {0: "msrp12",  # An26
-             14: "testerU32",  # An32, An72
-             70: "Compact Flash",  # A320
-             71: "QAR-B747",
-             72: "bur92",  # An148
-             73: "QAR-2100",
-             74: "QAR-4100",
-             75: "QAR-4120",
-             76: "QAR-4700",
-             254: "QAR SAAB",
-             255: "QAR-R"}
-
 
 class Flight:
 
@@ -67,6 +55,7 @@ class Flight:
             self.make_flight()
 
         elif self.flag == "an74_bur3":
+            self.qar_type = "bur3"
             self.get_flight()
             self.make_flight()
 
@@ -111,7 +100,6 @@ class Flight:
         else:
             data.seek(self.start)
             length = self.end - self.start
-            #print("length is ", length)
             self.flight = data.read(length)
 
     def make_flight(self):
@@ -162,11 +150,11 @@ class Flight:
                                                 self.progress_bar,
                                                 self.path_to_save,
                                                 self.flag, ["255"], 384)
+
+            # current version goes as analog to digital signal conversion
             elif self.qar_type == "bur3":  # an74
-                bur = Bur3(tmp_file_name, target_file_name,
-                                                self.progress_bar,
-                                                self.path_to_save,
-                                                self.flag, ["011111111"], 512, mode="ord")
+                bur = Bur3(tmp_file_name, target_file_name, 384, 96,
+                            self.progress_bar, self.path_to_save, self.flag, mode="ord")
 
             elif self.qar_type == "bur3_code":  # an74
                 bur = Bur3(tmp_file_name, "code_" + target_file_name,
@@ -182,13 +170,15 @@ class Flight:
 
             elif self.flag == "b737_dfdr_980":
                 b737 = B737(tmp_file_name, target_file_name, 384, 96,
-                            self.progress_bar, self.path_to_save, self.flag)
+                            self.progress_bar, self.path_to_save, self.flag, self.qar_type)
                 # file -> cop_centr_head
 
     def prepare_cf_file(self):
+
         """ Prepares Compact Flash file
-        Each cluster begins with header.
-        Leave the first header and delete other """
+            Each cluster begins with header.
+            Leave the first header and delete other """
+
         header = 32  # bytes
         # path to tmp file containing full copy of compact flash
         data = open(self.path, "rb")
@@ -204,12 +194,11 @@ class Flight:
             bytes_counter += cluster
 
     def save_flight(self):
+
         """ save flight as it is in file """
+
         new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + ".inf", "wb")
         new_file.write(self.flight)
-
-    def prepare_bur3_file(self):
-        pass
 
     def save_raw(self):  # b737_qar
         source = open(self.path, "rb").read()

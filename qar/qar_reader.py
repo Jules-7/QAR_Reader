@@ -11,13 +11,12 @@ import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen
 """ This module contains:
+    - creates window for choosing of file with flights
+    - displays all flights in file
+    - allows to save flight as raw data or as flight according
+      to QAR type"""
 
-
-- creates window for choosing of file with flights
-- displays all flights in file
-- allows to save flight as raw data or as flight according
-to QAR type"""
-
+# User id | username in code | name of program window | program window size
 ACCESS = {1: ["admin", "admin", (800, 500)],
           10: ["yanair", "YanAir", (600, 500)],
           11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
@@ -26,7 +25,7 @@ ACCESS = {1: ["admin", "admin", (800, 500)],
 # admin
 USER = 1
 
-# title for window depending on USER
+# title for window depending on USER id
 WIN_TITLE = ACCESS[USER][1]
 
 # size of main window
@@ -40,23 +39,27 @@ EVT_RESULT_ID = wx.NewId()
 
 
 def event_result(win, func):
+
     """ Define Result Event """
+
     win.Connect(-1, -1, EVT_RESULT_ID, func)
 
 
 class ResultEvent(wx.PyEvent):
+
     """ Simple event to carry arbitrary result data """
+
     def __init__(self, data):
-        """Init Result Event."""
         wx.PyEvent.__init__(self)
         self.SetEventType(EVT_RESULT_ID)
         self.data = data
 
 
 class WorkerThread(Thread):  # Thread class that executes processing
+
     """ Worker Thread Class """
+
     def __init__(self, notify_window, path, flag):
-        """ Init Worker Thread Class """
         Thread.__init__(self)
         self._notify_window = notify_window
         self._want_abort = 0
@@ -67,7 +70,9 @@ class WorkerThread(Thread):  # Thread class that executes processing
         self.start()
 
     def run(self):
+
         """ Run Worker Thread """
+
         # This is the code executing in the new thread
         s = Split(self.path, self.flag)
         q = s.result
@@ -140,9 +145,11 @@ class MyPanel(wx.Panel):
         self.SetSizer(sizer)
 
     def on_item_selected(self, event):
+
         """ At the row selection - an index is returned
-        using that index -> search the flight from the flights_dict
-        and pass it for the processing """
+            using that index -> search the flight from the flights_dict
+            and pass it for the processing """
+
         self.selected_parent_set = []
         self.parent.selected = []
         #-------- Ensures multiple flights selection -----------
@@ -383,11 +390,13 @@ class MyFrame(wx.Frame):
         self.progress_bar.Hide()
 
     def create_file_menu(self):
+
         """ Each user access is defined by access (ability to see)
             aircraft type buttons/file menu options
             Check of user ensures display of this user options
             Access (visibility) of each option
             in file_menu and tool_bar is the same """
+
         filemenu = wx.Menu()
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
@@ -498,11 +507,13 @@ class MyFrame(wx.Frame):
             self.Bind(wx.EVT_TOOL, self.an74_qar_chosen, an74_qar)
 
     def create_tool_bar(self):
+
         """ Each user access is defined by access (ability to see)
             aircraft type buttons/file menu options
             Check of user ensures display of this user options
             Access (visibility) of each option
             in file_menu and tool_bar is the same """
+
         # do not use this at window reload -> toolbar is not shown at first and
         # then it appears on the top of the flights` data
         #self.toolbar = wx.ToolBar(self, -1)
@@ -756,14 +767,18 @@ class MyFrame(wx.Frame):
 
     #------------------------------------------------------------------
     def initialization(self, event):
+
         """ Display initialization options for a flash-card """
+
         window = InitializationFrame()
         # Show initialization window
         window.Show(True)
 
     #------------------------------------------------------------------
     def formatting(self, event):
+
         """ Perform formatting of a flash-card"""
+
         dlg = wx.DirDialog(self, "Choose a Compact Flash:",
                            style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         # If the user selects OK, then we process the dialog's data.
@@ -785,7 +800,9 @@ class MyFrame(wx.Frame):
     #------------------------------------------------------------------
 
     def on_open_file(self, event):
+
         """ Show Result status """
+
         self.q = event.data
         self.qar_type = self.q.qar_type
         self.DestroyChildren()
@@ -829,7 +846,9 @@ class MyFrame(wx.Frame):
         self.Destroy()
 
     def on_choose_file(self):
-        """ Open a file """
+
+        """ Open a file which contain flights"""
+
         self.get_path_to_file()
 
         if self.chosen_acft_type is None:
@@ -851,7 +870,7 @@ class MyFrame(wx.Frame):
         self.progress_bar.SetValue(15)
         self.progress_bar.SetValue(20)
 
-        dlg_save = wx.DirDialog(self, "Choose directory to safe flight copy",
+        dlg_save = wx.DirDialog(self, "Choose directory to get flight copy",
                                 style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
         if dlg_save.ShowModal() == wx.ID_OK:
             path_save = u"%s" % dlg_save.GetPath()
@@ -916,8 +935,10 @@ class MyFrame(wx.Frame):
         self.statusbar.SetStatusText("Flight is saved", 0)
 
     def twelve_to_sixteen(self, event):
+
         """ Transform data recorded as 12 bits word into 16 bits data;
             take what is and just add convert all data (no check for header)"""
+
         self.get_path_to_file()
         self.get_path_to_save()
         self.progress_bar.Show()
