@@ -50,7 +50,7 @@ class Flight:
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "an26_msrp12":
+        elif self.qar_type == "msrp12":
             self.get_flight()
             self.make_flight()
 

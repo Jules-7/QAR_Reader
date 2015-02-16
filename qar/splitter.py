@@ -17,8 +17,9 @@ ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
                   3911: ["s340", "qar_no_sound"],
                   401: ["b737", "qar"],
                   402: ["b737", "dfdr_980"],
-                  403: ["b737", "4700"]}
-MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 382, 391, 3911, 403]
+                  403: ["b737", "4700"],
+                  411: ["an12", "msrp12"]}
+MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 382, 391, 3911, 403, 411]
 OWN_HEADER_TYPES = [322]
 NO_HEADER_TYPES = [331, 341, 401, 402]
 
@@ -40,14 +41,14 @@ class Split(object):
 
     def define_file_opening(self):
         if self.flag in MONSTR_HEADER_TYPES:
-            self.open_with_monstr_header(self.path, self.flag)
+            self.open_with_monstr_header()
         elif self.flag in OWN_HEADER_TYPES:
             self.open_with_own_header(self.path, self.flag)
         elif self.flag in NO_HEADER_TYPES:
             self.open_with_no_header(self.path, self.flag)
 
-    def open_with_monstr_header(self, path, acft_fdr_type):
-        qar = MonstrHeader(path, self.acft_fdr_type)
+    def open_with_monstr_header(self):
+        qar = MonstrHeader(self.path, self.acft, self.qar, self.acft_fdr_type)
         self.result = qar
 
     def open_with_own_header(self, path, flag):

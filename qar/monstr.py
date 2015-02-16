@@ -30,7 +30,7 @@ class MonstrHeader():
 
         COMPLETE HEADER DESCRIPTION IN initialization.py """
 
-    def __init__(self, path, info=None):
+    def __init__(self, path, acft, qar, info=None):
         self.path = path
         self.info = info
         self.dat = open(self.path, 'rb')
@@ -41,7 +41,8 @@ class MonstrHeader():
         self.headers = []
         self.date = []
         self.time = []
-        self.qar_type = None
+        self.qar_type = qar
+        self.acft = acft
         self.init_date = None
         self.start_date = []
         self.start_date_str_repr = []
@@ -55,7 +56,7 @@ class MonstrHeader():
             if self.corrupted_header:
                 self.correct_flight_intervals()
             # count durations by frames
-            if self.info == "a320_qar" or self.info == "an26_msrp12" or self.info == "b737_4700"\
+            if self.info == "a320_qar" or self.qar_type == "msrp12" or self.info == "b737_4700"\
                     or self.info == "s340_qar_sound" or self.info == "s340_qar_no_sound" \
                     or self.info == "an74_bur3" or self.info == "an74_bur3_code":
                 self.get_durations_optional(self.info)
@@ -110,7 +111,7 @@ class MonstrHeader():
         # bur3 flight ends either by zeroes or by next header
         # last flight ends either by zeroes or by file end
         if self.info == "an74_bur3_code" or self.info == "a320_qar" \
-                or self.info == "an26_msrp12" or self.info == "s340_qar_sound":
+                or self.qar_type == "msrp12" or self.info == "s340_qar_sound":
             #if self.info == "an74_bur3"
             i = 0
             for each in self.flights_start:
@@ -227,7 +228,8 @@ class MonstrHeader():
                                "an74_bur3": [0.12, 384],
                                "an74_bur3_code": [0.12, 384],
                                "an32_testerU32": [1, 512],
-                               "an72_testerU32": [1, 512]}
+                               "an72_testerU32": [1, 512],
+                               "an12_msrp12": [0.5, 512]}
         frame_duration = acft_frame_duration[acft][0]
         bytes_in_frame = acft_frame_duration[acft][1]
         i = 0
@@ -251,7 +253,7 @@ class MonstrHeader():
         pattern_size = 20
         bytes_counter = 0
 
-        if self.info == "an26_msrp12" or self.info == "an32_testerU32" \
+        if self.qar_type == "msrp12" or self.info == "an32_testerU32" \
                 or self.info == "an72_testerU32":
             pattern_size = 512
 

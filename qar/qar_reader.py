@@ -17,7 +17,7 @@ from converter import TwelveToSixteen
       to QAR type"""
 
 # User id | username in code | name of program window | program window size
-ACCESS = {1: ["admin", "admin", (800, 500)],
+ACCESS = {1: ["admin", "admin", (900, 500)],
           10: ["yanair", "YanAir", (600, 500)],
           11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
           12: ["VCH", u'В/Ч №2269', (600, 500)]}
@@ -363,7 +363,8 @@ class MyFrame(wx.Frame):
                                 3911: ["s340", "qar_no_sound"],
                                 401: ["b737", "qar"],
                                 402: ["b737", "dfdr_980"],
-                                403: ["b737", "4700"]}
+                                403: ["b737", "4700"],
+                                411: ["an12", "msrp12"]}
 
         self.selected = []  # flights selected from the list
         self.create_file_menu()
@@ -532,6 +533,9 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('b747.bmp'))
 
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
+            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('s340.bmp'))
+
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
             self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('an26.bmp'))
 
@@ -547,14 +551,15 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
             self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('an148.bmp'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('s340.bmp'))
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(150, "AN12", wx.Bitmap('an12.png'))
 
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
 
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
+
 
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -570,6 +575,8 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(146, u"Aн74. Choose data source")
         self.toolbar.SetToolLongHelp(147, "S340. Choose data source")
         self.toolbar.SetToolLongHelp(148, "B737. Choose data source")
+        self.toolbar.SetToolLongHelp(149, "Convert from 12 bit-word to 16 bit-word")
+        self.toolbar.SetToolLongHelp(150, u"Ан12. Choose data source")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -588,6 +595,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.s340_button, id=147)
         self.Bind(wx.EVT_MENU, self.b737_button, id=148)
         self.Bind(wx.EVT_MENU, self.twelve_to_sixteen, id=149)
+        self.Bind(wx.EVT_MENU, self.an12_button, id=150)
 
     #---- At the acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
@@ -749,6 +757,16 @@ class MyFrame(wx.Frame):
             self.on_choose_file()
         elif option == "4700":
             self.chosen_acft_type = 403
+            self.on_choose_file()
+
+    def an12_button(self, event):
+        self.chosen_acft_type = 411
+        name = u"Aн12"
+        choices = [u"МСРП-12"]
+        option = self.make_choice_window(name, choices)
+        if option == u"МСРП-12":
+            self.chosen_acft_type = 411
+        if option:  # choose path to file
             self.on_choose_file()
 
     def make_choice_window(self, name, choices):
