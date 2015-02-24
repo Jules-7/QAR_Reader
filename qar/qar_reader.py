@@ -2,7 +2,7 @@
 from threading import *
 import wx
 import re
-import time
+from source_data import USER, QAR_TYPES, ACCESS
 from extractFlight import Flight
 from splitter import Split
 from datetime import datetime
@@ -10,20 +10,12 @@ from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen
+
 """ This module contains:
     - creates window for choosing of file with flights
     - displays all flights in file
     - allows to save flight as raw data or as flight according
       to QAR type"""
-
-# User id | username in code | name of program window | program window size
-ACCESS = {1: ["admin", "admin", (900, 500)],
-          10: ["yanair", "YanAir", (600, 500)],
-          11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500)],
-          12: ["VCH", u'В/Ч №2269', (600, 500)]}
-
-# admin
-USER = 1
 
 # title for window depending on USER id
 WIN_TITLE = ACCESS[USER][1]
@@ -59,12 +51,13 @@ class WorkerThread(Thread):  # Thread class that executes processing
 
     """ Worker Thread Class """
 
-    def __init__(self, notify_window, path, flag):
+    def __init__(self, notify_window, path, flag, progress_bar):
         Thread.__init__(self)
         self._notify_window = notify_window
         self._want_abort = 0
         self.path = path
         self.flag = flag
+        self.progress_bar = progress_bar
         # This starts the thread running on creation, but you could
         # also make the GUI thread responsible for calling this
         self.start()
@@ -74,7 +67,7 @@ class WorkerThread(Thread):  # Thread class that executes processing
         """ Run Worker Thread """
 
         # This is the code executing in the new thread
-        s = Split(self.path, self.flag)
+        s = Split(self.path, self.flag, self.progress_bar)
         q = s.result
         # Here's where the result would be returned
         wx.PostEvent(self._notify_window, ResultEvent(q))
@@ -327,18 +320,6 @@ class InitializationPanel(wx.Panel):
 
 ########################################################################
 
-QAR_TYPES = {0: "msrp12",  # An26
-             14: "testerU32",  # An32, An72
-             70: "Compact Flash",  # A320
-             71: "QAR-B747",
-             72: "bur92",  # An148
-             73: "QAR-2100",
-             74: "QAR-4100",
-             75: "QAR-4120",
-             76: "QAR-4700",
-             254: "QAR SAAB",  # S340
-             255: "QAR-R"}
-
 
 class MyFrame(wx.Frame):
 
@@ -349,23 +330,10 @@ class MyFrame(wx.Frame):
                           "QAR Reader  %s" % WIN_TITLE, size=SIZE)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.create_status_bar()
-        self.chosen_acft_type = None  # means both acft type and data source type
-        self.acft_data_types = {321: ["a320", "qar"],
-                                322: ["a320", "cf"],
-                                331: ["b747", "qar"],
-                                341: ["an148", "bur92"],
-                                351: ["an32", "testerU32"],
-                                361: ["an26", "msrp12"],
-                                371: ["an72", "testerU32"],
-                                381: ["an74", "bur3"],
-                                382: ["an74", "bur3_code"],
-                                391: ["s340", "qar_sound"],
-                                3911: ["s340", "qar_no_sound"],
-                                401: ["b737", "qar"],
-                                402: ["b737", "dfdr_980"],
-                                403: ["b737", "4700"],
-                                411: ["an12", "msrp12"]}
-
+        # stands for both acft type and data source type
+        # this is global like variable
+        # it goes to almost all methods
+        self.chosen_acft_type = None
         self.selected = []  # flights selected from the list
         self.create_file_menu()
         self.create_tool_bar()
@@ -745,10 +713,10 @@ class MyFrame(wx.Frame):
                 return
             if self.path:
                 self.get_path_to_save()
-                qar_type = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
-                                      self.acft_data_types[self.chosen_acft_type][1])
-                self.flag = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
-                                       self.acft_data_types[self.chosen_acft_type][1])
+                qar_type = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
+                                      QAR_TYPES[self.chosen_acft_type][1])
+                self.flag = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
+                                       QAR_TYPES[self.chosen_acft_type][1])
                 flight = Flight(self.progress_bar, start=None, end=None, path=self.path,
                                 name=None, qar_type=qar_type,
                                 path_to_save=self.path_to_save, flag=self.flag)
@@ -851,8 +819,8 @@ class MyFrame(wx.Frame):
             # display aircraft and recorder type
             try:
                 self.statusbar.SetStatusText(u"%s-%s" %
-                                            (self.acft_data_types[self.chosen_acft_type][0],
-                                             self.acft_data_types[self.chosen_acft_type][1]),
+                                            (QAR_TYPES[self.chosen_acft_type][0],
+                                             QAR_TYPES[self.chosen_acft_type][1]),
                                              1)
             except KeyError:
                 self.statusbar.SetStatusText(u" -%s" % self.qar_type, 1)
@@ -868,16 +836,13 @@ class MyFrame(wx.Frame):
         """ Open a file which contain flights"""
 
         self.get_path_to_file()
-
-        if self.chosen_acft_type is None:
-            self.flag = 0
-        else:
-            self.flag = self.chosen_acft_type
-        self.q = WorkerThread(self, self.path, self.flag)
+        # redirect path and choice of acft/qar for file opening
+        # and flight displaying
+        self.q = WorkerThread(self, self.path, self.chosen_acft_type, self.progress_bar)
 
         self.progress_bar.Show()
         self.progress_bar.SetValue(10)
-        self.progress_bar.Pulse()
+        #self.progress_bar.Pulse()
         self.statusbar.SetStatusText("Downloading...", 0)
 
     def on_choose_cf(self, event):  # choose compact flash
@@ -903,8 +868,8 @@ class MyFrame(wx.Frame):
         self.statusbar.SetStatusText("Downloading...", 0)
 
         try:
-            self.flag = 322
-            self.q = WorkerThread(self, self.path, self.flag)
+            self.chosen_acft_type = 322
+            self.q = WorkerThread(self, self.path, self.chosen_acft_type)
         except:
             pass
 
@@ -918,13 +883,13 @@ class MyFrame(wx.Frame):
         self.get_path_to_save()
         self.progress_bar.Show()
         self.statusbar.SetStatusText("Saving...", 0)
-        if self.chosen_acft_type is None:
-            self.flag = "qar"
-            acft = None
-        else:
-            self.flag = "%s_%s" % (self.acft_data_types[self.chosen_acft_type][0],
-                                   self.acft_data_types[self.chosen_acft_type][1])
-            acft = self.acft_data_types[self.chosen_acft_type][0]
+        #if self.chosen_acft_type is None:
+            #self.flag = "qar"
+            #acft = None
+        #else:
+            #self.flag = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
+                                   #QAR_TYPES[self.chosen_acft_type][1])
+            #acft = QAR_TYPES[self.chosen_acft_type][0]
         try:
             for each in self.selected:  # [flight_interval, index, date, qar]
                 # get flight start and end indexes
@@ -935,14 +900,17 @@ class MyFrame(wx.Frame):
                 flight_index = each[1] + 1
                 flight_date = each[2]
                 flight_qar = each[3]
-                if acft:
-                    flight_acft = acft
-                else:
-                    flight_acft = None
-                name = self.form_name(mode, flight_index, flight_acft,
-                                      flight_qar, flight_date)
+                #if acft:
+                    #flight_acft = acft
+                #else:
+                    #flight_acft = None
+                #name = self.form_name(mode, flight_index, flight_acft,
+                                      #flight_qar, flight_date)
+                name = self.form_name(mode, flight_index, flight_date)
+                #f = Flight(self.progress_bar, start, end, self.q.path, name,
+                           #self.qar_type, self.path_to_save, self.flag)
                 f = Flight(self.progress_bar, start, end, self.q.path, name,
-                           self.qar_type, self.path_to_save, self.flag)
+                           self.chosen_acft_type, self.path_to_save)
 
         except AttributeError:  # save button was pressed, but no file was opened before
             self.warning("Open file with flights to process")
@@ -970,9 +938,15 @@ class MyFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
-    def form_name(self, rec_type, index, acft, qar, date):
+    def form_name(self, rec_type, index, date):
+        """
+           - either add 'raw' record or not
+           - add flight index/number and date it was performed
+           - add acft and qar type from self.chosen_acft_type 'global' variable"""
         cor_date = re.sub(r":", r"_", date)
         no_space_date = str(cor_date).replace(" ", "_")
+        acft = QAR_TYPES[self.chosen_acft_type][0]
+        qar = QAR_TYPES[self.chosen_acft_type][1]
         if acft == "a320":
             qar = "qar"
         elif acft == "s340":

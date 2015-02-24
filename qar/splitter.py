@@ -1,25 +1,10 @@
 from monstr import MonstrHeader
-from boeing import Boeing, Boeing737DFDR980, B747
+from boeing import Boeing737DFDR980, B747
 from bur_92 import Bur
 from compactFlash import CompactFlash
+from source_data import QAR_TYPES
 
-ACFT_FDR_TYPES = {321: ["a320", "qar"],  # A320
-                  322: ["a320", "cf"],
-                  331: ["b747", "qar"],
-                  341: ["an148", "bur92"],
-                  351: ["an32", "testerU32"],
-                  361: ["an26", "msrp12"],
-                  371: ["an72", "testerU32"],
-                  381: ["an74", "bur3"],
-                  382: ["an74", "bur3_code"],
-                  0:   ["NA", "NA"],
-                  391: ["s340", "qar_sound"],
-                  3911: ["s340", "qar_no_sound"],
-                  401: ["b737", "qar"],
-                  402: ["b737", "dfdr_980"],
-                  403: ["b737", "4700"],
-                  411: ["an12", "msrp12"]}
-MONSTR_HEADER_TYPES = [0, 321, 351, 361, 371, 381, 382, 391, 3911, 403, 411]
+MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 391, 3911, 403, 411]
 OWN_HEADER_TYPES = [322]
 NO_HEADER_TYPES = [331, 341, 401, 402]
 
@@ -27,38 +12,42 @@ NO_HEADER_TYPES = [331, 341, 401, 402]
 class Split(object):
 
     """ This class redirect to appropriate class
-    depending on type of data source (QAR, CF, FDR) and aircraft type"""
+        depending on type of data source (QAR, CF, FDR) and aircraft type"""
 
-    def __init__(self, path, flag):
+    def __init__(self, path, flag, progress_bar):
         self.path = path
         self.flag = flag
-        self.acft_fdr_type = "%s_%s" % (ACFT_FDR_TYPES[flag][0],
-                                        ACFT_FDR_TYPES[flag][1])
-        self.acft = ACFT_FDR_TYPES[flag][0]
-        self.qar = ACFT_FDR_TYPES[flag][1]
+        self.acft_fdr_type = "%s_%s" % (QAR_TYPES[flag][0],
+                                        QAR_TYPES[flag][1])
+        self.acft = QAR_TYPES[flag][0]
+        self.qar = QAR_TYPES[flag][1]
         self.result = None
+        self.progress_bar = progress_bar
         self.define_file_opening()
+
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(15)
 
     def define_file_opening(self):
         if self.flag in MONSTR_HEADER_TYPES:
             self.open_with_monstr_header()
         elif self.flag in OWN_HEADER_TYPES:
-            self.open_with_own_header(self.path, self.flag)
+            self.open_with_own_header()
         elif self.flag in NO_HEADER_TYPES:
-            self.open_with_no_header(self.path, self.flag)
+            self.open_with_no_header()
 
     def open_with_monstr_header(self):
-        qar = MonstrHeader(self.path, self.acft, self.qar, self.acft_fdr_type)
+        qar = MonstrHeader(self.path, self.flag, self.progress_bar)
         self.result = qar
 
-    def open_with_own_header(self, path, flag):
-        if flag == 322 or flag == 402:
-            self.result = CompactFlash(path, self.acft_fdr_type)
+    def open_with_own_header(self):
+        if self.flag == 322 or self.flag == 402:
+            self.result = CompactFlash(self.path, self.acft_fdr_type)
 
-    def open_with_no_header(self, path, flag):
-        if flag == 331:  # boeing
-            self.result = B747(path, self.acft, self.qar)
-        elif flag == 341:  # bur92
-            self.result = Bur(path)
-        elif flag == 402:  # boeing 737-dfdr-980
-            self.result = Boeing737DFDR980(path, self.acft, self.qar)
+    def open_with_no_header(self):
+        if self.flag == 331:  # boeing
+            self.result = B747(self.path, self.acft, self.qar)
+        elif self.flag == 341:  # bur92
+            self.result = Bur(self.path)
+        elif self.flag == 402:  # boeing 737-dfdr-980
+            self.result = Boeing737DFDR980(self.path, self.acft, self.qar)

@@ -2,23 +2,12 @@
 import os
 import struct
 import datetime
+from source_data import QAR_TYPES
 
 MONSTR = 'MONSTR'  # monstr header start indicator
 CLUSTER = 32768  # cluster size in bytes 32 * 1024
 COUNTER_INCREMENT = float(4294967295)
 HEADER_SIZE = 128  # B
-QAR_TYPES = {0: "msrp12",  # An26
-             11: "bur3",  # an74
-             14: "testerU32",  # An32, an72
-             70: "Compact Flash",  # A320
-             71: "QAR-B747",
-             72: "bur92",  # An148
-             73: "QAR-2100",
-             74: "QAR-4100",
-             75: "QAR-4120",
-             76: "QAR-4700",
-             254: "qar",  # SAAB340
-             255: "QAR-R"}
 
 
 class MonstrHeader():
@@ -30,9 +19,14 @@ class MonstrHeader():
 
         COMPLETE HEADER DESCRIPTION IN initialization.py """
 
-    def __init__(self, path, acft, qar, info=None):
+    def __init__(self, path, flag, progress_bar):
         self.path = path
-        self.info = info
+        self.info = "%s_%s" % (QAR_TYPES[flag][0],
+                               QAR_TYPES[flag][1])
+        self.acft = QAR_TYPES[flag][0]
+        self.qar_type = QAR_TYPES[flag][1]
+        self.frame_size = QAR_TYPES[flag][2]  # in Bytes
+        self.frame_duration = QAR_TYPES[flag][3]  # in seconds
         self.dat = open(self.path, 'rb')
         self.file_len = os.stat(self.path).st_size
         self.index = 0  #524288  # index of records beginning in bytes
@@ -41,30 +35,38 @@ class MonstrHeader():
         self.headers = []
         self.date = []
         self.time = []
-        self.qar_type = qar
-        self.acft = acft
         self.init_date = None
         self.start_date = []
         self.start_date_str_repr = []
         self.durations = []
         self.end_date = []
         self.corrupted_header = []
+        self.progress_bar = progress_bar
 
         self.find_flights()
+        self.progress_bar.SetValue(25)
+
         if self.flights_start:
             self.get_flight_intervals()
+            self.progress_bar.SetValue(45)
+
             if self.corrupted_header:
                 self.correct_flight_intervals()
-            # count durations by frames
+            '''# count durations by frames
             if self.info == "a320_qar" or self.qar_type == "msrp12" or self.info == "b737_4700"\
                     or self.info == "s340_qar_sound" or self.info == "s340_qar_no_sound" \
                     or self.info == "an74_bur3" or self.info == "an74_bur3_code":
                 self.get_durations_optional(self.info)
             else:
                 # count durations using QAR header -> processor time
-                self.get_durations()
-            self.get_qar_type()
+                self.get_durations()'''
+            self.get_durations()
+            self.progress_bar.SetValue(65)
+
+            #self.get_qar_type()
             self.dat.close()
+            self.progress_bar.SetValue(85)
+
         self.check_dates()
         # additional
         # write current date (flight start date) to header
@@ -72,6 +74,7 @@ class MonstrHeader():
         # in bytes: 70, 72, 74, 76, 78, 80
         # symmetrically + 2 lines (16 columns) to date of initialization
         self.add_date_to_header()
+        self.progress_bar.SetValue(100)
 
     def is_flight(self):
         """ check for MONSTR and if so record header """
@@ -88,29 +91,37 @@ class MonstrHeader():
             else:  # header is not valid
                 # but we need to take it as an end of previous flight
                 self.corrupted_header.append((self.flights_start[-1], self.index))
-                #print(self.corrupted_header)
         self.index += CLUSTER
 
     def find_flights(self):
+
         """ find all flights indexes """
+
         while self.index < self.file_len:
-            #if self.index == 524288:
-                #self.dat.seek(524288)
-                #self.is_flight()
-            #else:
-                #self.dat.seek(self.index)
-                #self.is_flight()
             self.dat.seek(self.index)
             self.is_flight()
 
     def get_flight_intervals(self):
 
-        """ different types have different end patterns
-            determination of flight end according to acft_qar_type """
+        """ flight intervals may be found either by headers index
+            or by checking for 'end pattern'
+            different types have different end patterns
 
-        # bur3 flight ends either by zeroes or by next header
-        # last flight ends either by zeroes or by file end
-        if self.info == "an74_bur3_code" or self.info == "a320_qar" \
+            - bur3 flight ends either by zeroes or by next header
+              last flight ends either by zeroes or by file end """
+
+        if self.info == "b737_4700" or self.info == "an74_bur3":
+            i = 0
+            for each in self.flights_start:
+                try:
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.flights_start[i+1]))
+                except IndexError:  # last flight(header) -> no more headers after that
+                    self.flight_intervals.append((self.flights_start[i],
+                                                  self.file_len))
+                i += 1
+
+        elif self.info == "an74_bur3_code" or self.info == "a320_qar" \
                 or self.qar_type == "msrp12" or self.info == "s340_qar_sound":
             #if self.info == "an74_bur3"
             i = 0
@@ -124,24 +135,10 @@ class MonstrHeader():
                                                                       self.file_len)))
                 i += 1
 
-        elif self.info == "an74_bur3":
-            i = 0
-            for each in self.flights_start:
-                try:  # current header index and next one
-                    self.flight_intervals.append((self.flights_start[i],
-                                                  self.flights_start[i+1]))
-                except IndexError:  # last flight(header) -> no more headers after that
-                    self.flight_intervals.append((self.flights_start[i],
-                                                  self.file_len))
-                i += 1
-
         # msrp12 flights end by header
         # testerU32 flights end by FF*512
         # s340-qar flights end by FF*20 or 00*20 or header
-        elif self.info == "an32_testerU32"\
-                or self.info == "an72_testerU32" \
-                or self.info == "s340_qar_no_sound":
-            #or self.info == "b737_4700"
+        elif self.qar_type == "testerU32" or self.info == "s340_qar_no_sound":
             i = 0
             for each in self.flights_start:
                 try:
@@ -159,13 +156,12 @@ class MonstrHeader():
             for each in self.flights_start:
                 try:
                     self.flight_intervals.append((self.flights_start[i],
-                                                 self.flights_start[i+1]))
+                                                  self.flights_start[i+1]))
                 except IndexError:  # last flight(header) -> no more headers after that
                     self.flight_intervals.append((self.flights_start[i],
-                                                      self.get_flight_end(self.flights_start[i],
-                                                                          self.file_len)))
+                                                  self.get_flight_end(self.flights_start[i],
+                                                                      self.file_len)))
                 i += 1
-        #print(self.flight_intervals)
 
     def correct_flight_intervals(self):
 
@@ -179,38 +175,8 @@ class MonstrHeader():
                 if start == start_cor:
                     self.flight_intervals[i] = (start, end_cor)
             i += 1
-        #print(self.flight_intervals)
 
     def get_durations(self):
-
-        """ duration is counted using data specified in header """
-
-        i = 0
-        byte = 8
-        for each in self.headers:
-            dimension = self.process_counter(self.headers[i][5])
-            # bits/bytes in channel
-            channel = self.process_counter(self.headers[i][7], self.headers[i][6])
-            # channels in frame
-            frame = self.process_counter(self.headers[i][9], self.headers[i][8])
-            frame_rate = self.process_counter(self.headers[i][11], self.headers[i][10])
-            if dimension == 0:  # bytes
-                bytes_in_frame = frame * channel
-            elif dimension == 1:  # bits
-                bytes_in_frame = (frame * channel) / byte
-
-            bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
-            frames_in_flight = bytes_in_flight / bytes_in_frame
-            # difference may be not whole number,
-            # not to get seconds as decimal fraction -> round it
-            duration_in_sec = round(frames_in_flight / frame_rate)
-            end = self.start_date[i] + datetime.timedelta(seconds=duration_in_sec)
-            self.end_date.append(end)
-            #duration = time.strftime('%H h %M m %S s', time.gmtime(duration_in_sec))
-            self.durations.append(duration_in_sec)
-            i += 1
-
-    def get_durations_optional(self, acft):
 
         """ duration is counted by frames, not by counter value from header
 
@@ -219,26 +185,17 @@ class MonstrHeader():
             duration -> 1 frame (384B) count as 0.12 sec, although actually
             its 1 frame - 1 sec """
 
-        # frame duration for aircraft type in sec and frame size in bytes
-        acft_frame_duration = {"a320_qar": [4, 768],    # 1 frame - 4 sec
-                               "an26_msrp12": [0.5, 512],
-                               "b737_4700": [4, 768],
-                               "s340_qar_sound": [0.03, 384],
-                               "s340_qar_no_sound": [1, 384],
-                               "an74_bur3": [0.12, 384],
-                               "an74_bur3_code": [0.12, 384],
-                               "an32_testerU32": [1, 512],
-                               "an72_testerU32": [1, 512],
-                               "an12_msrp12": [0.5, 512]}
-        frame_duration = acft_frame_duration[acft][0]
-        bytes_in_frame = acft_frame_duration[acft][1]
         i = 0
         for each in self.start_date:
             bytes_in_flight = self.flight_intervals[i][1] - self.flight_intervals[i][0]
-            frames_in_flight = bytes_in_flight / bytes_in_frame
+            #frames_in_flight = bytes_in_flight / bytes_in_frame
+            frames_in_flight = bytes_in_flight / self.frame_size
+
             # difference may be not whole number,
             # not to get seconds as decimal fraction -> round it
-            duration_in_sec = round(frames_in_flight * frame_duration)
+
+            #duration_in_sec = round(frames_in_flight * frame_duration)
+            duration_in_sec = round(frames_in_flight * self.frame_duration)
             end = each + datetime.timedelta(seconds=duration_in_sec)
             self.end_date.append(end)
             self.durations.append(duration_in_sec)
@@ -253,8 +210,7 @@ class MonstrHeader():
         pattern_size = 20
         bytes_counter = 0
 
-        if self.qar_type == "msrp12" or self.info == "an32_testerU32" \
-                or self.info == "an72_testerU32":
+        if self.qar_type == "msrp12" or self.qar_type == "testerU32":
             pattern_size = 512
 
         elif self.info == "an74_bur3" or self.info == "an74_bur3_code":
@@ -270,20 +226,19 @@ class MonstrHeader():
         end_sign_zeroes = ['0'] * pattern_size
 
         while bytes_counter < end:
-            next_byte = self.dat.read(1)
-            if next_byte == "":
+            next_frame = self.dat.read(pattern_size)
+            if next_frame == "":
                 return start + bytes_counter
-            bytes_counter += 1
-            if ord(next_byte) == 0 or ord(next_byte) == 255:
-                bytes_to_check = [str(ord(each)) for each in self.dat.read(pattern_size)]
-                bytes_counter += pattern_size
-                if bytes_to_check == end_sign_ff or bytes_to_check == end_sign_zeroes:
-                    bytes_counter -= pattern_size
-                    break
-                else:
-                    bytes_to_check = []
-                    self.dat.seek(-(pattern_size/2), 1)
-                    bytes_counter -= pattern_size/2
+            bytes_counter += pattern_size
+
+            bytes_to_check = [str(ord(each)) for each in next_frame]
+            if bytes_to_check == end_sign_ff or bytes_to_check == end_sign_zeroes:
+                bytes_counter -= pattern_size
+                break
+            else:
+                bytes_to_check = []
+                #self.dat.seek(-(pattern_size/2), 1)
+                #bytes_counter -= pattern_size/2
         return start + bytes_counter
 
     def get_initial_date(self, header):
@@ -384,11 +339,11 @@ class MonstrHeader():
         current_counter = int(counter, 16)
         return current_counter
 
-    def get_qar_type(self):
+    '''def get_qar_type(self):
         qar_type = ord(self.headers[0][4])
         for key, value in QAR_TYPES.iteritems():
             if qar_type == key:
-                self.qar_type = value
+                self.qar_type = value'''
 
     def add_date_to_header(self):
 

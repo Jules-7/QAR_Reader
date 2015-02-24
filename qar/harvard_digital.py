@@ -16,7 +16,7 @@ class DigitalHarvard:
 
     def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
                  progress_bar, path_to_save, flag):
-        self.zero = 5  # min number of bytes(length) that determines zero
+        self.zero = 40  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")
@@ -56,10 +56,10 @@ class DigitalHarvard:
         self.convert_to_arinc()
         self.progress_bar.SetValue(65)
 
-        self.get_data_as_str()
-        self.progress_bar.SetValue(85)
+        #self.get_data_as_str()
+        #self.progress_bar.SetValue(85)
 
-        self.record_data()
+        #self.record_data()
         self.progress_bar.SetValue(100)
 
     def write_header(self):
@@ -71,7 +71,7 @@ class DigitalHarvard:
         self.average = summa/self.sequence
         # go back by sequence length -> to get at the data beginning
         self.source.seek(128, 0)
-        print(self.average)
+        #print(self.average)
 
     def count_upper(self, data, upper_part):
         """count number of bytes above average level"""
@@ -111,7 +111,7 @@ class DigitalHarvard:
             elif not upper:
                 lower_part, upper = self.count_lower(data, lower_part)
         # lengths should begin from zero value
-        print(self.lengths)
+        #print(self.lengths)
         while True:
             if self.lengths[0] < self.zero:
                 del self.lengths[0]
@@ -129,12 +129,12 @@ class DigitalHarvard:
             elif self.lengths[i] < self.zero:
                 self.flight_harvard.append("1")
                 i += 2
-            #if len(self.flight_harvard) == 8:
-                #byte_to_str = ''.join(self.flight_harvard)
-                #str_to_int = int(byte_to_str, 2)
-                #chr_from_int = chr(str_to_int)
-                #self.target_file.write(chr_from_int)
-                #self.flight_harvard = []
+            if len(self.flight_harvard) == 8:
+                byte_to_str = ''.join(self.flight_harvard)
+                str_to_int = int(byte_to_str, 2)
+                data_to_write = struct.pack("i", str_to_int)
+                self.target_file.write(data_to_write[:1])
+                self.flight_harvard = []
         #self.write_result_in_bin()
 
     def write_result_in_bin(self):
@@ -194,8 +194,8 @@ class DigitalHarvard:
         while i < len(frame):
             word = frame[i:i+12]
             #reverse_word = "0000" + word[::-1]
-            reverse_word = "0000" + word
-            bytes_to_write = [reverse_word[0:8], reverse_word[8:]]
+            direct_word = "0000" + word
+            bytes_to_write = [direct_word[0:8], direct_word[8:]]
             for each in bytes_to_write:
                 str_to_int = int(each, 2)
                 data_to_write = struct.pack("i", str_to_int)

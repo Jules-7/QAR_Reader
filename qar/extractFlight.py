@@ -5,6 +5,7 @@ import win32api
 from boeing import B737
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import DigitalHarvard
+from source_data import QAR_TYPES
 
 
 class Flight:
@@ -14,17 +15,19 @@ class Flight:
         to be processed according to the QAR type """
 
     def __init__(self, gui_progress, start, end, path, name,
-                 qar_type, path_to_save, flag):
+                 chosen_acft_qar, path_to_save):
         self.progress_bar = gui_progress
         self.start = start
         self.end = end
         self.path = path
         self.name = name
+        self.chosen_acft_type = chosen_acft_qar
+        self.acft = QAR_TYPES[self.chosen_acft_type][0]
+        self.qar_type = QAR_TYPES[self.chosen_acft_type][1]
+        self.flag = self.acft + "_" + self.qar_type
         self.path_to_save = path_to_save
-        self.flag = flag
-        self.qar_type = qar_type
 
-        if self.flag == "a320_cf":
+        if self.qar_type == "cf":
             self.prepare_cf_file()
             self.make_flight()
 
@@ -32,21 +35,21 @@ class Flight:
             self.get_flight()
             self.save_flight()
 
-        elif self.flag == "qar":
+        elif self.qar_type == "qar":
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "s340_qar_sound" or self.flag == "s340_qar_no_sound":
-            #self.qar_type = "qar"
+        elif self.acft == "s340":
+        #elif self.flag == "s340_qar_sound" or self.flag == "s340_qar_no_sound":
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "a320_qar":
-            #self.qar_type = self.flag
-            self.get_flight()
-            self.make_flight()
+        #elif self.flag == "a320_qar":
+            #self.get_flight()
+            #self.make_flight()
 
-        elif self.flag == "an32_testerU32" or self.flag == "an72_testerU32":
+        elif self.qar_type == "testerU32":
+        #elif self.flag == "an32_testerU32" or self.flag == "an72_testerU32":
             self.get_flight()
             self.make_flight()
 
@@ -54,18 +57,16 @@ class Flight:
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "an74_bur3":
-            self.qar_type = "bur3"
+        elif self.qar_type == "bur3":
+        #elif self.flag == "an74_bur3":
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "an74_bur3_code":
-            self.qar_type = "bur3_code"
+        elif self.qar_type == "bur3_code":
             self.get_flight()
             self.make_flight()
 
         elif self.flag == "b737_4700":
-            #self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -73,7 +74,6 @@ class Flight:
             self.save_raw()
 
         elif self.flag == "b737_dfdr_980":
-            #self.qar_type = self.flag
             self.get_flight()
             self.make_flight()
 
@@ -135,7 +135,8 @@ class Flight:
                             self.progress_bar, self.path_to_save,
                             self.flag, None, self.qar_type)
 
-            elif self.flag == "a320_qar" or self.flag == "a320_cf":
+            elif self.acft == "a320":
+            #elif self.flag == "a320_qar" or self.flag == "a320_cf": 768 192
                 a320 = A320(tmp_file_name, target_file_name, 768, 192,
                             self.progress_bar, self.path_to_save, self.flag, self.qar_type)
 
@@ -158,15 +159,14 @@ class Flight:
 
             elif self.qar_type == "bur3_code":  # an74
                 bur = Bur3(tmp_file_name, "code_" + target_file_name,
-                                                self.progress_bar,
-                                                self.path_to_save,
-                                                self.flag, ["011111111"], 512, mode="code")
+                           self.progress_bar, self.path_to_save,
+                           self.flag, ["011111111"], 512, mode="code")
 
             # 768 - bytes in frame, 192 - bytes in subframe
             # for now data is recorded in length (Harvard coding)
             elif self.flag == "b737_4700":
                 b737 = DigitalHarvard(tmp_file_name, target_file_name, 768, 192,
-                            self.progress_bar, self.path_to_save, self.flag)
+                                      self.progress_bar, self.path_to_save, self.flag)
 
             elif self.flag == "b737_dfdr_980":
                 b737 = B737(tmp_file_name, target_file_name, 384, 96,
