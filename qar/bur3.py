@@ -1,6 +1,6 @@
 import os
 import struct
-import time
+from source_data import HEADER_SIZE
 
 
 SOURCE = 'ACFT'
@@ -22,7 +22,6 @@ class Bur3(object):
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")
-        self.header_size = 128
         self.sequence = 1000  # sequence of bytes to determine average
         self.start = 0
         self.stop = 0
@@ -66,14 +65,14 @@ class Bur3(object):
         self.progress_bar.SetValue(100)
 
     def write_header(self):
-        self.target_file.write(self.source.read(self.header_size))
+        self.target_file.write(self.source.read(HEADER_SIZE))
 
     def find_average(self):
         """find average value - average level to compare with"""
         summa = sum(map((lambda x: ord(x)), self.source.read(self.sequence)))
         self.average = summa/self.sequence
         # go back by sequence length -> to get at the data beginning
-        self.source.seek(128, 0)
+        self.source.seek(HEADER_SIZE, 0)
 
     def count_upper(self, data, upper_part):
         """count number of bytes above average level"""

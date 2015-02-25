@@ -5,7 +5,7 @@ import win32api
 from boeing import B737
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import DigitalHarvard
-from source_data import QAR_TYPES
+from source_data import QAR_TYPES, HEADER_SIZE
 
 
 class Flight:
@@ -79,12 +79,11 @@ class Flight:
 
     def get_flight(self):
         """ get the whole flight from source file """
-        header = 128
         eof = [255] * 16
         data = open(self.path, "rb")
         if self.end == 0:
-            data.seek(self.start + header)
-            counter = header
+            data.seek(self.start + HEADER_SIZE)
+            counter = HEADER_SIZE
             dat = data.read(15)
             part = [ord(each) for each in dat]
             while True:
@@ -162,10 +161,10 @@ class Flight:
                            self.progress_bar, self.path_to_save,
                            self.flag, ["011111111"], 512, mode="code")
 
-            # 768 - bytes in frame, 192 - bytes in subframe
+            # 768 - bits in subframe, 3072 - bits in frame
             # for now data is recorded in length (Harvard coding)
             elif self.flag == "b737_4700":
-                b737 = DigitalHarvard(tmp_file_name, target_file_name, 768, 192,
+                b737 = DigitalHarvard(tmp_file_name, target_file_name, 3072, 768,
                                       self.progress_bar, self.path_to_save, self.flag)
 
             elif self.flag == "b737_dfdr_980":
