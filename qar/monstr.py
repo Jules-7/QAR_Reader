@@ -89,8 +89,11 @@ class MonstrHeader():
                 self.get_current_date(header)
                 self.headers.append(header)
             else:  # header is not valid
-                # but we need to take it as an end of previous flight
-                self.corrupted_header.append((self.flights_start[-1], self.index))
+                if len(self.flights_start) > 1:
+                    # but we need to take it as an end of previous flight
+                    self.corrupted_header.append((self.flights_start[-1], self.index))
+                else:
+                    pass
         self.index += CLUSTER
 
     def find_flights(self):
@@ -162,6 +165,7 @@ class MonstrHeader():
                                                   self.get_flight_end(self.flights_start[i],
                                                                       self.file_len)))
                 i += 1
+        #print(self.flight_intervals)
 
     def correct_flight_intervals(self):
 
@@ -225,7 +229,7 @@ class MonstrHeader():
         end_sign_ff = ['255'] * pattern_size
         end_sign_zeroes = ['0'] * pattern_size
 
-        while bytes_counter < end:
+        while bytes_counter < (end - start - pattern_size):
             next_frame = self.dat.read(pattern_size)
             if next_frame == "":
                 return start + bytes_counter

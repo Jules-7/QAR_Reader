@@ -1,6 +1,6 @@
 from SAAB340 import SAAB
 from airbus import A320
-from bur3 import Bur3
+from bur3 import Bur3, Bur3Analog
 import win32api
 from boeing import B737
 from header_frames import HeaderFrameSearchWrite
@@ -63,6 +63,10 @@ class Flight:
             self.make_flight()
 
         elif self.qar_type == "bur3_code":
+            self.get_flight()
+            self.make_flight()
+
+        elif self.qar_type == "bur3_analog":
             self.get_flight()
             self.make_flight()
 
@@ -153,13 +157,18 @@ class Flight:
 
             # current version goes as analog to digital signal conversion
             elif self.qar_type == "bur3":  # an74
-                bur = Bur3(tmp_file_name, target_file_name, 384, 96,
-                            self.progress_bar, self.path_to_save, self.flag, mode="ord")
+                bur = Bur3(tmp_file_name, target_file_name,
+                           self.progress_bar, self.path_to_save,
+                           self.flag, mode="ord")
 
             elif self.qar_type == "bur3_code":  # an74
                 bur = Bur3(tmp_file_name, "code_" + target_file_name,
                            self.progress_bar, self.path_to_save,
                            self.flag, ["011111111"], 512, mode="code")
+
+            elif self.qar_type == "bur3_analog":  # an74
+                bur = Bur3Analog(tmp_file_name, target_file_name, 384, 96,
+                                 self.progress_bar, self.path_to_save, self.flag)
 
             # 768 - bits in subframe, 3072 - bits in frame
             # for now data is recorded in length (Harvard coding)

@@ -1,11 +1,11 @@
 import struct
+from source_data import ARINC_DIRECT
 
 
 class PrepareData(object):
 
     """ This module holds basic methods for frames search
-        A320, SAAB340
-    """
+        A320, SAAB340 """
 
     def __init__(self, tmp_file_name, param_file_name, frame_len,
                  subframe_len, progress_bar, path_to_save, flag, qar_type):
@@ -14,8 +14,10 @@ class PrepareData(object):
         # target parametric file ".inf"
         self.param_file = open(r"%s" % path_to_save + r"\\" +
                                r"%s" % param_file_name, "wb")
-        self.sw_one = "001001000111"  # syncword one
-        self.sw_two = "010110111000"  # syncword two
+        #self.sw_one = "001001000111"  # syncword one
+        #self.sw_two = "010110111000"  # syncword two
+        self.sw_one = ARINC_DIRECT[1]
+        self.sw_two = ARINC_DIRECT[2]
         #self.sw_two = "101001000111"  # actually its syncword three
         self.bytes_counter = 0
         self.mix_type = None

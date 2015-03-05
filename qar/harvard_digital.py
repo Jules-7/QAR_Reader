@@ -192,7 +192,6 @@ class DigitalHarvard:
             return False
 
     def write_frame(self, frame):
-
         i = 0
         while i < len(frame):
             word = frame[i:i+12]

@@ -2,11 +2,8 @@ from monstr import MonstrHeader
 from boeing import Boeing737DFDR980, B747
 from bur_92 import Bur
 from compactFlash import CompactFlash
-from source_data import QAR_TYPES
-
-MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 391, 3911, 403, 411]
-OWN_HEADER_TYPES = [322]
-NO_HEADER_TYPES = [331, 341, 401, 402]
+from source_data import QAR_TYPES, MONSTR_HEADER_TYPES
+from source_data import OWN_HEADER_TYPES, NO_HEADER_TYPES
 
 
 class Split(object):

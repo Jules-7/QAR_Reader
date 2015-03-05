@@ -671,12 +671,14 @@ class MyFrame(wx.Frame):
     def an74_button(self, event):
         self.chosen_acft_type = 381
         name = u"Aн74"
-        choices = [u"БУР-3", u"БУР-3 код"]
+        choices = [u"БУР-3", u"БУР-3 код", u"БУР-3 аналог"]
         option = self.make_choice_window(name, choices)
         if option == u"БУР-3":
             self.chosen_acft_type = 381
         elif option == u"БУР-3 код":
             self.chosen_acft_type = 382
+        elif option == u"БУР-3 аналог":
+            self.chosen_acft_type = 383
         if option:  # choose path to file
             self.on_choose_file()
 
