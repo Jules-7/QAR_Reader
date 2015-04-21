@@ -4,14 +4,14 @@ import wx
 import re
 from source_data import USER, QAR_TYPES, ACCESS
 from extractFlight import Flight
-from splitter import Split
+from splitter import Redirect
 from datetime import datetime
 from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen
 
-""" This module contains:
+""" This module:
     - creates window for choosing of file with flights
     - displays all flights in file
     - allows to save flight as raw data or as flight according
@@ -67,10 +67,10 @@ class WorkerThread(Thread):  # Thread class that executes processing
         """ Run Worker Thread """
 
         # This is the code executing in the new thread
-        s = Split(self.path, self.flag, self.progress_bar)
-        q = s.result
+        out_instance = Redirect(self.path, self.flag, self.progress_bar)
+        file_data = out_instance.result
         # Here's where the result would be returned
-        wx.PostEvent(self._notify_window, ResultEvent(q))
+        wx.PostEvent(self._notify_window, ResultEvent(file_data))
         return
 
 
@@ -335,7 +335,7 @@ class MyFrame(wx.Frame):
         # it goes to almost all methods
         self.chosen_acft_type = None
         self.selected = []  # flights selected from the list
-        self.create_file_menu()
+        #self.create_file_menu()
         self.create_tool_bar()
         self.saved_flights = []  # flights which are already processed and saved
         self.init_options = []
@@ -439,10 +439,8 @@ class MyFrame(wx.Frame):
         self.SetMenuBar(menubar)  # Adding the MenuBar to the Frame content.
 
         #--------- Bind buttons/commands with the methods
-        self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
         #self.Bind(wx.EVT_MENU, self.on_choose_file, choose_file)
 
-        self.Bind(wx.EVT_TOOL, self.save_flight, id=134)  # bind with toolbar
         self.Bind(wx.EVT_MENU, self.save_flight, save_file)  # bind with filemenu
         #self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         #self.Bind(wx.EVT_MENU, self.save_raw, save_raw_file)
@@ -495,7 +493,8 @@ class MyFrame(wx.Frame):
             self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('open_CF.png'))
             self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('a320.bmp'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair" or \
+            ACCESS[USER][0] == "bukovina":
             self.toolbar.AddLabelTool(148, "B737", wx.Bitmap('b737.bmp'))
 
         if ACCESS[USER][0] == "admin":
@@ -520,6 +519,9 @@ class MyFrame(wx.Frame):
             self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('an148.bmp'))
 
         if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(151, "AN140", wx.Bitmap('an140.bmp'))
+
+        if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(150, "AN12", wx.Bitmap('an12.png'))
 
         if ACCESS[USER][0] == "admin":
@@ -527,6 +529,9 @@ class MyFrame(wx.Frame):
 
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
+
+        if ACCESS[USER][0] == "mak":
+            self.toolbar.AddLabelTool(152, "AN148", wx.Bitmap('bur92.bmp'))
 
 
         #--------- HELP for toolbar bitmaps -----------------------------
@@ -545,11 +550,15 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(148, "B737. Choose data source")
         self.toolbar.SetToolLongHelp(149, "Convert from 12 bit-word to 16 bit-word")
         self.toolbar.SetToolLongHelp(150, u"Ан12. Choose data source")
+        self.toolbar.SetToolLongHelp(151, u"Ан140. Choose data source")
+        self.toolbar.SetToolLongHelp(152, u"БУР-92А-05. Choose data source")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
 
         # bind toolbar
+        self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
+        self.Bind(wx.EVT_TOOL, self.save_flight, id=134)  # bind with toolbar
         self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
         self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
@@ -564,6 +573,8 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.b737_button, id=148)
         self.Bind(wx.EVT_MENU, self.twelve_to_sixteen, id=149)
         self.Bind(wx.EVT_MENU, self.an12_button, id=150)
+        self.Bind(wx.EVT_MENU, self.an140_button, id=151)
+        self.Bind(wx.EVT_MENU, self.an140_button, id=152)
 
     #---- At the acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
@@ -638,6 +649,19 @@ class MyFrame(wx.Frame):
         if option:  # choose path to file
             self.on_choose_file()
 
+    def an140_button(self, event):
+        self.chosen_acft_type = 421
+        name = u"Aн140"
+        if ACCESS[USER][0] == "admin":
+            choices = [u"БУР-92А-05"]
+            option = self.make_choice_window(name, choices)
+            if option == u"БУР-92А-05":
+                self.chosen_acft_type = 421
+        elif ACCESS[USER][0] == "mak":
+            option = u"БУР-92А-05"
+        if option:  # choose path to file
+            self.on_choose_file()
+
     def an32_button(self, event):
         self.chosen_acft_type = 351
         name = u"Aн32"
@@ -701,29 +725,35 @@ class MyFrame(wx.Frame):
         self.chosen_acft_type = 401
         name = "B737"
         if ACCESS[USER][0] == "admin":
-            choices = ["QAR", "DFDR 980", "4700"]
+            choices = ["QAR", "DFDR 980", "DFDR 980 I", "4700"]
         elif ACCESS[USER][0] == "yanair":
             choices = ["DFDR 980"]
+        elif ACCESS[USER][0] == "bukovina":
+            choices = ["DFDR 980 I"]
         option = self.make_choice_window(name, choices)
         if option == "QAR":  # save this file with extension .inf to target place
             self.chosen_acft_type = 401
-            dlg = wx.FileDialog(self, "Choose a file:",
+            self.get_path_to_file()
+            ''' dlg = wx.FileDialog(self, "Choose a file:",
                                 style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
             if dlg.ShowModal() == wx.ID_OK:
                 self.path = u"%s" % dlg.GetPath()
             else:  # user press Cancel
-                return
+                return'''
             if self.path:
                 self.get_path_to_save()
-                qar_type = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
+                '''qar_type = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
                                       QAR_TYPES[self.chosen_acft_type][1])
                 self.flag = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
-                                       QAR_TYPES[self.chosen_acft_type][1])
+                                       QAR_TYPES[self.chosen_acft_type][1])'''
                 flight = Flight(self.progress_bar, start=None, end=None, path=self.path,
-                                name=None, qar_type=qar_type,
-                                path_to_save=self.path_to_save, flag=self.flag)
+                                name=None, chosen_acft_qar=self.chosen_acft_type,
+                                path_to_save=self.path_to_save)
         elif option == "DFDR 980":
             self.chosen_acft_type = 402
+            self.on_choose_file()
+        elif option == "DFDR 980 I":
+            self.chosen_acft_type = 4022
             self.on_choose_file()
         elif option == "4700":
             self.chosen_acft_type = 403
@@ -791,8 +821,8 @@ class MyFrame(wx.Frame):
 
         """ Show Result status """
 
-        self.q = event.data
-        self.qar_type = self.q.qar_type
+        self.file_data = event.data
+        self.qar_type = self.file_data.qar_type
         self.DestroyChildren()
 
         self.create_status_bar()
@@ -811,7 +841,7 @@ class MyFrame(wx.Frame):
         self.create_tool_bar()
 
         # at this point separate thread starts and perform processing
-        panel = MyPanel(self, self.q, self.q.path)
+        panel = MyPanel(self, self.file_data, self.file_data.path)
 
         if panel.no_flights:
             self.statusbar.SetStatusText("There are no flights", 0)
@@ -840,12 +870,16 @@ class MyFrame(wx.Frame):
         self.get_path_to_file()
         # redirect path and choice of acft/qar for file opening
         # and flight displaying
-        self.q = WorkerThread(self, self.path, self.chosen_acft_type, self.progress_bar)
+        try:
+            self.file_data = WorkerThread(self, self.path,
+                                          self.chosen_acft_type,
+                                          self.progress_bar)
+            self.progress_bar.Show()
+            self.progress_bar.SetValue(10)
+            self.statusbar.SetStatusText("Downloading...", 0)
 
-        self.progress_bar.Show()
-        self.progress_bar.SetValue(10)
-        #self.progress_bar.Pulse()
-        self.statusbar.SetStatusText("Downloading...", 0)
+        except AttributeError:
+            self.statusbar.SetStatusText("No file is selected...", 0)
 
     def on_choose_cf(self, event):  # choose compact flash
         self.get_path_to_dir()
@@ -871,11 +905,16 @@ class MyFrame(wx.Frame):
 
         try:
             self.chosen_acft_type = 322
-            self.q = WorkerThread(self, self.path, self.chosen_acft_type)
+            self.file_data = WorkerThread(self, self.path,
+                                          self.chosen_acft_type,
+                                          self.progress_bar)
         except:
             pass
 
     def save_flight(self, event):
+        if not self.chosen_acft_type:
+            self.warning("Chose file to load first")
+            return
         self.save("flight")
 
     def save_raw(self, event):
@@ -911,7 +950,7 @@ class MyFrame(wx.Frame):
                 name = self.form_name(mode, flight_index, flight_date)
                 #f = Flight(self.progress_bar, start, end, self.q.path, name,
                            #self.qar_type, self.path_to_save, self.flag)
-                f = Flight(self.progress_bar, start, end, self.q.path, name,
+                flight = Flight(self.progress_bar, start, end, self.file_data.path, name,
                            self.chosen_acft_type, self.path_to_save)
 
         except AttributeError:  # save button was pressed, but no file was opened before
@@ -953,7 +992,10 @@ class MyFrame(wx.Frame):
             qar = "qar"
         elif acft == "s340":
             qar = "qar"
-        name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(no_space_date)
+        if ACCESS[USER][0] == "mak":
+            name = str(index) + "_" + str(qar) + "_" + str(no_space_date)
+        else:
+            name = str(index) + "_" + str(acft) + "_" + str(qar) + "_" + str(no_space_date)
         if rec_type == "flight":
             return name
         elif rec_type == "raw":

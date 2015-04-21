@@ -5,7 +5,7 @@ from source_data import ARINC_DIRECT
 class PrepareData(object):
 
     """ This module holds basic methods for frames search
-        A320, SAAB340 """
+        A320, SAAB340, B737-DFDR-980 """
 
     def __init__(self, tmp_file_name, param_file_name, frame_len,
                  subframe_len, progress_bar, path_to_save, flag, qar_type):

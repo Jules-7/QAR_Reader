@@ -113,7 +113,8 @@ class MonstrHeader():
             - bur3 flight ends either by zeroes or by next header
               last flight ends either by zeroes or by file end """
 
-        if self.info == "b737_4700" or self.info == "an74_bur3":
+        if self.info == "b737_4700" or self.info == "an74_bur3"\
+                or self.info == "an74_bur3_analog":
             i = 0
             for each in self.flights_start:
                 try:

@@ -200,3 +200,44 @@ class Bur(object):
             end_date = each + datetime.timedelta(seconds=self.durations[i])
             self.end_date.append(end_date)
             i += 1
+
+
+class BUR92AN140(object):
+
+    def __init__(self, tmp_file_name, target_file_name, progress_bar,
+                 path_to_save, flag):
+        self.source_file = open(tmp_file_name, "rb")
+        self.target_file = open(r"%s" % path_to_save + r"\\" +
+                                r"%s" % target_file_name, "w")
+        self.progress_bar = progress_bar
+        self.flag = flag
+        self.bytes_counter = 0
+        self.source_size = os.stat(tmp_file_name).st_size
+
+        self.record_data_as_decimal_in_text()
+
+    def record_data_as_decimal_in_text(self):
+        while self.bytes_counter < self.source_size-2:
+            bytes_in_channel = self.get_channel_bytes()
+            #print(bytes_in_channel)
+            switched_bytes = self.switch_bytes(bytes_in_channel)
+            #print switched_bytes
+            inverse_bytes = self.inverse_bytes(switched_bytes)
+            #print inverse_bytes
+            self.target_file.write("%s;\n" % inverse_bytes)
+
+    def get_channel_bytes(self):
+        channel = self.source_file.read(2)
+        self.bytes_counter += 2
+        return [ord(each) for each in channel]
+
+    def switch_bytes(self, bytes_in_channel):
+        return [bytes_in_channel[1], bytes_in_channel[0]]
+
+    def inverse_bytes(self, bytes_ord):
+        channel_bin_str = ""
+        for each in bytes_ord:
+            channel_bin_str += ((str(bin(each)))[2:]).rjust(8, "0")
+        channel_inverse_bin_str = ''.join(["1" if symbol == "0" else "0" for symbol in channel_bin_str])
+        channel = int(channel_inverse_bin_str, 2)
+        return channel

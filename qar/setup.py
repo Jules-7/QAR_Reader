@@ -1,34 +1,9 @@
 #-*-coding: utf-8-*-
 import sys
 from cx_Freeze import setup, Executable
+from source_data import ACCESS, USER
 
-ACCESS = {1: ["admin", "admin", ['b747.bmp',
-                                 'a320.bmp',
-                                 'an148.bmp',
-                                 'an32.bmp',
-                                 'an26.bmp',
-                                 'an72.bmp',
-                                 'an74.bmp',
-                                 's340.bmp',
-                                 'b737.bmp',
-                                 'open_CF.png',
-                                 'save_raw.png',
-                                 '12_16.png',
-                                 'an12.png',
-                                 'test.png']],
-          10: ["yanair", "YanAir", ['a320.bmp', 
-                                    's340.bmp',
-                                    'open_CF.png',
-                                    'b737.bmp']],
-          11: ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', []],
-          12: ["VCH", u'В/Ч №2269', ['an26.bmp', 
-                                     'an72.bmp',
-                                     'an74.bmp']]}
-
-
-USER = 1
-
-USER_LIST = [each for each in ACCESS[USER][2]]
+USER_LIST = [each for each in ACCESS[USER][3]]
 
 # Dependencies are automatically detected, but it might need fine tuning.
 COMMON = ['save.png', 
@@ -49,15 +24,17 @@ build_exe_options = {"packages": ["os"],
 if sys.platform == "win32":
     base = "Win32GUI"
 
-setup(name=u"QAR Reader %s" % ACCESS[USER][1],
-      version="0.13",
-      description="QAR reader application",
-      options={"build_exe": build_exe_options},
-      executables=[Executable("qar_reader.py")])
-#base = "Win32GUI"
-
-
-# GUI applications require a different base on Windows (the default is for a
-# console application).
+if ACCESS[USER][0] == 'admin':
+    setup(name=u"QAR Reader %s" % ACCESS[USER][1],
+          version="0.16",
+          description="QAR reader application",
+          options={"build_exe": build_exe_options},
+          executables=[Executable("qar_reader.py")])
+else:
+    setup(name=u"QAR Reader %s" % ACCESS[USER][1],
+          version="0.1",
+          description="QAR reader application",
+          options={"build_exe": build_exe_options},
+          executables=[Executable("qar_reader.py", base="Win32GUI")])
 
 

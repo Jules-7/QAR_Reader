@@ -6,6 +6,7 @@ from boeing import B737
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import DigitalHarvard
 from source_data import QAR_TYPES, HEADER_SIZE
+from bur_92 import BUR92AN140
 
 
 class Flight:
@@ -34,6 +35,10 @@ class Flight:
         elif self.flag == "b747_qar" or self.flag == "an148_bur92":
             self.get_flight()
             self.save_flight()
+
+        elif self.flag == "an140_bur92":
+            self.get_flight()
+            self.make_flight()
 
         elif self.qar_type == "qar":
             self.get_flight()
@@ -180,6 +185,10 @@ class Flight:
                 b737 = B737(tmp_file_name, target_file_name, 384, 96,
                             self.progress_bar, self.path_to_save, self.flag, self.qar_type)
                 # file -> cop_centr_head
+
+            elif self.flag == "an140_bur92":
+                bur92 = BUR92AN140(tmp_file_name, target_file_name, self.progress_bar,
+                                   self.path_to_save, self.flag)
 
     def prepare_cf_file(self):
 

@@ -1,13 +1,15 @@
 import os
 import datetime
 from processing import PrepareData
+from source_data import QAR_TYPES
 
 
 class Boeing(object):
 
-    """ Common attributes and methods for Boeing flights to be displayed """
+    """ Common attributes and methods for Boeing flights
+        to be found and displayed """
 
-    def __init__(self, path, acft, qar=None):
+    def __init__(self, path, flag):
         self.path = path
         self.data = None
         self.data_len = None
@@ -17,8 +19,8 @@ class Boeing(object):
         self.headers = []
         self.date = []
         self.time = []
-        self.acft = acft
-        self.qar_type = qar
+        self.acft = QAR_TYPES[flag][0]
+        self.qar_type = QAR_TYPES[flag][1]
         self.init_date = None
         self.durations = []
         self.bytes_counter = 0
@@ -44,7 +46,7 @@ class Boeing(object):
     def get_durations(self):
         for each in self.flight_intervals:
             # get amount of bytes in flight,
-            # delete on frame length -> number of frames
+            # depends on frame length -> number of frames
             # multiply by 4 sec -> duration of each frame
             flight_duration = ((each[1] - each[0]) /
                                self.frame_len) * self.frame_duration
@@ -52,7 +54,7 @@ class Boeing(object):
 
     def get_flight_ends(self):
         """ end of each flight
-        gets as start date + flight duration"""
+            equals to -> start date + flight duration"""
         i = 0
         for each in self.start_date:
             duration = self.durations[i]  # seconds
@@ -65,26 +67,31 @@ class Boeing(object):
 class B737(PrepareData):
 
     """ B737 DFDR 980
-        scheme search, frames check, data record """
+        scheme`s search, frames check, flight`s recording """
 
     def __init__(self, tmp_file_name, param_file_name, frame, subframe,
                  progress_bar, path_to_save, flag, qar_type):
         PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
                              subframe, progress_bar, path_to_save, flag, qar_type)
         self.progress_bar.Show()
+
         self.qar_type = qar_type
         self.progress_bar.SetValue(5)
+
         source = open(tmp_file_name, "rb")
         # just created tmp parametric file
         self.source_file = source.read()
         # size of tmp parametric file
         self.param_file_end = len(self.source_file)
         self.progress_bar.SetValue(25)
+
         #-- find mix type scheme -
         self.scheme_search()
         self.progress_bar.SetValue(45)
+
         self.record_data()
         self.progress_bar.SetValue(85)
+
         source.close()
         self.progress_bar.SetValue(95)
 
@@ -94,15 +101,15 @@ class B747(Boeing):
     """ Boeing 747-200
         Search flights and data integrity check """
 
-    def __init__(self, path, acft, qar):
-        Boeing.__init__(self, path, acft, qar)
+    def __init__(self, path, flag):
+        Boeing.__init__(self, path, flag)
         self.data = open(self.path, 'rb')
         self.data_len = os.stat(self.path).st_size
         #self.qar_type = "b747_qar"
         self.init_date = None
-        self.subframe_len = 128
-        self.frame_len = 512
-        self.frame_duration = 4  # sec
+        self.frame_len = QAR_TYPES[flag][2]
+        self.subframe_len = self.subframe_len / 4
+        self.frame_duration = QAR_TYPES[flag][3]  # sec
         self.end_flag = False
         self.record_end_index = False
         # decimal representation of syncwords
@@ -159,14 +166,14 @@ class B747(Boeing):
                     return True
             else:
                 self.data.seek(-1, 1)
-                p11 = self.data.tell()
-                #self.bytes_counter = p11
+                current_pos = self.data.tell()
+                #self.bytes_counter = current_pos
                 self.bytes_counter -= 1
             if self.record_end_index:
                 self.flights_end.append(self.bytes_counter)
                 # important value -> ensures same value of
                 # actual index in file and bytes_counter
-                self.bytes_counter = p11
+                self.bytes_counter = current_pos
                 self.record_end_index = False
 
     def check_frame(self):
@@ -178,7 +185,7 @@ class B747(Boeing):
             and check_sw_four == self.sw_four):
             self.bytes_counter += self.frame_len
             self.data.seek(self.subframe_len, 1)
-            p3 = self.data.tell()
+            #p3 = self.data.tell()
             #self.bytes_counter += self.subframe_len
             return True
 
@@ -190,7 +197,7 @@ class B747(Boeing):
         for each in sw:
             sw_ord.append(str(ord(each)))
         self.data.seek(-2, 1)
-        p2 = self.data.tell()
+        #p2 = self.data.tell()
         return sw_ord
 
     def get_time(self):
@@ -200,12 +207,12 @@ class B747(Boeing):
         - minutes are recorded at 1st subframe only at 72 and 73 bytes
         - hours are recorded at 3d subframe only at 72"""
         i = 1
-        for each in self.flight_intervals:
-            frames_in_flight = (each[1] - each[0]) / self.frame_len
+        for flight in self.flight_intervals:
+            frames_in_flight = (flight[1] - flight[0]) / self.frame_len
             # amount of frames in half flight
             half_flight_frames = frames_in_flight / 2
             # index of half flight
-            half_flight_index = each[0] + half_flight_frames * self.frame_len
+            half_flight_index = flight[0] + half_flight_frames * self.frame_len
 
             #--------- subframe 1 byte 72 and 73 (36 channel)
             minutes_index = half_flight_index + 36 * 2
@@ -289,13 +296,13 @@ class B747(Boeing):
         return int("%s%s" % (one, two))
 
 
-class Boeing737DFDR980(Boeing):
+class Boeing737DFDR980(Boeing, PrepareData):
 
     """ Boeing 737 DFDR 980
         Find flights to display"""
 
-    def __init__(self, path, acft, fdr):
-        Boeing.__init__(self, path, acft, fdr)
+    def __init__(self, path, flag):
+        Boeing.__init__(self, path, flag)
         self.path = path
         self.end_pattern = [0] * 20
         self.start_pattern = [255] * 20
@@ -308,16 +315,19 @@ class Boeing737DFDR980(Boeing):
         self.end_flag = False
         self.data_start = None
         self.record_end_index = False
-        self.subframe_len = 96
-        self.frame_len = 384
-        self.frame_duration = 5  # sec
+        self.frame_len = QAR_TYPES[flag][2]
+        self.subframe_len = self.frame_len / 4
+        self.frame_duration = QAR_TYPES[flag][3]  # sec
+        self.flight_first_three_frames = []
 
         self.find_start()
-        #self.find_flights()
+        self.find_flights()
         #self.correct_flights_starts()
         self.get_flight_intervals()
         self.get_durations()
-        self.get_date_time()
+
+        self.get_first_frames_for_date_time()
+        #self.get_date_time()
 
     def find_start(self):
         """ technical info goes at the beginning - something like header (4 of them)
@@ -391,7 +401,7 @@ class Boeing737DFDR980(Boeing):
         #if self.data_len - self.flights_start[-1] <= self.frame_len:
             #del self.flights_start[-1]
         # at switching to engine generator - power surge appears
-        # it cases appearance of bunch of zeroes after that
+        # it causes appearance of bunch of zeroes after that
         # thus causing absence of data (zeroes) after right engine is started
         # and after its turn off
         # in order to count this case ->
@@ -430,13 +440,32 @@ class Boeing737DFDR980(Boeing):
                 break
 
     def get_flight_intervals(self):
-        #i = 0
-        #while i < len(self.starts):
-            #self.flight_intervals.append((self.starts[i], self.ends[i]))
-            #i += 1
+        i = 0
+        while i < len(self.flights_start):
+            try:
+                self.flight_intervals.append((self.flights_start[i], self.flights_start[i+1]))
+            except:
+                self.flight_intervals.append((self.flights_start[i], self.data_len))
+            i += 1
         #print(self.flight_intervals)
         #take all flights as a whole record from data start till data end
-        self.flight_intervals.append((self.flights_start[0], self.data_len))
+        #self.flight_intervals.append((self.flights_start[0], self.data_len))
+
+    def get_first_frames_for_date_time(self):
+        """first few frames need for date and time"""
+        for each in self.flights_start:
+            first_frames = self.data[each:each + self.frame_len * 3]
+            self.flight_first_three_frames.append(first_frames)
+
+    def get_flight_date_time(self):
+        """take first flight frames, apply scheme search, get date and time"""
+        for each in self.flight_first_three_frames:
+            self.bytes_counter = 0
+            self.source_file = each
+            self.scheme_search()
+
+
+
 
     def get_date_time(self):
         date = datetime.datetime.now()

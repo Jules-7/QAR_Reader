@@ -4,11 +4,13 @@ from source_data import HEADER_SIZE, ARINC_DIRECT
 from harvard_digital import DigitalHarvard
 
 
-SOURCE = 'ACFT'
+SOURCE = 'M'
 if SOURCE == 'BSPI':
     zero = 40  # 29, 2A, 2B
 elif SOURCE == 'ACFT':
     zero = 19
+elif SOURCE == 'M':
+    zero = 5
 
 
 class Bur3(object):

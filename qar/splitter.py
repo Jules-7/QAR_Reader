@@ -6,7 +6,7 @@ from source_data import QAR_TYPES, MONSTR_HEADER_TYPES
 from source_data import OWN_HEADER_TYPES, NO_HEADER_TYPES
 
 
-class Split(object):
+class Redirect(object):
 
     """ This class redirect to appropriate class
         depending on type of data source (QAR, CF, FDR) and aircraft type"""
@@ -43,8 +43,10 @@ class Split(object):
 
     def open_with_no_header(self):
         if self.flag == 331:  # boeing
-            self.result = B747(self.path, self.acft, self.qar)
-        elif self.flag == 341:  # bur92
+            self.result = B747(self.path, self.flag)
+        elif self.flag == 341:  # bur92 an148
             self.result = Bur(self.path)
-        elif self.flag == 402:  # boeing 737-dfdr-980
-            self.result = Boeing737DFDR980(self.path, self.acft, self.qar)
+        elif self.flag == 421:  # bur92 an140
+            self.result = Bur(self.path)
+        elif self.flag == 402 or self.flag == 4022:  # boeing 737-dfdr-980
+            self.result = Boeing737DFDR980(self.path, self.flag)
