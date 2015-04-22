@@ -8,9 +8,10 @@ class SAAB(PrepareData):
         file with data being processed """
 
     def __init__(self,  tmp_file_name, param_file_name,
-                 progress_bar, path_to_save, flag, tmp_bin_file=None):
-        PrepareData.__init__(self, tmp_file_name, param_file_name,
-                             progress_bar, path_to_save, flag)
+                 frame, subframe, progress_bar, path_to_save, flag, tmp_bin_file, qar_type):
+        PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
+                             subframe, progress_bar, path_to_save, flag, qar_type)
+        #self.flag = flag
         self.progress_bar.Show()
         self.progress_bar.SetValue(5)
         # make export of parametric info to tmp param file

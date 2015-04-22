@@ -69,11 +69,13 @@ class B737(PrepareData):
     """ B737 DFDR 980
         scheme`s search, frames check, flight`s recording """
 
-    def __init__(self, tmp_file_name, param_file_name,
-                 progress_bar, path_to_save, flag):
-        PrepareData.__init__(self, tmp_file_name, param_file_name,
-                             progress_bar, path_to_save, flag)
+    def __init__(self, tmp_file_name, param_file_name, frame, subframe,
+                 progress_bar, path_to_save, flag, qar_type):
+        PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
+                             subframe, progress_bar, path_to_save, flag, qar_type)
         self.progress_bar.Show()
+
+        self.qar_type = qar_type
         self.progress_bar.SetValue(5)
 
         source = open(tmp_file_name, "rb")
@@ -103,9 +105,10 @@ class B747(Boeing):
         Boeing.__init__(self, path, flag)
         self.data = open(self.path, 'rb')
         self.data_len = os.stat(self.path).st_size
+        #self.qar_type = "b747_qar"
         self.init_date = None
         self.frame_len = QAR_TYPES[flag][2]
-        self.subframe_len = self.frame_len / 4
+        self.subframe_len = self.subframe_len / 4
         self.frame_duration = QAR_TYPES[flag][3]  # sec
         self.end_flag = False
         self.record_end_index = False

@@ -6,10 +6,10 @@ class A320(PrepareData):
 
     """ A320. Creation of parametric file with data being processed """
 
-    def __init__(self, tmp_file_name, param_file_name,
-                 progress_bar, path_to_save, flag):
-        PrepareData.__init__(self, tmp_file_name, param_file_name,
-                             progress_bar, path_to_save, flag)
+    def __init__(self, tmp_file_name, param_file_name, frame, subframe,
+                 progress_bar, path_to_save, flag, qar_type):
+        PrepareData.__init__(self, tmp_file_name, param_file_name, frame,
+                             subframe, progress_bar, path_to_save, flag, qar_type)
         self.progress_bar.Show()
         #self.qar_type = qar_type  # "airbus"
         self.progress_bar.SetValue(5)

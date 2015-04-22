@@ -1,18 +1,16 @@
 import os
 import datetime
-from source_data import QAR_TYPES
 
 
 class Bur(object):
 
-    def __init__(self, path, chosen_acft_type):
+    def __init__(self, path):
         self.path = path
         self.dat = open(path, "rb")
         # in order to avoid header and starting "noises"
         self.dat.seek(12800, 0)
         self.file_len = os.stat(path).st_size
-        self.chosen_acft_type = chosen_acft_type
-        self.qar_type = QAR_TYPES[self.chosen_acft_type][1]
+        self.qar_type = "BUR-92"
         self.start = False
         self.syncword_one = [0, 0]
         self.flights_start = []
@@ -108,9 +106,7 @@ class Bur(object):
                 i += 1
 
     def get_date_time(self):
-        """
-                   An 148
-        time and date are recorded at the beginning of each frame
+        """ time and date are recorded at the beginning of each frame
         (each 512 starting with 00 00 - 1st and 2d bytes):
         - seconds at 3-4 B
         - minutes at 5-6 B
@@ -120,73 +116,43 @@ class Bur(object):
         - day is recorded only at frame where seconds == 5
         In order to get stable time -> find 'middle flight time'
         and then get start and end flight time
-        knowing amount of frames in flight
-
-                    An 140
-
-        - get first frame
-        - after frame start 00 00 take time and path as start time
-        - seconds at 3 and 4 bytes
-        - minutes at 5 and 6 bytes
-        - hours at 7 and 8 bytes
-        - for each part of time - switch bytes, make inversion, get decimal value
-        """
-
-        if QAR_TYPES[self.chosen_acft_type][0] == "an140":
-            for each in self.flight_intervals:
-                start = each[0]
-                end = each[1]
-                self.dat.seek(start, 0)
-                first_frame = self.dat.read(self.frame_size)
-                sec = self.convert_data(first_frame[2:4])
-                minute = self.convert_data(first_frame[4:6])
-                hour = self.convert_data(first_frame[6:8])
-                sec_decimal = int(sec, 2)
-                min_decimal = int(minute, 2)
-                hour_decimal = int(hour, 2)
-                year = 2014
-                month = 1
-                day = 1
-                start_date_time = datetime.datetime(year=year, month=month, day=day,
-                                             hour=hour_decimal, minute=min_decimal, second=sec_decimal)
-                self.start_date.append(start_date_time)
-
-        else:
-            datetime_reference_table = {}
-            for each in self.flight_intervals:
-                # amount of frames in flight
-                frames_in_flight = (each[1] - each[0]) / self.frame_size
-                frame_half_flight = frames_in_flight / 2  # amount of frames in half
-                # byte
-                middle_flight_index = each[0] + frame_half_flight * self.frame_size
-                self.dat.seek(middle_flight_index, 0)
-                # one minute is 60 frames
-                seconds_N = 0
-                while seconds_N < 60:
-                    one_frame = self.dat.read(self.frame_size)
-                    sec = self.convert_data(one_frame[2:4])
-                    sec_ord = self.convert_in_ord(sec)
-                    if sec_ord == 3:  # at 3d second year is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                    elif sec_ord == 4:  # at 4th second month is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                    elif sec_ord == 5:  # at 5th second day is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                        break
-                    seconds_N += 1
-                middle_flight_date_time = self.get_middle_flight_date(datetime_reference_table)
-                duration = frame_half_flight * self.frame_duration  # sec first half of flight
-                start_date = middle_flight_date_time - datetime.timedelta(seconds=duration)
-                self.start_date.append(start_date)
+        knowing amount of frames in flight"""
+        datetime_reference_table = {}
+        for each in self.flight_intervals:
+            # amount of frames in flight
+            frames_in_flight = (each[1] - each[0]) / self.frame_size
+            frame_half_flight = frames_in_flight / 2  # amount of frames in half
+            # byte
+            middle_flight_index = each[0] + frame_half_flight * self.frame_size
+            self.dat.seek(middle_flight_index, 0)
+            # one minute is 60 frames
+            seconds_N = 0
+            while seconds_N < 60:
+                one_frame = self.dat.read(self.frame_size)
+                pp2 = self.dat.tell
+                sec = self.convert_data(one_frame[2:4])
+                sec_ord = self.convert_in_ord(sec)
+                if sec_ord == 3:  # at 3d second year is recorded as date channel
+                    minute = self.convert_data(one_frame[4:6])
+                    hour = self.convert_data(one_frame[6:8])
+                    date = self.convert_data(one_frame[8:])
+                    datetime_reference_table[sec_ord] = [minute, hour, date]
+                elif sec_ord == 4:  # at 4th second month is recorded as date channel
+                    minute = self.convert_data(one_frame[4:6])
+                    hour = self.convert_data(one_frame[6:8])
+                    date = self.convert_data(one_frame[8:])
+                    datetime_reference_table[sec_ord] = [minute, hour, date]
+                elif sec_ord == 5:  # at 5th second day is recorded as date channel
+                    minute = self.convert_data(one_frame[4:6])
+                    hour = self.convert_data(one_frame[6:8])
+                    date = self.convert_data(one_frame[8:])
+                    datetime_reference_table[sec_ord] = [minute, hour, date]
+                    break
+                seconds_N += 1
+            middle_flight_date_time = self.get_middle_flight_date(datetime_reference_table)
+            duration = frame_half_flight * self.frame_duration  # sec first half of flight
+            start_date = middle_flight_date_time - datetime.timedelta(seconds=duration)
+            self.start_date.append(start_date)
 
     def convert_data(self, data):
         """ Perform change by place bytes and obtain string binary representation """
@@ -247,22 +213,18 @@ class BUR92AN140(object):
         self.flag = flag
         self.bytes_counter = 0
         self.source_size = os.stat(tmp_file_name).st_size
-        self.channels_per_frame = (QAR_TYPES[flag][2])/2
 
         self.record_data_as_decimal_in_text()
 
     def record_data_as_decimal_in_text(self):
-        channels_in_frame = 0
         while self.bytes_counter < self.source_size-2:
             bytes_in_channel = self.get_channel_bytes()
+            #print(bytes_in_channel)
             switched_bytes = self.switch_bytes(bytes_in_channel)
+            #print switched_bytes
             inverse_bytes = self.inverse_bytes(switched_bytes)
-            channels_in_frame += 1
-            if channels_in_frame < self.channels_per_frame:
-                self.target_file.write("%s;" % inverse_bytes)
-            elif channels_in_frame == self.channels_per_frame:
-                self.target_file.write("%s\n" % inverse_bytes)
-                channels_in_frame = 0
+            #print inverse_bytes
+            self.target_file.write("%s;\n" % inverse_bytes)
 
     def get_channel_bytes(self):
         channel = self.source_file.read(2)
