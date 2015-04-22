@@ -1,5 +1,5 @@
 import struct
-from source_data import ARINC_DIRECT
+from source_data import ARINC_DIRECT, QAR_TYPES
 
 
 class PrepareData(object):
@@ -7,8 +7,8 @@ class PrepareData(object):
     """ This module holds basic methods for frames search
         A320, SAAB340, B737-DFDR-980 """
 
-    def __init__(self, tmp_file_name, param_file_name, frame_len,
-                 subframe_len, progress_bar, path_to_save, flag, qar_type):
+    def __init__(self, tmp_file_name, param_file_name,
+                 progress_bar, path_to_save, flag):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
         # target parametric file ".inf"
@@ -21,11 +21,11 @@ class PrepareData(object):
         #self.sw_two = "101001000111"  # actually its syncword three
         self.bytes_counter = 0
         self.mix_type = None
-        self.frame_len = frame_len
-        self.subframe_len = subframe_len  # in bytes
-        self.progress_bar = progress_bar  # in bytes
         self.flag = flag
-        self.qar_type = qar_type
+        self.frame_len = QAR_TYPES[flag][2]
+        self.subframe_len = self.frame_len / 4  # in bytes
+        self.progress_bar = progress_bar
+        self.qar_type = QAR_TYPES[flag][1]
 
     def record_data(self):
         """ perform recording of valid frames only """

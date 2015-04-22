@@ -1,6 +1,6 @@
 import os
 import struct
-from source_data import HEADER_SIZE, ARINC_DIRECT
+from source_data import HEADER_SIZE, ARINC_DIRECT, QAR_TYPES
 from harvard_digital import DigitalHarvard
 
 
@@ -45,7 +45,8 @@ class Bur3(object):
         self.str_data = None
         self.start_index = 0
         self.flight = True
-        self.frame_in_bits = 3072
+        self.frame_size = QAR_TYPES[flag][2]
+        self.frame_in_bits = self.frame_size * 8  # 3072 bits
         self.bit_counter = 0
 
         self.record_header()
@@ -70,8 +71,8 @@ class Bur3(object):
         #self.target_txt.close()
 
     def record_header(self):
-        header = self.source.read(128)
-        self.bytes_counter += 128
+        header = self.source.read(HEADER_SIZE)
+        self.bytes_counter += HEADER_SIZE
         self.target_file.write(header)
 
     def convert_to_ord(self):
@@ -161,7 +162,7 @@ class Bur3Analog(object):
     """ Data (Arinc 717) is written as durations (zeros and ones)
 
         Harvard rectangular signal conversion to arinc """
-    def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
+    def __init__(self, tmp_file_name, target_file_name,
                  progress_bar, path_to_save, flag):
         self.zero = 5  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
@@ -170,11 +171,11 @@ class Bur3Analog(object):
         self.sequence = 1000  # sequence of bytes to determine average
         self.start = 0
         self.stop = 0
-        self.syncword = "001001000111"
-        self.frame_in_bits = 3072
+        self.syncword = ARINC_DIRECT[1]  # "001001000111"
         self.source_size = os.stat(tmp_file_name).st_size
-        self.frame_size = frame_size
-        self.subframe_size = subframe_size
+        self.frame_size = QAR_TYPES[flag][1]
+        self.subframe_size = self.frame_size / 4
+        self.frame_in_bits = self.frame_size * 8  # 3072 bits
         self.progress_bar = progress_bar
         self.flag = flag
         self.bytes_counter = 0
