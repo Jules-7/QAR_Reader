@@ -51,12 +51,12 @@ class WorkerThread(Thread):  # Thread class that executes processing
 
     """ Worker Thread Class """
 
-    def __init__(self, notify_window, path, flag, progress_bar):
+    def __init__(self, notify_window, path, chosen_acft_type, progress_bar):
         Thread.__init__(self)
         self._notify_window = notify_window
         self._want_abort = 0
         self.path = path
-        self.flag = flag
+        self.chosen_acft_type = chosen_acft_type
         self.progress_bar = progress_bar
         # This starts the thread running on creation, but you could
         # also make the GUI thread responsible for calling this
@@ -67,7 +67,7 @@ class WorkerThread(Thread):  # Thread class that executes processing
         """ Run Worker Thread """
 
         # This is the code executing in the new thread
-        out_instance = Redirect(self.path, self.flag, self.progress_bar)
+        out_instance = Redirect(self.path, self.chosen_acft_type, self.progress_bar)
         file_data = out_instance.result
         # Here's where the result would be returned
         wx.PostEvent(self._notify_window, ResultEvent(file_data))
@@ -330,7 +330,7 @@ class MyFrame(wx.Frame):
                           "QAR Reader  %s" % WIN_TITLE, size=SIZE)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.create_status_bar()
-        # stands for both acft type and data source type
+        # chosen_acft_type stands for both acft type and data source type
         # this is global like variable
         # it goes to almost all methods
         self.chosen_acft_type = None
@@ -345,7 +345,7 @@ class MyFrame(wx.Frame):
         self.SetSizer(self.sizer)
 
     def create_status_bar(self):
-        # Create StatusBar in the bottom of the window
+        """ Create StatusBar in the bottom of the window"""
         self.statusbar = self.CreateStatusBar()
         # Set number of fields for statusbar
         self.statusbar.SetFieldsCount(3)
@@ -486,7 +486,7 @@ class MyFrame(wx.Frame):
         #self.toolbar = wx.ToolBar(self, -1)
         self.toolbar = self.CreateToolBar()
         self.toolbar.SetToolBitmapSize((30, 30))
-        #at executable creation -> place images to the same folder and change path
+        #at executable creation -> images must be at the same folder with script
         self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('save.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
@@ -558,7 +558,7 @@ class MyFrame(wx.Frame):
 
         # bind toolbar
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
-        self.Bind(wx.EVT_TOOL, self.save_flight, id=134)  # bind with toolbar
+        self.Bind(wx.EVT_TOOL, self.save_flight, id=134)
         self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
         self.Bind(wx.EVT_TOOL, self.save_raw, id=135)
         self.Bind(wx.EVT_TOOL, self.on_choose_cf, id=136)
@@ -616,7 +616,7 @@ class MyFrame(wx.Frame):
     #---- When acft type ChoiceDialog is already opened ------------------
     #---- -> at type picking its value is stored -------------------------
     def a320_button(self, event):
-        #---- In case teh acft type bitmap is pressed -> assign value of QAR --
+        #---- In case the acft type bitmap is pressed -> assign value of QAR --
         #---- as it is already marked in the ChoiceDialog (as it is the first)
         self.chosen_acft_type = 321
         name = "A320"
@@ -713,10 +713,8 @@ class MyFrame(wx.Frame):
         option = self.make_choice_window(name, choices)
         if option == u"QAR(with sound)":
             self.chosen_acft_type = 391
-            self.qar_type = "qar_sound"
         elif option == u"QAR(no sound)":
             self.chosen_acft_type = 3911
-            self.qar_type = "qar_no_sound"
         if option:
             # choose path to file
             self.on_choose_file()
@@ -747,7 +745,7 @@ class MyFrame(wx.Frame):
                 self.flag = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
                                        QAR_TYPES[self.chosen_acft_type][1])'''
                 flight = Flight(self.progress_bar, start=None, end=None, path=self.path,
-                                name=None, chosen_acft_qar=self.chosen_acft_type,
+                                name=None, chosen_acft_type=self.chosen_acft_type,
                                 path_to_save=self.path_to_save)
         elif option == "DFDR 980":
             self.chosen_acft_type = 402
@@ -950,10 +948,10 @@ class MyFrame(wx.Frame):
                 name = self.form_name(mode, flight_index, flight_date)
                 #f = Flight(self.progress_bar, start, end, self.q.path, name,
                            #self.qar_type, self.path_to_save, self.flag)
-                flight = Flight(self.progress_bar, start, end, self.file_data.path, name,
-                           self.chosen_acft_type, self.path_to_save)
+                flight = Flight(self.progress_bar, start, end, self.file_data.path,
+                                name, self.chosen_acft_type, self.path_to_save)
 
-        except AttributeError:  # save button was pressed, but no file was opened before
+        except AttributeError:  # save button is pressed, but no file was opened before
             self.warning("Open file with flights to process")
             return
         self.selected = []
@@ -988,9 +986,11 @@ class MyFrame(wx.Frame):
         no_space_date = str(cor_date).replace(" ", "_")
         acft = QAR_TYPES[self.chosen_acft_type][0]
         qar = QAR_TYPES[self.chosen_acft_type][1]
-        if acft == "a320":
-            qar = "qar"
-        elif acft == "s340":
+        #if acft == "a320":
+            #qar = "qar"
+        #elif acft == "s340":
+            #qar = "qar"
+        if acft == "s340":
             qar = "qar"
         if ACCESS[USER][0] == "mak":
             name = str(index) + "_" + str(qar) + "_" + str(no_space_date)

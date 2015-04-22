@@ -1,7 +1,7 @@
 #-*-coding: utf-8-*-
 
 # admin
-USER = 14
+USER = 1
 #-----------|id|---|acft|----|qar|-----|frame, B|--|duration, sec|
 QAR_TYPES = {321:  ["a320",  "qar",          768,    4],
              322:  ["a320",  "cf",           768,    2],
