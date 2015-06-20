@@ -48,5 +48,7 @@ class Redirect(object):
             self.result = Bur(self.path, self.chosen_acft_type)
         elif self.chosen_acft_type == 421:  # bur92 an140
             self.result = Bur(self.path, self.chosen_acft_type)
-        elif self.chosen_acft_type == 402 or self.chosen_acft_type == 4022:  # boeing 737-dfdr-980
+        elif self.chosen_acft_type == 402 or self.chosen_acft_type == 4022 or  \
+                 self.chosen_acft_type == 4031 or self.chosen_acft_type == 4032 or \
+                 self.chosen_acft_type == 4033:  # boeing 737-dfdr-980
             self.result = Boeing737DFDR980(self.path, self.chosen_acft_type)

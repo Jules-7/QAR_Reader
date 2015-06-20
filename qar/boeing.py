@@ -301,12 +301,11 @@ class Boeing737DFDR980(Boeing, PrepareData):
     def __init__(self, path, flag):
         Boeing.__init__(self, path, flag)
         self.path = path
+        self.flag = flag # define fdr type
         self.end_pattern = [0] * 20
         self.start_pattern = [255] * 20
         self.data = open(self.path, "rb").read()
         self.data_len = os.stat(self.path).st_size
-        #self.acft = acft
-        #self.qar_type = fdr
         self.start_index = None
         self.init_date = None
         self.end_flag = False
@@ -316,6 +315,7 @@ class Boeing737DFDR980(Boeing, PrepareData):
         self.subframe_len = self.frame_len / 4
         self.frame_duration = QAR_TYPES[flag][3]  # sec
         self.flight_first_three_frames = []
+        self.pattern = None
 
         self.find_start()
         self.find_flights()
@@ -324,7 +324,7 @@ class Boeing737DFDR980(Boeing, PrepareData):
         self.get_durations()
 
         self.get_first_frames_for_date_time()
-        #self.get_date_time()
+        self.get_date_time()
 
     def find_start(self):
         """ technical info goes at the beginning - something like header (4 of them)
@@ -367,19 +367,36 @@ class Boeing737DFDR980(Boeing, PrepareData):
             self.find_flight_start(self.data[self.bytes_counter:])
 
     def find_flight_start(self, data_range):
+        """ different fdr types has different pattern of flight end\start"""
         i = 0
-        for each in data_range:
-            if ord(each) == 0:
-                i += 1
-            else:
-                i = 0
-            self.bytes_counter += 1
-            if i == 20:
-                self.flights_start.append(self.bytes_counter)
-                # ensure cases when zeroes = 40 and more
-                # increase position to pass zeroes
-                self.bytes_counter += 40
-                return
+        if QAR_TYPES[self.flag][1] == "dfdr_980_BDV":
+            pattern = 6
+            for each in data_range:
+                if ord(each) == 255:
+                    i += 1
+                else:
+                    i = 0
+                self.bytes_counter += 1
+                if i == pattern:
+                    self.append_start()
+        else:
+            pattern = 20
+            for each in data_range:
+                if ord(each) == 0:
+                    i += 1
+                else:
+                    i = 0
+                self.bytes_counter += 1
+                if i == pattern:
+                    self.append_start()
+
+    def append_start(self):
+        """ append flight start to flights start list"""
+        self.flights_start.append(self.bytes_counter)
+        # ensure cases when zeroes = 40 and more
+        # increase position to pass zeroes
+        #self.bytes_counter += 40
+        return
 
     def correct_flights_starts(self):
         """ At the end of a record plenty zeroes may be present (up to 200).
@@ -460,9 +477,6 @@ class Boeing737DFDR980(Boeing, PrepareData):
             self.bytes_counter = 0
             self.source_file = each
             self.scheme_search()
-
-
-
 
     def get_date_time(self):
         date = datetime.datetime.now()

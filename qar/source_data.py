@@ -18,13 +18,16 @@ QAR_TYPES = {321:  ["a320",  "qar",          768,    4],
              401:  ["b737",  "qar",          None,   None],
              402:  ["b737",  "dfdr_980",     384,    5],
              4022: ["b737",  "dfdr_980_I",   384,    4],
+             4031: ["b737",  "dfdr_980_BDB", 384,    5],
+             4032: ["b737",  "dfdr_980_BDO", 384,    5],
+             4033: ["b737",  "dfdr_980_BDV", 384,    5],
              403:  ["b737",  "4700",         768,    4],
              411:  ["an12",  "msrp12",       512,    0.5],
              421:  ["an140", "bur92",        512,    1]}
 
 
 # ------|User id|-|username through code|-|name of prog window|-|program window size|
-ACCESS = {1:       ["admin",          "admin",                  (900, 500), ['b747.bmp',
+ACCESS = {1:       ["admin",          "admin",                (1000, 500), ['b747.bmp',
                                                                             'a320.bmp',
                                                                             'an148.bmp',
                                                                             'an32.bmp',
@@ -38,7 +41,8 @@ ACCESS = {1:       ["admin",          "admin",                  (900, 500), ['b7
                                                                             '12_16.png',
                                                                             'an12.png',
                                                                             'test.png',
-                                                                            'an140.bmp']],
+                                                                            'an140.bmp',
+                                                                            'har_dig.png']],
 
           10:      ["yanair",           "YanAir",               (600, 500), ['a320.bmp',
                                                                              's340.bmp',
@@ -70,4 +74,4 @@ HEADER_SIZE = 128  # Monstr
 # all qar_types id must be registered here
 MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411]
 OWN_HEADER_TYPES = [322]
-NO_HEADER_TYPES = [331, 341, 401, 402, 4022, 421]
+NO_HEADER_TYPES = [331, 341, 401, 402, 4022, 4031, 4032, 4033, 421]

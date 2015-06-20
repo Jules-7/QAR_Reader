@@ -10,6 +10,8 @@ from initialization import Initialize
 import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen
+from harvard_digital import HarvardToDigitConverter
+from wx.lib.masked import NumCtrl
 
 """ This module:
     - creates window for choosing of file with flights
@@ -533,6 +535,8 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "mak":
             self.toolbar.AddLabelTool(152, "AN148", wx.Bitmap('bur92.bmp'))
 
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(153, 'har_dig', wx.Bitmap('har_dig.png'))
 
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -552,6 +556,7 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(150, u"Ан12. Choose data source")
         self.toolbar.SetToolLongHelp(151, u"Ан140. Choose data source")
         self.toolbar.SetToolLongHelp(152, u"БУР-92А-05. Choose data source")
+        self.toolbar.SetToolLongHelp(153, "Convert from Harvard to digital")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()
@@ -575,6 +580,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.an12_button, id=150)
         self.Bind(wx.EVT_MENU, self.an140_button, id=151)
         self.Bind(wx.EVT_MENU, self.an140_button, id=152)
+        self.Bind(wx.EVT_MENU, self.harvard_to_digital, id=153)
 
     #---- At the acft and data type selection via FILEMENU -> -------
     #---- selected option is stored
@@ -722,6 +728,7 @@ class MyFrame(wx.Frame):
     def b737_button(self, event):
         self.chosen_acft_type = 401
         name = "B737"
+        choices = []
         if ACCESS[USER][0] == "admin":
             choices = ["QAR", "DFDR 980", "DFDR 980 I", "4700"]
         elif ACCESS[USER][0] == "yanair":
@@ -732,23 +739,22 @@ class MyFrame(wx.Frame):
         if option == "QAR":  # save this file with extension .inf to target place
             self.chosen_acft_type = 401
             self.get_path_to_file()
-            ''' dlg = wx.FileDialog(self, "Choose a file:",
-                                style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
-            if dlg.ShowModal() == wx.ID_OK:
-                self.path = u"%s" % dlg.GetPath()
-            else:  # user press Cancel
-                return'''
             if self.path:
                 self.get_path_to_save()
-                '''qar_type = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
-                                      QAR_TYPES[self.chosen_acft_type][1])
-                self.flag = "%s_%s" % (QAR_TYPES[self.chosen_acft_type][0],
-                                       QAR_TYPES[self.chosen_acft_type][1])'''
                 flight = Flight(self.progress_bar, start=None, end=None, path=self.path,
                                 name=None, chosen_acft_type=self.chosen_acft_type,
                                 path_to_save=self.path_to_save)
-        elif option == "DFDR 980":
-            self.chosen_acft_type = 402
+        elif option == "DFDR 980":  # different fdr types
+            dfdr_choices = ["default", "BDB", "BDO", "BDV"]
+            dfdr_type = self.make_choice_window(name, dfdr_choices)
+            if dfdr_type == "default":
+                self.chosen_acft_type = 402
+            elif dfdr_type == "BDB":
+                self.chosen_acft_type = 4031
+            elif dfdr_type == "BDO":
+                self.chosen_acft_type = 4032
+            elif dfdr_type == "BDV":
+                self.chosen_acft_type = 4033
             self.on_choose_file()
         elif option == "DFDR 980 I":
             self.chosen_acft_type = 4022
@@ -972,6 +978,17 @@ class MyFrame(wx.Frame):
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
+    def harvard_to_digital(self, event):
+        """ Transform rectangular Harvard data to digital equivalent """
+        self.get_path_to_file()
+        self.get_file_to_save()
+        zero_length = self.get_zero_length()
+        self.statusbar.SetStatusText("Converting...", 0)
+        convert = HarvardToDigitConverter(self.path, zero_length,
+                                          self.progress_bar, self.path_to_save)
+        self.progress_bar.SetValue(100)
+        self.statusbar.SetStatusText("Conversion is finished", 0)
+
     def warning(self, message, caption='Warning!'):
         dlg = wx.MessageDialog(self, message, caption, wx.OK | wx.ICON_WARNING)
         dlg.ShowModal()
@@ -1015,6 +1032,20 @@ class MyFrame(wx.Frame):
             return
         save_dialog.Destroy()
 
+    def get_file_to_save(self):
+        """ Get path and name for file to save """
+        save_dialog = wx.FileDialog(self, "Save file as: ", "", "",
+                    "INF files (*.inf)| *.inf | BIN files (*.bin)| *.bin | DAT files (*.dat) | *.dat",
+                    wx.FD_SAVE)
+        # If the user selects OK, then we process the dialog's data.
+        # This is done by getting the path data from the dialog - BEFORE
+        # we destroy it.
+        if save_dialog.ShowModal() == wx.ID_OK:
+            self.path_to_save = u"%s" % save_dialog.GetPath()
+        else:
+            return
+        save_dialog.Destroy()
+
     def get_path_to_file(self):
         dlg = wx.FileDialog(self, "Choose a file:",
                             style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
@@ -1035,6 +1066,14 @@ class MyFrame(wx.Frame):
         else:
             return
         dlg.Destroy()
+
+    def get_zero_length(self):
+        dlg = wx.TextEntryDialog(self, 'Insert zero length', style=wx.OK)
+        dlg.ShowModal()
+        zero_length = dlg.GetValue()
+        dlg.Destroy()
+        return int(zero_length)
+
 
 #----------------------------------------------------------------------
 # runs the script

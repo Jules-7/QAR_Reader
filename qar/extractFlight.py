@@ -84,7 +84,8 @@ class Flight:
         elif self.flag == "b737_qar":
             self.save_raw()
 
-        elif self.flag == "b737_dfdr_980":
+        elif self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or \
+            self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV":
             self.get_flight()
             self.make_flight()
 
@@ -113,6 +114,7 @@ class Flight:
             self.flight = data.read(length)
 
     def make_flight(self):
+        global RESOLUTION
         if "raw" in self.name:
             # save raw data in file
             new_file = open(r"%s" % self.path_to_save + r"\\" + str(self.name) + ".bin", "wb")
@@ -180,7 +182,8 @@ class Flight:
                 b737 = DigitalHarvard(tmp_file_name, target_file_name, 3072, 768,
                                       self.progress_bar, self.path_to_save, self.flag)
 
-            elif self.flag == "b737_dfdr_980":
+            elif self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or \
+                     self.flag == "b737_dfdr_980_BDO" or  self.flag == "b737_dfdr_980_BDV":
                 b737 = B737(tmp_file_name, target_file_name,
                             self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)

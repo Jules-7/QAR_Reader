@@ -3,6 +3,12 @@ import sys
 from cx_Freeze import setup, Executable
 from source_data import ACCESS, USER
 
+""" to make executable:
+    1. put all related files in Python dir which contains python.exe
+    2. set up this file (setup.py)
+    3. in terminal cd to dir with setup.py, python.exe and all project files
+    4. run $ python setup.py install """
+
 USER_LIST = [each for each in ACCESS[USER][3]]
 
 # Dependencies are automatically detected, but it might need fine tuning.

@@ -20,11 +20,10 @@ class DigitalHarvard:
 
     def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
                  progress_bar, path_to_save, flag):
-        self.zero = 40  # min number of bytes(length) that determines zero
+        self.zero = 12  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")
-        self.sequence = 1000  # sequence of bytes to determine average
         self.start = 0
         self.stop = 0
         self.first_syncword = ARINC_REVERSE[1]
@@ -74,6 +73,7 @@ class DigitalHarvard:
 
     def find_average(self):
         """find average value - average level to compare with"""
+        self.sequence = 1000  # sequence of bytes to determine average
         summa = sum(map((lambda x: ord(x)), self.source.read(self.sequence)))
         self.average = summa/self.sequence
         # go back by sequence length -> to get at the data beginning
@@ -110,6 +110,7 @@ class DigitalHarvard:
         upper = True
         while True:
             data = self.source.read(1)
+            self.bytes_counter += 1
             if data == '':
                 break
             if upper:
@@ -134,12 +135,12 @@ class DigitalHarvard:
                 self.flight_harvard.append("1")
                 i += 2
             # to create binary file of data
-            #if len(self.flight_harvard) == 8:
-                #byte_to_str = ''.join(self.flight_harvard)
-                #str_to_int = int(byte_to_str, 2)
-                #data_to_write = struct.pack("i", str_to_int)
-                #self.target_file.write(data_to_write[:1])
-                #self.flight_harvard = []
+            if len(self.flight_harvard) == 8:
+                byte_to_str = ''.join(self.flight_harvard)
+                str_to_int = int(byte_to_str, 2)
+                data_to_write = struct.pack("i", str_to_int)
+                self.target_file.write(data_to_write[:1])
+                self.flight_harvard = []
 
     def get_data_as_str(self):
         self.str_data = ''.join(self.flight_harvard)
@@ -204,3 +205,56 @@ class DigitalHarvard:
                 data_to_write = struct.pack("i", str_to_int)
                 self.target_file.write(data_to_write[:1])
             i += 12
+
+
+class HarvardToDigitConverter(DigitalHarvard):
+
+    """ Harvard encoded data to digital representation
+
+        HarvardToDigitConverter:
+            - determine average
+            - calculate pulses length
+            - convert to digital representation
+            - record to file
+    """
+
+    def __init__(self, source_file, zero_length,
+                 progress_bar, path_to_save):
+        self.zero = zero_length
+        self.source = open(source_file, "rb")
+        self.source_size = os.stat(source_file).st_size
+        self.target_file = open(r"%s" % path_to_save, "wb")
+        self.progress_bar = progress_bar
+        self.bytes_counter = 0
+        self.flight_ord = []
+        self.flight_harvard = []
+        self.str_data = None
+        self.start_index = 0
+        self.flight = True
+        self.lengths = []
+        self.flight_harvard = []
+
+        self.progress_bar.Show()
+
+        self.find_average()
+        self.progress_bar.SetValue(15)
+
+        self.find_start()
+        self.progress_bar.SetValue(35)
+
+        self.calc_length()
+        self.progress_bar.SetValue(65)
+
+        # just conversion to digital no arinc checks
+        self.convert_to_arinc()
+        self.progress_bar.SetValue(100)
+
+    def find_start(self):
+        self.source.seek(0)
+        while True:
+            next_byte = ord(self.source.read(1))
+            self.bytes_counter += 1
+            if next_byte != 255:
+                break
+        print self.bytes_counter
+
