@@ -1,7 +1,8 @@
 from monstr import MonstrHeader
-from boeing import Boeing737DFDR980, B747
+from boeing import Boeing737DFDR980, B747Series200, B747Series300
 from bur_92 import Bur
 from compactFlash import CompactFlash
+from msrp64_viewer import MSRP64EBNViewer
 from source_data import QAR_TYPES, MONSTR_HEADER_TYPES
 from source_data import OWN_HEADER_TYPES, NO_HEADER_TYPES
 
@@ -40,15 +41,19 @@ class Redirect(object):
     def open_with_own_header(self):
         if self.chosen_acft_type == 322 or self.chosen_acft_type == 402:
             self.result = CompactFlash(self.path, self.acft_fdr_type)
+        elif self.chosen_acft_type == 5011:
+            self.result = MSRP64EBNViewer(self.path, self.chosen_acft_type, self.progress_bar)
 
     def open_with_no_header(self):
         if self.chosen_acft_type == 331:  # boeing
-            self.result = B747(self.path, self.chosen_acft_type)
+            self.result = B747Series200(self.path, self.chosen_acft_type)
+        elif self.chosen_acft_type == 3312:
+            self.result = B747Series300(self.path, self.chosen_acft_type)
         elif self.chosen_acft_type == 341:  # bur92 an148
             self.result = Bur(self.path, self.chosen_acft_type)
         elif self.chosen_acft_type == 421:  # bur92 an140
             self.result = Bur(self.path, self.chosen_acft_type)
-        elif self.chosen_acft_type == 402 or self.chosen_acft_type == 4022 or  \
-                 self.chosen_acft_type == 4031 or self.chosen_acft_type == 4032 or \
-                 self.chosen_acft_type == 4033:  # boeing 737-dfdr-980
+        elif (self.chosen_acft_type == 402 or self.chosen_acft_type == 4022 or
+              self.chosen_acft_type == 4031 or self.chosen_acft_type == 4032 or
+              self.chosen_acft_type == 4033):  # boeing 737-dfdr-980
             self.result = Boeing737DFDR980(self.path, self.chosen_acft_type)

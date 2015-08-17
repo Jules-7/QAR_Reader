@@ -1,5 +1,6 @@
 import os
 import datetime
+import struct
 from source_data import QAR_TYPES
 
 
@@ -148,7 +149,7 @@ class Bur(object):
                 month = 1
                 day = 1
                 start_date_time = datetime.datetime(year=year, month=month, day=day,
-                                             hour=hour_decimal, minute=min_decimal, second=sec_decimal)
+                                                    hour=hour_decimal, minute=min_decimal, second=sec_decimal)
                 self.start_date.append(start_date_time)
 
         else:
@@ -279,3 +280,151 @@ class BUR92AN140(object):
         channel_inverse_bin_str = ''.join(["1" if symbol == "0" else "0" for symbol in channel_bin_str])
         channel = int(channel_inverse_bin_str, 2)
         return channel
+
+
+class Bur4T(object):
+
+    """  BUR-4T
+         data is written in 160 byte frames by 10 bits word
+         syncwords are parts of original ARINC syncwords
+
+         frame starts with fourth (ARINC reverse) syncword and only with last 8 bits
+
+         ARINC reverse fourth syncword - 000111011011
+         bur-4t first syncword - 11011011
+
+         1. find all valid frames (by first syncwords)
+         2. convert data from 10 bit words to 16 bit words (by adding 000000 at the beginning)
+            starting from the first syncword
+         3. record to file
+    """
+
+    def __init__(self, path, chosen_acft_type, progress_bar, path_to_save):
+        self.path = path
+        self.data = open(self.path, "rb").read()
+        self.data_len = os.stat(path).st_size
+        self.start = 0
+        self.bytes_counter = 0
+        self.current_position = 0
+        self.chosen_acft_type = chosen_acft_type
+        self.progress_bar = progress_bar
+        self.sw_one = "11011011"  # last 8 bits of ARINC reverse fourth syncword
+        self.frame_len = QAR_TYPES[self.chosen_acft_type][2]  # in bytes
+        self.frame_len_bits = 1280
+        self.data_end = False
+        self.first_frame = None
+        self.path_to_save = path_to_save
+        self.word_size = 10
+        self.board_number = None
+        self.flight_number = None
+        self.data_len_in_bits = self.data_len * 8
+
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(15)
+
+        self.str_data = self.convert_data_to_str()
+        self.progress_bar.SetValue(45)
+
+        self.record_data()
+        self.progress_bar.SetValue(85)
+        self.target_file.close()
+
+    def convert_data_to_str(self):
+        """ convert from bytes to binary string representation """
+        result = []
+        for each in self.data:
+            result.append((str(bin(ord(each)))[2:]).rjust(8, "0"))
+        return ''.join(result)
+
+    def record_data(self):
+        while self.current_position < self.data_len_in_bits and not self.data_end:
+            self.find_start()
+            while self.start:
+                self.current_position = self.start
+                frame = self.check_next_frame()
+                if not frame:
+                    break
+                else:
+                    self.write_frame(frame)
+
+    def find_start(self):
+        # todo: redo this method
+        while self.current_position < self.data_len_in_bits and not self.data_end:
+            syncword_index = self.str_data.find(self.sw_one, self.current_position)
+            next_syncword = self.str_data.find(self.sw_one, syncword_index + self.frame_len_bits)
+            if next_syncword - syncword_index == self.frame_len_bits:
+                self.start = syncword_index
+                next_syncword_index = self.str_data.find(self.sw_one, next_syncword + self.frame_len_bits)
+                if next_syncword_index - next_syncword == self.frame_len_bits:
+                    next_next_syncword = self.str_data.find(self.sw_one, next_syncword_index + self.frame_len_bits)
+                    if next_next_syncword - next_syncword_index == self.frame_len_bits:
+                        # get first 2 frames to get from them board number and flight number
+                        self.first_frame = self.str_data[self.start:self.start + self.frame_len_bits * 2]
+                        # as soon as we got first two frames of a flight - get board and flight number
+                        self.get_boardN_flightN_in_path_to_save()
+                        # and modify name of a file to save
+                        self.form_file_name()
+                        break
+            self.current_position += 1
+
+    def write_frame(self, frame):
+        # todo: call this method from converter class
+        i = 0
+        while i < len(frame):
+            word = frame[i:i+self.word_size]
+            # insert zeroes
+            bytes_to_write = ["000000" + word[:2], word[2:]]
+            for each in bytes_to_write:
+                str_to_int = int(each, 2)
+                data_to_write = struct.pack("i", str_to_int)
+                self.target_file.write(data_to_write[:1])
+            i += self.word_size
+
+    def check_next_frame(self):
+        next_syncword = self.str_data.find(self.sw_one, self.current_position + self.frame_len_bits)
+        if next_syncword == -1:  # end of file - no more syncwords
+            self.data_end = True
+            return
+        if next_syncword - self.start == self.frame_len_bits:
+            frame = self.str_data[self.current_position:next_syncword]
+            self.start = next_syncword
+            return frame
+        else:
+            return False
+
+    def get_boardN_flightN_in_path_to_save(self):
+        """ convert first 2 frames to 16 bit words to get data from it
+            - board number is in 160, 161 bytes starting from the frame beginning
+            - flight number is in 224, 225 bytes starting from the frame beginning
+            each of these number should be processed as following:
+            1. get two bytes - 00000011 10110011
+            2. make shift by two lower bits and take 8 bits - 11101100
+            3. make full inversion 00010011 or get its ord value and make 255 - ord(11101100)
+        """
+        board_start_bit = 160 * 8  # bits to start from
+        flight_start_bit = 224 * 8  # bits to starts from
+        converted_frame = []
+        i = 0
+        while i < len(self.first_frame):
+            word = self.first_frame[i:i+self.word_size]
+            # insert zeroes
+            converted_word = "000000" + word
+            converted_frame.append(converted_word)
+            i += self.word_size
+        str_converted_frame = ''.join(converted_frame)
+        board_channel = str_converted_frame[board_start_bit:board_start_bit + 16]  # two bytes to read
+        flight_channel = str_converted_frame[flight_start_bit:flight_start_bit + 16]   # two bytes to read
+        board = board_channel[6:-2]  # take only necessary bits
+        flight = flight_channel[6:-2]   # take only necessary bits
+        self.board_number = 255 - int(board, 2)
+        self.flight_number = 255 - int(flight, 2)
+
+    def form_file_name(self):
+        date_time_now = datetime.datetime.now().strftime("%Y.%m.%d_%H_%M_%S")
+        self.name = "MI_24_{}_{}_{}.inf".format(self.board_number, self.flight_number, date_time_now)
+        self.target_file = open(r"%s" % self.path_to_save + r"\\" + r"%s" % self.name, "wb")
+
+
+
+
+

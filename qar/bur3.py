@@ -1,6 +1,7 @@
 import os
 import struct
 from source_data import HEADER_SIZE, ARINC_DIRECT, QAR_TYPES
+from source_data import ARINC_REVERSE
 from harvard_digital import DigitalHarvard
 
 
@@ -15,7 +16,8 @@ elif SOURCE == 'M':
 
 class Bur3(object):
 
-    """ harvard signal recorded as already counted durations """
+    """ Extract data from harvard signal that
+        recorded as already counted durations """
 
     def __init__(self, tmp_file_name, target_file_name,
                  progress_bar, path_to_save, flag, mode):
@@ -23,21 +25,15 @@ class Bur3(object):
         self.target_file_name = target_file_name
         self.mode = mode
         self.progress_bar = progress_bar
-
         self.progress_bar.Show()
 
         self.path_to_save = path_to_save
         name = (r"%s" % self.path_to_save + r"\\" + r"%s" % self.target_file_name)
-        #name_txt = (r"%s" % self.path_to_save + r"\\" + r"result_an74.txt")
         self.target_file = open(name, "wb")
-
         self.progress_bar.SetValue(5)
 
-        #self.target_txt = open(name_txt, "w")
         self.source_size = os.stat(tmp_file_name).st_size
         self.flag = flag
-        #self.sw = sw
-        #self.syncword = "001001000111"
         self.syncword = ARINC_DIRECT[1]
         self.bytes_counter = 0
         self.flight_ord = []
@@ -67,8 +63,6 @@ class Bur3(object):
             self.record_data()
 
         self.progress_bar.SetValue(100)
-        #self.target_file.close()
-        #self.target_txt.close()
 
     def record_header(self):
         header = self.source.read(HEADER_SIZE)
@@ -159,12 +153,12 @@ class Bur3(object):
 
 class Bur3Analog(object):
 
-    """ Data (Arinc 717) is written as durations (zeros and ones)
-
-        Harvard rectangular signal conversion to arinc """
+    """ Convert Data Harvard rectangular signal to ARINC
+        (Arinc 717) is written as durations (zeros and ones)"""
+    
     def __init__(self, tmp_file_name, target_file_name,
-                 progress_bar, path_to_save, flag):
-        self.zero = 12  # min number of bytes(length) that determines zero
+                 progress_bar, path_to_save, chosen_acft, zero_level):
+        self.zero = zero_level  # min number of bytes(length) that determines zero
         self.target_file = open(r"%s" % path_to_save + r"\\" +
                                 r"%s" % target_file_name, "wb")
         self.source = open(tmp_file_name, "rb")
@@ -173,11 +167,11 @@ class Bur3Analog(object):
         self.stop = 0
         self.syncword = ARINC_DIRECT[1]  # "001001000111"
         self.source_size = os.stat(tmp_file_name).st_size
-        self.frame_size = QAR_TYPES[flag][2]
+        self.frame_size = QAR_TYPES[chosen_acft][2]
         self.subframe_size = self.frame_size / 4
         self.frame_in_bits = self.frame_size * 8  # 3072 bits
         self.progress_bar = progress_bar
-        self.flag = flag
+        self.flag = chosen_acft
         self.bytes_counter = 0
         self.flight_ord = []
         self.flight_harvard = []
@@ -194,23 +188,18 @@ class Bur3Analog(object):
 
         self.write_header()
         self.progress_bar.SetValue(15)
-        print('recorded header')
 
         self.find_average()
         self.progress_bar.SetValue(25)
-        print 'found average', self.average
 
         self.calc_length()
         self.progress_bar.SetValue(35)
-        print('calculated lengthes')
 
         self.convert_to_arinc()
         self.progress_bar.SetValue(65)
-        print('converted to arinc')
 
         self.get_data_as_str()
         self.progress_bar.SetValue(85)
-        print('almost done, start recording to file')
 
         self.record_data()
         self.progress_bar.SetValue(100)
@@ -254,7 +243,6 @@ class Bur3Analog(object):
 
     def calc_length(self):
         """count bytes (length) of pulses and record them"""
-        print("raw flight length is %s" % self.source_size)
         self.bytes_counter = HEADER_SIZE
         upper_part = 0
         lower_part = 0
@@ -270,15 +258,12 @@ class Bur3Analog(object):
                 upper_part, upper = self.count_upper(data, upper_part)
             elif not upper:
                 lower_part, upper = self.count_lower(data, lower_part)
-        print('got out of first while')
         # lengths should begin from zero value
         while True:
-            print('got in second while')
             if self.lengths_part_one[0] < self.zero:
                 del self.lengths_part_one[0]
             else:
                 break
-        print('got out of second while')
 
     def convert_to_arinc(self):
         """Convert to arinc (zeros and ones) by lengths"""

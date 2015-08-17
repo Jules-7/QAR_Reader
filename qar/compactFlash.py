@@ -162,6 +162,8 @@ class CompactFlash(object):
         end_pattern = [0]*48
         while True:
             next_byte = self.source.read(1)
+            if next_byte == "":  #EOF
+                return bytes_counter
             bytes_counter += 1
             if ord(next_byte) == 0:
                 next_48_bytes = self.source.read(48)

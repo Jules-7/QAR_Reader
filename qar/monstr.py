@@ -17,7 +17,17 @@ class MonstrHeader():
         - extract information from headers
         - provide with all technical/additional information
 
-        COMPLETE HEADER DESCRIPTION IN initialization.py """
+        COMPLETE HEADER DESCRIPTION IN initialization.py
+
+
+        MSRP 64 that has been readout by EBN viewer.
+
+        After viewer it contains only flights. But headers are not at the clusters beginning,
+        so it is not possible to get flights using regular MONSTR flights determination code.
+        Need to search explicitly for headers, by seeking 128 bytes (header size),
+        as data inside is multiple of 128
+
+    """
 
     def __init__(self, path, flag, progress_bar):
         self.path = path
@@ -94,15 +104,23 @@ class MonstrHeader():
                     self.corrupted_header.append((self.flights_start[-1], self.index))
                 else:
                     pass
-        self.index += CLUSTER
+        # after EBN viewer readout headers are no longer at the beginning of 32768 cluster
+        # they are multiply of 128 - header size, so perform seek at header size
+        if self.qar_type == "msrp64_viewer":
+            self.index += HEADER_SIZE
+        else:
+            self.index += CLUSTER
 
     def find_flights(self):
 
         """ find all flights indexes """
-
+        a = 0
+        counter = 0
         while self.index < self.file_len:
             self.dat.seek(self.index)
             self.is_flight()
+            a += 32768
+            counter += 1
 
     def get_flight_intervals(self):
 
@@ -125,8 +143,8 @@ class MonstrHeader():
                                                   self.file_len))
                 i += 1
 
-        elif self.info == "an74_bur3_code" or self.info == "a320_qar" \
-                or self.qar_type == "msrp12" or self.info == "s340_qar_sound":
+        elif (self.info == "an74_bur3_code" or self.info == "a320_qar" or
+                      self.qar_type == "msrp12" or self.info == "s340_qar_sound"):
             #if self.info == "an74_bur3"
             i = 0
             for each in self.flights_start:

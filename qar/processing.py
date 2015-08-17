@@ -1,5 +1,5 @@
 import struct
-from source_data import ARINC_DIRECT, QAR_TYPES
+from source_data import ARINC_DIRECT, QAR_TYPES, ARINC_REVERSE
 
 
 class PrepareData(object):
@@ -18,22 +18,21 @@ class PrepareData(object):
         #self.sw_two = "010110111000"  # syncword two
         self.sw_one = ARINC_DIRECT[1]
         self.sw_two = ARINC_DIRECT[2]
-        #self.sw_two = "101001000111"  # actually its syncword three
         self.bytes_counter = 0
         self.mix_type = None
         self.flag = flag
         self.frame_len = QAR_TYPES[flag][2]
         self.subframe_len = self.frame_len / 4  # in bytes
         self.progress_bar = progress_bar
-        self.qar_type = QAR_TYPES[flag][1]
+        self.acft_qar_type = QAR_TYPES[flag][0] + "_" + QAR_TYPES[flag][1]
 
     def record_data(self):
         """ perform recording of valid frames only """
         while self.bytes_counter < self.param_file_end - 4:
             # cases when flight is too small less than 10 min
             if self.mix_type is None:
+                print self.mix_type
                 self.param_file.close()
-                print("didnt find syncword")
             elif self.mix_type % 2 == 1:
                 #if syncword is found at 2d subword, it means that syncword
                 #is at the end of list (2d, 3d bytes), so we shift two byes
@@ -120,11 +119,11 @@ class PrepareData(object):
 
     def header_to_param_file(self):
         header_length = None
-        if self.flag == "a320_qar" or self.flag == "s340_qar_sound" \
-                or self.flag == "s340_qar_no_sound" or self.flag == "b737_4700":
+        if (self.acft_qar_type == "a320_qar" or self.acft_qar_type == "s340_qar_sound" or
+                    self.acft_qar_type == "s340_qar_no_sound" or self.acft_qar_type == "b737_4700"):
             header_length = 128  # header length is 128 bytes
         # if flag says its compact flash -> header length is 32
-        elif self.flag == "a320_cf":
+        elif self.acft_qar_type == "a320_cf":
             header_length = 32
         # rewrite header to target file
         self.param_file.write(self.source_file[:header_length])
@@ -152,8 +151,12 @@ class PrepareData(object):
             if mixed_words is None:
                 break
             elif mixed_words == ["111111111111"] * 8:  # found end pattern
-                self.bytes_counter = self.param_file_end
-                break
+                if self.acft_qar_type == "b737_dfdr_980_BDV":
+                    pass  # a lot of FF is normal in this file
+                if (self.acft_qar_type == "a320_qar" or self.acft_qar_type == "s340_qar_sound" or
+                    self.acft_qar_type == "s340_qar_no_sound" or self.acft_qar_type == "b737_4700"):
+                    self.bytes_counter = self.param_file_end
+                    break
 
             del search_bytes[0]  # remove first byte -> ensure shift by byte
 
