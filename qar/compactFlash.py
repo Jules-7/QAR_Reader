@@ -1,54 +1,27 @@
 #-*-coding: utf-8-*-
 import os
-import datetime
-import time
-import win32api
+from specific_header_types import HeaderType32Bytes
+
+SAVE_OPTION = "__save__"
 
 
-class CompactFlash(object):
-
-    """  Compact Flash Header description (complete description is absent)
-
-    Header length: 32 B
-
-    0 - 1: header pattern (in present case -> 0403 (hex))
-    2 - 3: flight number (as it is) -> if there is 27 - it means 27th flight
-    4 - 5: may be part of cluster #
-    6 - 7: cluster # (hex)
-    9: seconds (as it is)
-    10: minutes (as it is)
-    11: hours   (as it is)
-    12: day     (as it is)
-    13: month   (as it is)
-    14: year    (last two digits as it is) """
+class CompactFlash(HeaderType32Bytes):
 
     def __init__(self, path, qar_type):
-        self.header_len = 32  # Bytes
+        HeaderType32Bytes.__init__(self, path, qar_type)
         self.frame_len = 768  # Bytes
         self.cluster_size = 8192
         self.frame_duration = 2  # sec
-        self.qar_type = qar_type
-        save_option = "__save__"
-        self.path_save = None
         self.compact_flash_size = 500400*512  # 512MB
-        self.start_date = []  # flights start date
-        self.headers = []
-        self.header_pattern = [4, 3]
-        self.syncword_one = ["4", "3"]
-        self.bytes_counter = 0
-        self.flights_start = []
-        self.flight_intervals = []
-        self.durations = []  # flights durations
-        self.time = []
-        self.end_date = []  # flights end date
-        self.current_flight = None
-        if save_option in path:
-            sep_path = path.find(save_option)
+        if SAVE_OPTION in path:
+            sep_path = path.find(SAVE_OPTION)
             self.path = path[:sep_path]
-            self.path_save = path[sep_path+len(save_option):]
+            self.path_save = path[sep_path+len(SAVE_OPTION):]
             transformed_path = r"\\.\%s" % self.path[:2]
             self.dat = file(transformed_path, "rb")
+            #------------------------------------------------------------
             #------ Copy data from compact flash into tmp file on desktop
+            #------------------------------------------------------------
             copy_file = self.copy_cf_data()
             self.source = open(copy_file, "rb")
             self.source_len = os.stat(copy_file).st_size
@@ -58,7 +31,9 @@ class CompactFlash(object):
             self.path = path
             self.source = open(self.path, "rb")
             self.source_len = os.stat(self.path).st_size
+        #-------------------------------------------------------
         #------ Search for flights start -----------------------
+        #-------------------------------------------------------
         self.find_start()
         self.find_flights()
         self.get_flight_intervals()
@@ -66,29 +41,62 @@ class CompactFlash(object):
         self.get_flights_duration()
         self.get_flights_end()
 
-    def copy_cf_data(self):
-        """ Copy data from Compact Flash into temporary
-        file on computer drive C or to place specified by user.
-        This ensure more convenient and quick data access """
-        if self.path_save:  # if user has chosen path to save
-            copy_name = u"%s_cf.tmp" % self.path_save
-        else:
-            copy_name = str(win32api.GetTempPath()) + "cf.tmp"
-        new_file = open(copy_name, "wb")
-        counter = 0
-        read_chunk = 512  # amount of bytes to read at a time
-        while counter < self.compact_flash_size:
-            new_file.write(self.dat.read(read_chunk))
-            counter += read_chunk
-        self.dat.close()
-        new_file.close()
-        return copy_name
 
-    def find_start(self):
-        while self.bytes_counter < self.source_len - self.cluster_size:
-            flights_start = self.find_syncword()
-            if flights_start:
-                break
+class B767QARFlights(HeaderType32Bytes):
+
+    def __init__(self, path, qar_type):
+        HeaderType32Bytes.__init__(self, path, qar_type)
+        self.frame_len = 1536  # Bytes
+        self.cluster_size = 8192
+        self.frame_duration = 4  # sec
+        self.path = path
+        self.source = open(self.path, "rb")
+        self.source_len = os.stat(self.path).st_size
+        #-------------------------------------------------------
+        #------ Search for flights start -----------------------
+        #-------------------------------------------------------
+        self.find_start()
+        self.find_flights()
+        self.get_flight_intervals()
+        self.get_flights_start()
+        self.get_flights_duration()
+        self.get_flights_end()
+
+
+class B737QARNG(HeaderType32Bytes):
+
+    """ 1. Find 0403 header
+        2. Find end of flight - 64 bytes of 00
+        3. Find next 0403 header
+        4. Find end of flight - 64 bytes of 00
+        ...
+    """
+
+    def __init__(self, path, qar_type):
+        HeaderType32Bytes.__init__(self, path, qar_type)
+        self.frame_len = 1536  # Bytes
+        self.cluster_size = 8192
+        self.frame_duration = 4  # sec
+        self.path = path
+        self.flights_end = []
+        self.source = open(self.path, "rb")
+        self.source_len = os.stat(self.path).st_size
+        self.clusters = range(0, self.source_len, self.cluster_size)
+        #-------------------------------------------------------
+        #------ Search for flights start -----------------------
+        #-------------------------------------------------------
+        #self.find_start()
+        self.find_flights()
+        self.get_flight_intervals()
+        self.get_flights_start()
+        self.get_flights_duration()
+        self.get_flights_end()
+
+    # def find_start(self):
+    #     while self.bytes_counter < self.source_len - self.cluster_size:
+    #         flights_start = self.find_syncword()
+    #         if flights_start:
+    #             break
 
     def find_syncword(self):
         byte_amount = len(self.syncword_one)
@@ -106,9 +114,9 @@ class CompactFlash(object):
                 self.flights_start.append(self.bytes_counter)
                 self.source.seek(-byte_amount, 1)
                 self.headers.append(self.source.read(self.header_len))
-                flight = self.headers[0][3]
-                flight_num = int('0' + (hex(ord(flight)))[2:])
-                self.current_flight = flight_num
+                #flight = self.headers[0][3]
+                #flight_num = int('0' + (hex(ord(flight)))[2:])
+                #self.current_flight = flight_num
                 self.source.seek(-self.header_len, 1)
                 return True
             else:
@@ -121,115 +129,47 @@ class CompactFlash(object):
         """ Using header pattern and notion that headers are written
         at the start of each 8KB cluster find all flights` starts.
         Distinguish flights by their flight numbers -> 2-3 bytes"""
-        for each_index in range(self.flights_start[0]+self.cluster_size, self.source_len, self.cluster_size):
-            self.source.seek(each_index, 0)
-            self.bytes_counter += self.cluster_size
-            next_byte = self.source.read(1)
-            try:
-                if (ord(next_byte) == self.header_pattern[0] and
-                        ord(self.source.read(1)) == self.header_pattern[1]):
-                    # check flight number
-                    self.source.seek(1, 1)
-                    flight = self.source.read(1)
-                    flight_num = ord(flight)
-                    if flight_num == self.current_flight:
-                        pass
-                    else:
-                        self.flights_start.append(self.bytes_counter)
-                        self.source.seek(each_index, 0)  # amount of syncword in bytes
+        while self.bytes_counter < self.source_len - self.cluster_size - 16:
+            if not self.flights_start:
+                self.find_start()
+            else:
+                for cluster in self.clusters:
+                    if cluster >= self.bytes_counter:
+                        next_start = cluster
+                        self.flights_start.append(next_start)
+                        self.source.seek(cluster, 0)
                         self.headers.append(self.source.read(self.header_len))
-                        self.current_flight = flight_num
-            except TypeError:  # no more bytes with data -> empty bytes at the end
+                        self.source.seek(-self.header_len, 1)
+                        break
+            self.find_end()
+
+    def find_end(self):
+        while self.bytes_counter < self.source_len - self.cluster_size - 16:
+            self.bytes_counter = self.source.tell()
+            next_bytes = self.source.read(512)
+            next_bytes_str = ''.join([str(ord(one_byte)) for one_byte in next_bytes])
+            self.bytes_counter += 512
+            if "00000000000000000000000000000000" in next_bytes_str:
+                self.flights_end.append(self.bytes_counter)
                 break
+            # try:
+            #     if ord(next_byte) == 0:
+            #         counter += 1
+            #     else:
+            #         counter = 0
+            #     self.bytes_counter += 1
+            #     if counter == 64:
+            #         self.flights_end.append(self.bytes_counter)
+            #         break
+            # except TypeError:  # no more bytes with data -> empty bytes at the end
+            #     break
 
     def get_flight_intervals(self):
         i = 0
-        while i < len(self.flights_start):
+        for each in self.flights_start:
             try:
-                self.flight_intervals.append([self.flights_start[i],
-                                              self.flights_start[i+1]])
+                self.flight_intervals.append([self.flights_start[i],self.flights_end[i]])
             except IndexError:
                 self.flight_intervals.append([self.flights_start[i],
                                               self.get_last_flight_end(self.flights_start[i])])
-            i += 1
-
-    def get_last_flight_end(self, start):
-        """ As there is no way to get another header after last flight,
-        simply process bytes starting from last flight start index
-        and search for end flight pattern, which is chunk of zeros """
-        self.source.seek(start, 0)
-        bytes_counter = start
-        end_pattern = [0]*48
-        while True:
-            next_byte = self.source.read(1)
-            if next_byte == "":  #EOF
-                return bytes_counter
-            bytes_counter += 1
-            if ord(next_byte) == 0:
-                next_48_bytes = self.source.read(48)
-                prev_bytes_list = [ord(each) for each in next_48_bytes]
-                if prev_bytes_list == end_pattern:
-                    return bytes_counter
-                else:
-                    bytes_counter += 48
-
-    def get_flights_start(self):
-        for header in self.headers:
-            year = '20' + (hex(ord(header[15])))[2:]
-
-            month = '0' + (hex(ord(header[14])))[2:] if \
-                           len((hex(ord(header[14])))[2:]) == 1 else \
-                           (hex(ord(header[14])))[2:]
-
-            day = '0' + (hex(ord(header[13])))[2:] if \
-                         len((hex(ord(header[13])))[2:]) == 1 else \
-                         (hex(ord(header[13])))[2:]
-
-            hour = '0' + (hex(ord(header[11])))[2:] if \
-                          len((hex(ord(header[11])))[2:]) == 1 else \
-                          (hex(ord(header[11])))[2:]
-
-            minute = '0' + (hex(ord(header[10])))[2:] if \
-                            len((hex(ord(header[10])))[2:]) == 1 else \
-                            (hex(ord(header[10])))[2:]
-
-            second = '0' + (hex(ord(header[9])))[2:] if \
-                            len((hex(ord(header[9])))[2:]) == 1 else \
-                            (hex(ord(header[9])))[2:]
-
-            start_date = datetime.datetime(int(year), int(month), int(day),
-                                           int(hour), int(minute), int(second))
-            self.start_date.append(start_date)
-
-    def get_flights_duration(self):
-        duration = []
-        duration_cluster = []
-        for header in self.headers:
-            clusters_num = (header[4], header[5], header[6], header[7])
-            clusters = '0x'
-            for each in clusters_num:
-                if len((hex(ord(each)))[2:]) == 1:
-                    clusters += '0' + (hex(ord(each)))[2:]
-                else:
-                    clusters += (hex(ord(each)))[2:]
-            current_clusters = int(clusters, 16)
-            duration.append(current_clusters)
-        i = 0
-        while i < len(duration) - 1:
-            duration_cluster.append(duration[i+1] - duration[i])  # amount of clusters
-            i += 1
-        for each in duration_cluster:
-            duration_time = ((each * self.cluster_size) / self.frame_len) * \
-                            self.frame_duration  # in sec
-            self.durations.append(duration_time)
-        #------ Calculate duration for last flight ---------
-        last_dur = self.flight_intervals[-1][1] - self.flight_intervals[-1][0]  # Bytes
-        dur = (last_dur / self.frame_len) * self.frame_duration
-        self.durations.append(dur)
-
-    def get_flights_end(self):
-        i = 0
-        while i < len(self.start_date):
-            flight_end = self.start_date[i] + datetime.timedelta(seconds=int(self.durations[i]))
-            self.end_date.append(flight_end)
             i += 1

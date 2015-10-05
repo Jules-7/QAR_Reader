@@ -131,7 +131,7 @@ class MonstrHeader():
             - bur3 flight ends either by zeroes or by next header
               last flight ends either by zeroes or by file end """
 
-        if self.info == "b737_4700" or self.info == "an74_bur3"\
+        if self.info == "b737_qar_4700_analog" or self.info == "an74_bur3"\
                 or self.info == "an74_bur3_analog":
             i = 0
             for each in self.flights_start:
@@ -160,7 +160,8 @@ class MonstrHeader():
         # msrp12 flights end by header
         # testerU32 flights end by FF*512
         # s340-qar flights end by FF*20 or 00*20 or header
-        elif self.qar_type == "testerU32" or self.info == "s340_qar_no_sound":
+        # b737 qar 4700 flights end by 00*384 or header
+        elif self.qar_type == "testerU32" or self.info == "s340_qar_no_sound" or self.info == "b737_qar_4700":
             i = 0
             for each in self.flights_start:
                 try:
@@ -242,13 +243,17 @@ class MonstrHeader():
         elif self.info == "a320_qar":
             pattern_size = 768
 
-        elif self.info == "b737_4700":
+        elif self.info == "b737_qar_4700":
+            pattern_size = 384*2
+
+        elif self.info == "b737_qar_4700_analog":
             pattern_size = 768*2
 
         end_sign_ff = ['255'] * pattern_size
         end_sign_zeroes = ['0'] * pattern_size
 
         while bytes_counter < (end - start - pattern_size):
+            # read by frames (i.e. pattern size) and check if full frame is filled with ff or 00
             next_frame = self.dat.read(pattern_size)
             if next_frame == "":
                 return start + bytes_counter

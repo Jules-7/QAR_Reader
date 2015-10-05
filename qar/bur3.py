@@ -1,8 +1,6 @@
 import os
 import struct
-from source_data import HEADER_SIZE, ARINC_DIRECT, QAR_TYPES
-from source_data import ARINC_REVERSE
-from harvard_digital import DigitalHarvard
+from source_data import HEADER_SIZE, ARINC_DIRECT, QAR_TYPES, ARINC_REVERSE
 
 
 SOURCE = 'M'
@@ -179,8 +177,7 @@ class Bur3Analog(object):
         self.start_index = 0
         self.flight = True
         self.bit_counter = 0
-        self.lengths_part_one = []
-        self.lengths_part_two = []
+        self.lengths = []
         self.flight_harvard = []
         self.arinc = []
 
@@ -222,11 +219,11 @@ class Bur3Analog(object):
             upper = True
         elif ord_data < self.average:
             try:
-                self.lengths_part_one.append(upper_part)
+                self.lengths.append(upper_part)
                 upper_part = 1
                 upper = False
             except MemoryError:
-                print(len(self.lengths_part_one))
+                print(len(self.lengths))
         return upper_part, upper
 
     def count_lower(self, data, lower_part):
@@ -236,7 +233,7 @@ class Bur3Analog(object):
             lower_part += 1
             upper = False
         elif ord_data >= self.average:
-            self.lengths_part_one.append(lower_part)
+            self.lengths.append(lower_part)
             lower_part = 1
             upper = True
         return lower_part, upper
@@ -260,19 +257,21 @@ class Bur3Analog(object):
                 lower_part, upper = self.count_lower(data, lower_part)
         # lengths should begin from zero value
         while True:
-            if self.lengths_part_one[0] < self.zero:
-                del self.lengths_part_one[0]
+            if self.lengths[0] < self.zero:
+                del self.lengths[0]
+            elif self.lengths[0] > self.zero * 3:
+                del self.lengths[0]
             else:
                 break
 
     def convert_to_arinc(self):
         """Convert to arinc (zeros and ones) by lengths"""
         i = 0
-        while i < len(self.lengths_part_one):
-            if self.lengths_part_one[i] >= self.zero:  # zero check
+        while i < len(self.lengths):
+            if self.lengths[i] >= self.zero:  # zero check
                 self.flight_harvard.append("0")
                 i += 1
-            elif self.lengths_part_one[i] < self.zero:
+            elif self.lengths[i] < self.zero:
                 self.flight_harvard.append("1")
                 i += 2
             #if len(self.flight_harvard) == 8:

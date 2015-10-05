@@ -392,16 +392,16 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
             self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('s340.png'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
             self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
 
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('an32.png'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
             self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('an72.png'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
             self.toolbar.AddLabelTool(146, "AN74", wx.Bitmap('an74.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
@@ -431,8 +431,11 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin":
             self.toolbar.AddLabelTool(155, '10B->16B', wx.Bitmap('10_16.png'))
 
-        if ACCESS[USER][0] == "admin":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH1604":
             self.toolbar.AddLabelTool(156, 'Mi24', wx.Bitmap('mi24.png'))
+
+        if ACCESS[USER][0] == "admin":
+            self.toolbar.AddLabelTool(157, "B767", wx.Bitmap('b767.png'))
 
         #--------- HELP for toolbar bitmaps -----------------------------
         self.toolbar.SetToolLongHelp(133, "Open file containing flights")
@@ -456,6 +459,7 @@ class MyFrame(wx.Frame):
         self.toolbar.SetToolLongHelp(154, u"Ил76. Choose data source")
         self.toolbar.SetToolLongHelp(155, "Convert from 10 bit-word to 16 bit-word")
         self.toolbar.SetToolLongHelp(156, u"Ми-24. Choose data source")
+        self.toolbar.SetToolLongHelp(157, "B767. Choose data source")
 
         self.toolbar.AddSeparator()
         self.toolbar.Realize()  # actually display toolbar
@@ -483,6 +487,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.il76_button, id=154)
         self.Bind(wx.EVT_MENU, self.ten_to_sixteen, id=155)
         self.Bind(wx.EVT_MENU, self.mi24_button, id=156)
+        self.Bind(wx.EVT_MENU, self.b767_button, id=157)
 
     #---------------------------------------------------------------------
     #---- At the acft and data type selection via TOOLBAR -> -------
@@ -500,6 +505,8 @@ class MyFrame(wx.Frame):
             self.chosen_acft_type = choices_dict[option]
         else:  # if nothing was chosen - select default type
             self.chosen_acft_type = button_type['default_choice']
+        if self.chosen_acft_type == 383:  # bur-3 analog
+            self.optional_arg = self.get_zero_length()  # get zero for conversion
         if option:  # choose a path to file
             self.on_choose_file()
 
@@ -546,15 +553,15 @@ class MyFrame(wx.Frame):
         name = "B737"
         choices = []
         if ACCESS[USER][0] == "admin":
-            choices = ["QAR", "DFDR 980", "DFDR 980 I", "4700"]
+            choices = ["QAR (arinc)", "DFDR 980", "DFDR 980 I", "QAR 4700 (analog)", "QAR 4700", "QAR NG"]
         elif ACCESS[USER][0] == "yanair":
-            choices = ["DFDR 980"]
+            choices = ["DFDR 980", "QAR 4700"]
         elif ACCESS[USER][0] == "bukovina":
             choices = ["DFDR 980 I"]
         elif ACCESS[USER][0] == "badr_airlines":
             choices = ["DFDR 980"]
         option = self.make_choice_window(name, choices)
-        if option == "QAR":  # save this file with extension .inf to target place
+        if option == "QAR (arinc)":  # save this file with extension .inf to target place
             self.chosen_acft_type = 401
             self.get_path_to_file()
             if self.path:
@@ -577,8 +584,14 @@ class MyFrame(wx.Frame):
         elif option == "DFDR 980 I":
             self.chosen_acft_type = 4022
             self.on_choose_file()
-        elif option == "4700":
+        elif option == "QAR 4700 (analog)":
             self.chosen_acft_type = 403
+            self.on_choose_file()
+        elif option == "QAR 4700":
+            self.chosen_acft_type = 4034
+        elif option == "QAR NG":
+            self.chosen_acft_type = 404
+
             self.on_choose_file()
 
     def an12_button(self, event):
@@ -586,6 +599,9 @@ class MyFrame(wx.Frame):
 
     def il76_button(self, event):
         self.choose_acft_qar_onclick_button(BUTTONS["il76"])
+
+    def b767_button(self, event):
+        self.choose_acft_qar_onclick_button(BUTTONS["b767"])
 
     def make_choice_window(self, name, choices):
         dlg = wx.SingleChoiceDialog(self, '', name,
@@ -884,11 +900,13 @@ class MyFrame(wx.Frame):
         dlg.Destroy()
 
     def get_zero_length(self):
-        dlg = wx.TextEntryDialog(self, 'Insert zero length', style=wx.OK)
-        dlg.ShowModal()
-        zero_length = dlg.GetValue()
+        dlg = wx.TextEntryDialog(self, 'Insert zero length')
+        if dlg.ShowModal() == wx.ID_OK:
+            zero_length = dlg.GetValue()
+            return int(zero_length)
+        else:
+            return
         dlg.Destroy()
-        return int(zero_length)
 
 
 #----------------------------------------------------------------------

@@ -4,31 +4,34 @@
 USER = 1
 #-----------|id|---|acft|----|qar|-----|frame, B for   |--|duration, sec|--|frame, B for  |
 #-----------|  |---|    |----|   |-----|data processing|--|             |--|flights search|
-QAR_TYPES = {321:  ["a320",  "qar",           768,        4],
-             322:  ["a320",  "cf",            768,        2],
-             331:  ["b747",  "qar",           512,        4],  # 200
-             3312: ["b747",  "4700",          384,        5,                 512],  # 300
-             341:  ["an148", "bur92",         512,        1],
-             351:  ["an32",  "testerU32",     512,        1],
-             361:  ["an26",  "msrp12",        512,        0.5],
-             371:  ["an72",  "testerU32",     512,        1],
-             381:  ["an74",  "bur3",          384,        0.12],
-             382:  ["an74",  "bur3_code",     384,        0.12],
-             383:  ["an74",  "bur3_analog",   384,        0.12],
-             391:  ["s340",  "qar_sound",     384,        0.03],
-             3911: ["s340",  "qar_no_sound",  384,        1],
-             401:  ["b737",  "qar",           None,       None],
-             402:  ["b737",  "dfdr_980",      384,        5],
-             4022: ["b737",  "dfdr_980_I",    384,        4],
-             4031: ["b737",  "dfdr_980_BDB",  384,        5],
-             4032: ["b737",  "dfdr_980_BDO",  384,        5],
-             4033: ["b737",  "dfdr_980_BDV",  384,        5],
-             403:  ["b737",  "4700",          768,        4],
-             411:  ["an12",  "msrp12",        512,        0.5],
-             421:  ["an140", "bur92",         512,        1],
-             501:  ["il76",  "msrp64",        512,        2],
-             5011: ["il76",  "msrp64_viewer", 512,        2],
-             601:  ["mi24",  "bur4T",         160,        4]}
+QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
+             322:  ["a320",  "cf",              768,        2],
+             331:  ["b747",  "qar",             512,        4],  # 200
+             3312: ["b747",  "4700",            384,        5,                 512],  # 300
+             341:  ["an148", "bur92",           512,        1],
+             351:  ["an32",  "testerU32",       512,        1],
+             361:  ["an26",  "msrp12",          512,        0.5],
+             371:  ["an72",  "testerU32",       512,        1],
+             381:  ["an74",  "bur3",            384,        0.12],
+             382:  ["an74",  "bur3_code",       384,        0.12],
+             383:  ["an74",  "bur3_analog",     384,        0.0467],
+             391:  ["s340",  "qar_sound",       384,        0.03],
+             3911: ["s340",  "qar_no_sound",    384,        1],
+             401:  ["b737",  "qar_arinc",      None,       None],
+             402:  ["b737",  "dfdr_980",        384,        5],
+             4022: ["b737",  "dfdr_980_I",      384,        4],
+             4031: ["b737",  "dfdr_980_BDB",    384,        5],
+             4032: ["b737",  "dfdr_980_BDO",    384,        5],
+             4033: ["b737",  "dfdr_980_BDV",    384,        5],
+             403:  ["b737",  "qar_4700_analog", 768,        4],
+             4034: ["b737",  "qar_4700",        384,        4],
+             404:  ["b737",  "qar_ng",          1536,       4],
+             411:  ["an12",  "msrp12",          512,        0.5],
+             421:  ["an140", "bur92",           512,        1],
+             501:  ["il76",  "msrp64",          512,        2],
+             5011: ["il76",  "msrp64_viewer",   512,        2],
+             601:  ["mi24",  "bur4T",           160,        4],
+             701:  ["b767",  "qar",             1536,       4]}
 
 
 # ------|User id|-|username through code|-|Program window|-|program window|-|list of bitmaps to be included|
@@ -51,7 +54,8 @@ ACCESS = {1:       ["admin",          "admin",                (1200, 500), ['b74
                                                                             'har_dig.png',
                                                                             'il76.png',
                                                                             '10_16.png',
-                                                                            'mi24.png']],
+                                                                            'mi24.png',
+                                                                            'b767.png']],
 
           10:      ["yanair",           "YanAir",               (600, 500), ['a320.png',
                                                                              's340.png',
@@ -60,7 +64,7 @@ ACCESS = {1:       ["admin",          "admin",                (1200, 500), ['b74
 
           11:      ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500), []],
 
-          12:      ["VCH",                 u'В/Ч №2269',        (600, 500), ['an26.png',
+          12:      ["VCH2269",             u'В/Ч №2269',        (600, 500), ['an26.png',
                                                                              'an72.png',
                                                                              'an74.png']],
 
@@ -70,7 +74,9 @@ ACCESS = {1:       ["admin",          "admin",                (1200, 500), ['b74
 
           15:      ["badr_airlines",      "Badr Airlines",       (600, 500), ['b737.png']],
 
-          16:      ["il76",                   u"Ил76",           (600, 500), ['il76.png']]}
+          16:      ["il76",                   u"Ил76",           (600, 500), ['il76.png']],
+
+          17:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']]}
 
 ARINC_DIRECT = {1: "001001000111",  # 247
                 2: "010110111000",  # 5b8
@@ -86,8 +92,8 @@ HEADER_SIZE = 128  # Monstr
 
 # all qar_types id must be registered here
 # it is used for determining how to process data further for flights search
-MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411, 501]
-OWN_HEADER_TYPES = [322, 5011]
+MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411, 501, 4034]
+OWN_HEADER_TYPES = [322, 5011, 701, 404]
 NO_HEADER_TYPES = [331, 3312, 341, 401, 402, 4022, 4031, 4032, 4033, 421, 601]
 
 
@@ -143,6 +149,10 @@ MI24_BUTTON = {'name': u"Ми-24",
                'choices': {u"Бур-4Т": 601},
                'default_choice': 601}
 
+B767_BUTTON = {'name': 'B767',
+               'choices': {'QAR': 701},
+               'default_choice': 701}
+
 BUTTONS = {"a320": A320_BUTTON,
            "b747": B747_BUTTON,
            "an148": AN148_BUTTON,
@@ -153,7 +163,8 @@ BUTTONS = {"a320": A320_BUTTON,
            "s340": S340_BUTTON,
            "an12": AN12_BUTTON,
            "il76": IL76_BUTTON,
-           "mi24": MI24_BUTTON}
+           "mi24": MI24_BUTTON,
+           "b767": B767_BUTTON}
 
 
 # def b737_button(self, event):

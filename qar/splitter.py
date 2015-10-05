@@ -1,7 +1,7 @@
 from monstr import MonstrHeader
 from boeing import Boeing737DFDR980, B747Series200, B747Series300
 from bur_92 import Bur
-from compactFlash import CompactFlash
+from compactFlash import CompactFlash, B767QARFlights, B737QARNG
 from msrp64_viewer import MSRP64EBNViewer
 from source_data import QAR_TYPES, MONSTR_HEADER_TYPES
 from source_data import OWN_HEADER_TYPES, NO_HEADER_TYPES
@@ -43,6 +43,10 @@ class Redirect(object):
             self.result = CompactFlash(self.path, self.acft_fdr_type)
         elif self.chosen_acft_type == 5011:
             self.result = MSRP64EBNViewer(self.path, self.chosen_acft_type, self.progress_bar)
+        elif self.chosen_acft_type == 701:
+            self.result = B767QARFlights(self.path, self.acft_fdr_type)
+        elif self.chosen_acft_type == 404:
+            self.result = B737QARNG(self.path, self.acft_fdr_type)
 
     def open_with_no_header(self):
         if self.chosen_acft_type == 331:  # boeing

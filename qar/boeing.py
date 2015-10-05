@@ -19,6 +19,7 @@ class Boeing(object):
         self.headers = []
         self.date = []
         self.time = []
+        self.flag = flag
         self.acft = QAR_TYPES[flag][0]
         self.qar_type = QAR_TYPES[flag][1]
         self.init_date = None
@@ -48,8 +49,9 @@ class Boeing(object):
             # get amount of bytes in flight,
             # depends on frame length -> number of frames
             # multiply by 4 sec -> duration of each frame
-            flight_duration = ((each[1] - each[0]) /
-                               self.frame_len) * self.frame_duration
+            # if self.flag == 3312:  # b747-300 has slightly different way of flight duration determination
+            #     self.frame_duration = (self.frame_len * 8) // 768
+            flight_duration = (each[1] - each[0]) * 8 // 768
             self.durations.append(flight_duration)
 
     def get_flight_ends(self):
@@ -65,7 +67,7 @@ class Boeing(object):
 
 class B737(PrepareData):
 
-    """ B737 DFDR 980
+    """ B737 DFDR 980, B747 QAR 4700, B737 QAR 4700 (digital data)
         scheme`s search, frames check, flight`s recording """
 
     def __init__(self, tmp_file_name, param_file_name,
@@ -418,7 +420,7 @@ class B747Series300(Boeing):
 
     def get_flight_intervals(self):
         i = 0
-        while i < len(self.flights_start)-1:
+        while i < len(self.flights_start):
             start = self.flights_start[i]
             end = self.flights_end[i]
             self.flight_intervals.append((start, end))
@@ -470,7 +472,7 @@ class Boeing737DFDR980(Boeing):
     def __init__(self, path, flag):
         Boeing.__init__(self, path, flag)
         self.path = path
-        self.flag = flag # define fdr type
+        self.flag = flag  # define fdr type
         self.end_pattern = [0] * 20
         self.start_pattern = [255] * 20
         self.data = open(self.path, "rb").read()
@@ -871,3 +873,67 @@ class Boeing737DFDR980(Boeing):
             date = datetime.datetime(year=2015, month=1, day=1,
                                      hour=0, minute=0, second=0)
             self.start_date.append(date)
+
+
+class B767Convert(PrepareData):
+
+    """ B767 QAR. Creation of parametric file with data being processed """
+
+    def __init__(self, tmp_file_name, param_file_name, progress_bar, path_to_save, flag):
+        PrepareData.__init__(self, tmp_file_name, param_file_name, progress_bar, path_to_save, flag)
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(5)
+
+        source = open(tmp_file_name, "rb")
+        # open just created tmp parametric file
+        self.source_file = source.read()
+
+        # size of tmp parametric file
+        self.param_file_end = len(self.source_file)
+        self.progress_bar.SetValue(15)
+
+        # rewrite header to target parametric file
+        self.header_to_param_file()
+        self.progress_bar.SetValue(25)
+
+        # find mix type scheme
+        self.scheme_search()
+        self.progress_bar.SetValue(45)
+
+        self.record_data()
+        self.progress_bar.SetValue(85)
+
+        source.close()
+        self.progress_bar.SetValue(100)
+
+
+class B737Convert(PrepareData):
+
+    """ B737 QAR. Creation of parametric file with data being processed """
+
+    def __init__(self, tmp_file_name, param_file_name, progress_bar, path_to_save, flag):
+        PrepareData.__init__(self, tmp_file_name, param_file_name, progress_bar, path_to_save, flag)
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(5)
+
+        source = open(tmp_file_name, "rb")
+        # open just created tmp parametric file
+        self.source_file = source.read()
+
+        # size of tmp parametric file
+        self.param_file_end = len(self.source_file)
+        self.progress_bar.SetValue(15)
+
+        # rewrite header to target parametric file
+        self.header_to_param_file()
+        self.progress_bar.SetValue(25)
+
+        # find mix type scheme
+        self.scheme_search()
+        self.progress_bar.SetValue(45)
+
+        self.record_data()
+        self.progress_bar.SetValue(85)
+
+        source.close()
+        self.progress_bar.SetValue(100)

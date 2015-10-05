@@ -2,7 +2,7 @@ import win32api
 from SAAB340 import SAAB
 from airbus import A320
 from bur3 import Bur3, Bur3Analog
-from boeing import B737
+from boeing import B737, B767Convert, B737Convert
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import DigitalHarvard
 from source_data import QAR_TYPES, HEADER_SIZE
@@ -47,6 +47,10 @@ class Flight:
             self.get_flight()
             self.make_flight()
 
+        elif self.flag == "b767_qar":  # b767
+            self.get_flight()
+            self.make_flight()
+
         elif self.qar_type == "qar":
             self.get_flight()
             self.make_flight()
@@ -75,15 +79,23 @@ class Flight:
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "b737_4700":
+        elif self.flag == "b737_qar_4700_analog":
             self.get_flight()
             self.make_flight()
 
-        elif self.flag == "b737_qar":
+        elif self.flag == "b737_qar_4700":
+            self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "b737_qar_arinc":
             self.save_raw()
 
         elif (self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or
               self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV"):
+            self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "b737_qar_ng":
             self.get_flight()
             self.make_flight()
 
@@ -135,67 +147,69 @@ class Flight:
                 # extracted from source
                 # used for qar with sound only
                 tmp_bin_file = str(win32api.GetTempPath()) + self.name + ".bin"
-                saab = SAAB(tmp_file_name, target_file_name,
-                            self.progress_bar, self.path_to_save,
+                saab = SAAB(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type, tmp_bin_file)
 
             elif self.flag == "s340_qar_no_sound":
-                saab = SAAB(tmp_file_name, target_file_name,
-                            self.progress_bar, self.path_to_save,
+                saab = SAAB(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)
 
             elif self.acft == "a320":
-                a320 = A320(tmp_file_name, target_file_name,
-                            self.progress_bar, self.path_to_save,
+                a320 = A320(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)
 
             elif self.qar_type == "testerU32":  # an32, an72
-                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name,
-                                                self.progress_bar,
-                                                self.path_to_save,
-                                                self.flag, ["255", "127"], 0)
+                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name, self.progress_bar,
+                                                self.path_to_save, self.flag, ["255", "127"], 0)
 
             elif self.qar_type == "msrp12" or self.qar_type == "msrp64" or self.qar_type == "msrp64_viewer":  # an26, il76
-                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name,
-                                                self.progress_bar,
-                                                self.path_to_save,
-                                                self.flag, ["255"], 384)
+                tester = HeaderFrameSearchWrite(tmp_file_name, target_file_name, self.progress_bar,
+                                                self.path_to_save, self.flag, ["255"], 384)
 
             # current version goes as analog to digital signal conversion
             elif self.qar_type == "bur3":  # an74
-                bur = Bur3(tmp_file_name, target_file_name, self.progress_bar,
-                           self.path_to_save, self.chosen_acft_type, mode="ord")
+                bur = Bur3(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                           self.chosen_acft_type, mode="ord")
 
             elif self.qar_type == "bur3_code":  # an74
-                bur = Bur3(tmp_file_name, "code_" + target_file_name,
-                           self.progress_bar, self.path_to_save,
+                bur = Bur3(tmp_file_name, "code_" + target_file_name, self.progress_bar, self.path_to_save,
                            self.chosen_acft_type, mode="code")
 
             elif self.qar_type == "bur3_analog":  # an74
-                bur = Bur3Analog(tmp_file_name, target_file_name,
-                                 self.progress_bar, self.path_to_save,
+                bur = Bur3Analog(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                                  self.chosen_acft_type, self.optional_arg)
 
             # 768 - bits in subframe, 3072 - bits in frame
             # for now data is recorded in length (Harvard coding)
-            elif self.flag == "b737_4700":
-                b737 = DigitalHarvard(tmp_file_name, target_file_name, 3072, 768,
-                                      self.progress_bar, self.path_to_save, self.flag)
+            elif self.flag == "b737_qar_4700_analog":
+                b737 = DigitalHarvard(tmp_file_name, target_file_name, 3072, 768, self.progress_bar,
+                                      self.path_to_save, self.flag)
 
             elif (self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or
-                          self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV"):
+                  self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV"):
                 b737 = B737(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)
                 # file -> cop_centr_head
 
             elif self.flag == "an140_bur92":
-                bur92 = BUR92AN140(tmp_file_name, target_file_name,
-                                   self.progress_bar, self.path_to_save,
+                bur92 = BUR92AN140(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                                    self.chosen_acft_type)
 
             elif self.flag == "b747_4700":  # data processing same as for B737
                 b747 = B737(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
-                                            self.chosen_acft_type)
+                            self.chosen_acft_type)
+
+            elif self.flag == "b737_qar_4700":  # data processing same as for B737
+                b737 = B737(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                            self.chosen_acft_type)
+
+            elif self.flag == "b767_qar":
+                b767 = B767Convert(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                                   self.chosen_acft_type)
+
+            elif self.flag == "b737_qar_ng":
+                b737 = B737Convert(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                                   self.chosen_acft_type)
 
     def prepare_cf_file(self):
 

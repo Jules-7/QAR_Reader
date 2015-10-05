@@ -1,5 +1,7 @@
 #python compiled files
 *.pyc
+.idea\*
+qar\*.pyc
 
 # Windows image file caches
 Thumbs.db
