@@ -7,8 +7,7 @@ class PrepareData(object):
     """ This module holds basic methods for frames search
         A320, SAAB340, B737-DFDR-980 """
 
-    def __init__(self, tmp_file_name, param_file_name,
-                 progress_bar, path_to_save, flag):
+    def __init__(self, tmp_file_name, param_file_name, progress_bar, path_to_save, flag):
         self.source_file = None
         self.param_file_end = None  # size of tmp parametric file
         # target parametric file ".inf"

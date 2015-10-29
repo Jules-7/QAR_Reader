@@ -4,13 +4,14 @@ import re
 import os
 import collections
 from threading import Thread
+import wx.lib.filebrowsebutton as filebrowse
 from bur_92 import Bur4T
+from raw_data_conversion import ReverseByte
 from source_data import USER, QAR_TYPES, ACCESS, BUTTONS
 from extractFlight import Flight
 from splitter import Redirect
 from datetime import datetime
 from initialization import Initialize
-import wx.lib.filebrowsebutton as filebrowse
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen, TenToSixteen
 from harvard_digital import HarvardToDigitConverter
@@ -19,7 +20,8 @@ from harvard_digital import HarvardToDigitConverter
     - creates window for choosing file with flights
     - displays all flights in file
     - allows to save flight as raw data or as flight according
-      to QAR type"""
+      to QAR type
+"""
 
 # title for window depending on USER id
 WIN_TITLE = ACCESS[USER][1]
@@ -143,7 +145,7 @@ class MyPanel(wx.Panel):
 
         self.selected_parent_set = []
         self.parent.selected = []
-        #-------- Ensures multiple flights selection -----------
+        # -------- Ensures multiple flights selection -----------
         flight_number = self.list_ctrl.GetFirstSelected()
         self.selected_flight = [flight_number]
         while True:
@@ -326,17 +328,19 @@ class MyFrame(wx.Frame):
     """ Main frame that contains everything """
 
     def __init__(self):
-        wx.Frame.__init__(self, None, wx.ID_ANY,
-                          "QAR Reader  %s" % WIN_TITLE, size=SIZE)
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        wx.Frame.__init__(self, None, wx.ID_ANY, "QAR Reader  %s" % WIN_TITLE, size=SIZE)
+        # self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)  # vertical allows second toolbar be below the first one
+
         self.create_status_bar()
         # chosen_acft_type stands for both acft type and data source type
         # this is global like variable
         # it is used by almost all methods
         self.chosen_acft_type = None
         self.selected = []  # flights selected from the list
-        #self.create_file_menu()
+        # self.create_file_menu()
         self.create_tool_bar()
+
         self.saved_flights = []  # flights which are already processed and saved
         self.init_options = []
         self.optional_arg = None
@@ -346,17 +350,14 @@ class MyFrame(wx.Frame):
         self.SetSizer(self.sizer)
 
     def create_status_bar(self):
-        """ Create StatusBar in the bottom of the window
-            It contains text description (help info), information about aircraft type
-            and QAR type, progress bar with progress status
+        """ Create StatusBar in the bottom of the window It contains text description (help info),
+            information about aircraft type and QAR type, progress bar with progress status
         """
         self.statusbar = self.CreateStatusBar()
-        # Set number of fields for statusbar
-        self.statusbar.SetFieldsCount(3)
+        self.statusbar.SetFieldsCount(3)  # Set number of fields for statusbar
         self.statusbar.SetStatusWidths([-2, -1, 200])
 
-        self.progress_bar = wx.Gauge(self.statusbar, -1,
-                                     style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
+        self.progress_bar = wx.Gauge(self.statusbar, -1, style=wx.GA_HORIZONTAL|wx.GA_SMOOTH)
         rect = self.statusbar.GetFieldRect(2)
         self.progress_bar.SetPosition((rect.x + 2, rect.y + 2))
         self.progress_bar.SetSize((rect.width - 4, rect.height - 4))
@@ -364,107 +365,116 @@ class MyFrame(wx.Frame):
 
     def create_tool_bar(self):
 
-        """ Each user access is defined by access option -
-            ability to see aircraft type buttons/file menu options
-            Check of user ensures the display of this user options
-            Access (visibility) of each option
-            in file_menu and tool_bar is the same """
+        """ Each user access is defined by access option - ability to see aircraft type buttons/file menu options
+            Check of user ensures the display of this user options Access (visibility) of each option
+            in file_menu and tool_bar is the same
 
-        # do not use this at window reload -> toolbar is not shown at first and
-        # then it appears on the top of the flights` data
-        #self.toolbar = wx.ToolBar(self, -1)
-        self.toolbar = self.CreateToolBar()
-        self.toolbar.SetToolBitmapSize((30, 30))
-        #at executable creation -> images must be at the same folder with script
-        self.toolbar.AddLabelTool(134, 'Save', wx.Bitmap('save.png'))
+            There are two toolbars. The second toolbar must be created after call of Realize() on the first one.
+            Each toolbar contains its bitmaps - must be added to specific toolbar.
 
+            At the end (after both toolbars are created), both must be added to frame sizer to stay fixed (no overflow)
+            after the list of flights (panel) is shown
+
+            !!! DO NOT !!! use this at window reload -> toolbar is not shown at first and
+            then it appears on the top of the flights` data
+
+            !!! NOTE !!! at executable creation -> images must be at the same folder with script
+
+        """
+        # ------------------- TOOLBAR 1 -------------------------------
+        self.toolbar1 = wx.ToolBar(self)
+        # self.toolbar = self.CreateToolBar()
+        self.toolbar1.SetToolBitmapSize((30, 30))
+
+        # ----------------- BITMAPS TOOLBAR 1 -----------------------------
+        self.toolbar1.AddLabelTool(134, 'Save', wx.Bitmap('save.png'))
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(136, 'Open CF', wx.Bitmap('open_CF.png'))
-            self.toolbar.AddLabelTool(140, "A320", wx.Bitmap('a320.png'))
+            self.toolbar1.AddLabelTool(136, 'Open CF', wx.Bitmap('open_CF.png'))
+            self.toolbar1.AddLabelTool(140, "A320", wx.Bitmap('a320.png'))
+            self.toolbar1.AddLabelTool(147, "S340", wx.Bitmap('s340.png'))
 
         if (ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair" or
             ACCESS[USER][0] == "bukovina" or ACCESS[USER][0] == "badr_airlines"):
-            self.toolbar.AddLabelTool(148, "B737", wx.Bitmap('b737.png'))
+            self.toolbar1.AddLabelTool(148, "B737", wx.Bitmap('b737.png'))
 
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(141, "B747", wx.Bitmap('b747.png'))
-
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "yanair":
-            self.toolbar.AddLabelTool(147, "S340", wx.Bitmap('s340.png'))
-
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
-            self.toolbar.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(143, "AN32", wx.Bitmap('an32.png'))
+            self.toolbar1.AddLabelTool(141, "B747", wx.Bitmap('b747.png'))
+            self.toolbar1.AddLabelTool(143, "AN32", wx.Bitmap('an32.png'))
+            self.toolbar1.AddLabelTool(151, "AN140", wx.Bitmap('an140.png'))
+            self.toolbar1.AddLabelTool(150, "AN12", wx.Bitmap('an12.png'))
+            self.toolbar1.AddLabelTool(157, "B767", wx.Bitmap('b767.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
-            self.toolbar.AddLabelTool(145, "AN72", wx.Bitmap('an72.png'))
-
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
-            self.toolbar.AddLabelTool(146, "AN74", wx.Bitmap('an74.png'))
+            self.toolbar1.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
+            self.toolbar1.AddLabelTool(145, "AN72", wx.Bitmap('an72.png'))
+            self.toolbar1.AddLabelTool(146, "AN74", wx.Bitmap('an74.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
-            self.toolbar.AddLabelTool(142, "AN148", wx.Bitmap('an148.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(151, "AN140", wx.Bitmap('an140.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(150, "AN12", wx.Bitmap('an12.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
+            self.toolbar1.AddLabelTool(142, "AN148", wx.Bitmap('an148.png'))
 
         if ACCESS[USER][0] == "mak":
-            self.toolbar.AddLabelTool(152, "AN148", wx.Bitmap('bur92.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(153, 'har_dig', wx.Bitmap('har_dig.png'))
+            self.toolbar1.AddLabelTool(152, "AN148", wx.Bitmap('bur92.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "il76":
-            self.toolbar.AddLabelTool(154, 'IL76', wx.Bitmap('il76.png'))
-
-        if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(155, '10B->16B', wx.Bitmap('10_16.png'))
+            self.toolbar1.AddLabelTool(154, 'IL76', wx.Bitmap('il76.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH1604":
-            self.toolbar.AddLabelTool(156, 'Mi24', wx.Bitmap('mi24.png'))
+            self.toolbar1.AddLabelTool(156, 'Mi24', wx.Bitmap('mi24.png'))
 
+        # --------- HELP TOOLBAR 1 BITMAPS -----------------------------
+        self.toolbar1.SetToolLongHelp(134, "Save chosen flight")
+        self.toolbar1.SetToolLongHelp(133, "Open file containing flights")
+        self.toolbar1.SetToolLongHelp(136, "Open Compact Flash")
+        self.toolbar1.SetToolLongHelp(140, "A320. Choose data source")
+        self.toolbar1.SetToolLongHelp(141, "B747. Choose data source")
+        self.toolbar1.SetToolLongHelp(142, u"Aн148. Choose data source")
+        self.toolbar1.SetToolLongHelp(143, u"Aн32. Choose data source")
+        self.toolbar1.SetToolLongHelp(144, u"Aн26. Choose data source")
+        self.toolbar1.SetToolLongHelp(145, u"Aн72. Choose data source")
+        self.toolbar1.SetToolLongHelp(146, u"Aн74. Choose data source")
+        self.toolbar1.SetToolLongHelp(147, "S340. Choose data source")
+        self.toolbar1.SetToolLongHelp(148, "B737. Choose data source")
+        self.toolbar1.SetToolLongHelp(150, u"Ан12. Choose data source")
+        self.toolbar1.SetToolLongHelp(151, u"Ан140. Choose data source")
+        self.toolbar1.SetToolLongHelp(152, u"БУР-92А-05. Choose data source")
+        self.toolbar1.SetToolLongHelp(154, u"Ил76. Choose data source")
+        self.toolbar1.SetToolLongHelp(156, u"Ми-24. Choose data source")
+        self.toolbar1.SetToolLongHelp(157, "B767. Choose data source")
+
+        self.toolbar1.AddSeparator()
+        self.toolbar1.Realize()  # actually display toolbar
+        # ------------------- END TOOLBAR 1 -------------------------------
+        # -----------------------------------------------------------------
+
+        # if it is admin mode - display additional toolbox with additional functionality
         if ACCESS[USER][0] == "admin":
-            self.toolbar.AddLabelTool(157, "B767", wx.Bitmap('b767.png'))
+            # ------------------- TOOLBAR 2 -----------------------------------
+            self.toolbar2 = wx.ToolBar(self)  # create toolbar
+            self.toolbar2.SetToolBitmapSize((30, 30))
+            # -----------------------------------------------------------------
 
-        #--------- HELP for toolbar bitmaps -----------------------------
-        self.toolbar.SetToolLongHelp(133, "Open file containing flights")
-        self.toolbar.SetToolLongHelp(136, "Open Compact Flash")
-        self.toolbar.SetToolLongHelp(134, "Save chosen flight")
-        self.toolbar.SetToolLongHelp(135, "Save chosen flight in RAW format")
-        self.toolbar.SetToolLongHelp(140, "A320. Choose data source")
-        self.toolbar.SetToolLongHelp(141, "B747. Choose data source")
-        self.toolbar.SetToolLongHelp(142, u"Aн148. Choose data source")
-        self.toolbar.SetToolLongHelp(143, u"Aн32. Choose data source")
-        self.toolbar.SetToolLongHelp(144, u"Aн26. Choose data source")
-        self.toolbar.SetToolLongHelp(145, u"Aн72. Choose data source")
-        self.toolbar.SetToolLongHelp(146, u"Aн74. Choose data source")
-        self.toolbar.SetToolLongHelp(147, "S340. Choose data source")
-        self.toolbar.SetToolLongHelp(148, "B737. Choose data source")
-        self.toolbar.SetToolLongHelp(149, "Convert from 12 bit-word to 16 bit-word")
-        self.toolbar.SetToolLongHelp(150, u"Ан12. Choose data source")
-        self.toolbar.SetToolLongHelp(151, u"Ан140. Choose data source")
-        self.toolbar.SetToolLongHelp(152, u"БУР-92А-05. Choose data source")
-        self.toolbar.SetToolLongHelp(153, "Convert from Harvard to digital")
-        self.toolbar.SetToolLongHelp(154, u"Ил76. Choose data source")
-        self.toolbar.SetToolLongHelp(155, "Convert from 10 bit-word to 16 bit-word")
-        self.toolbar.SetToolLongHelp(156, u"Ми-24. Choose data source")
-        self.toolbar.SetToolLongHelp(157, "B767. Choose data source")
+            # ----------------- BITMAPS TOOLBAR 2 -----------------------------
 
-        self.toolbar.AddSeparator()
-        self.toolbar.Realize()  # actually display toolbar
+            self.toolbar2.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
+            self.toolbar2.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
+            self.toolbar2.AddLabelTool(153, 'har_dig', wx.Bitmap('har_dig.png'))
+            self.toolbar2.AddLabelTool(155, '10B->16B', wx.Bitmap('10_16.png'))
+            self.toolbar2.AddLabelTool(158, "swap", wx.Bitmap('swap.png'))
+            # -------------------------------------------------------------------
 
-        # bind toolbar
+            # ----------------- HELP TOOLBAR 2 BITMAPS ---------------------------------
+            self.toolbar2.SetToolLongHelp(135, "Save chosen flight in RAW format")
+            self.toolbar2.SetToolLongHelp(149, "Convert from 12 bit-word to 16 bit-word")
+            self.toolbar2.SetToolLongHelp(153, "Convert from Harvard to digital")
+            self.toolbar2.SetToolLongHelp(155, "Convert from 10 bit-word to 16 bit-word")
+            self.toolbar2.SetToolLongHelp(158, "Swap bytes")
+            # ------------------------------------------------------------------------
+
+            self.toolbar2.Realize()  # actually display toolbar
+
+            # ------------------- END TOOLBAR 2 -------------------------------
+
+        # -------------------- TOOLBARS EVENTS ----------------------------
         self.Bind(wx.EVT_TOOL, self.on_choose_file, id=133)
         self.Bind(wx.EVT_TOOL, self.save_flight, id=134)
         self.Bind(wx.EVT_TOOL, self.on_choose, id=133)
@@ -488,13 +498,23 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ten_to_sixteen, id=155)
         self.Bind(wx.EVT_MENU, self.mi24_button, id=156)
         self.Bind(wx.EVT_MENU, self.b767_button, id=157)
+        self.Bind(wx.EVT_MENU, self.swap_button, id=158)
+        # -------------------- END TOOLBARS EVENTS ----------------------------
 
-    #---------------------------------------------------------------------
-    #---- At the acft and data type selection via TOOLBAR -> -------
-    #---- When acft type ChoiceDialog is already opened ------------------
-    #---- -> at type picking its value is stored -------------------------
-    #---- In case the acft type bitmap is pressed -> assign value of first option  --
-    #---- as it is already marked in the ChoiceDialog (as it is the first one)
+        ''' for both toolbars to be static when the list of lights is shown -
+            toolbars must be added to sizer here - at the end'''
+        self.sizer.Add(self.toolbar1, 0, wx.EXPAND)
+
+        if ACCESS[USER][0] == "admin": #  if it is admin - add second toolbar
+            if self.toolbar2:
+                self.sizer.Add(self.toolbar2, 0, wx.EXPAND)
+
+    # ---------------------------------------------------------------------
+    # ---- At the acft and data type selection via TOOLBAR ->
+    # ---- When acft type ChoiceDialog is already opened
+    # ---- -> at type picking its value is stored
+    # ---- In case the acft type bitmap is pressed -> assign value of first option
+    # ---- as it is already marked in the ChoiceDialog (as it is the first one)
     def choose_acft_qar_onclick_button(self, button_type):
         name = button_type["name"]  # choice window name
         # use orderdict, so each time keys are of the same order
@@ -814,6 +834,16 @@ class MyFrame(wx.Frame):
         zero_length = self.get_zero_length()
         self.statusbar.SetStatusText("Converting...", 0)
         convert = HarvardToDigitConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
+        self.progress_bar.SetValue(100)
+        self.statusbar.SetStatusText("Conversion is finished", 0)
+
+    def swap_button(self, event):
+        """ Take byte and reverse it """
+        self.get_path_to_file()
+        self.get_file_to_save()
+        self.progress_bar.Show()
+        self.statusbar.SetStatusText("Converting...", 0)
+        convert = ReverseByte(self.path, self.progress_bar, self.path_to_save)
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 

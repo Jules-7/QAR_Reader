@@ -2,8 +2,8 @@
 
 # admin
 USER = 1
-#-----------|id|---|acft|----|qar|-----|frame, B for   |--|duration, sec|--|frame, B for  |
-#-----------|  |---|    |----|   |-----|data processing|--|             |--|flights search|
+# -----------|id|---|acft|----|qar|-----|frame, B for   |--|duration, sec|--|frame, B for  |
+# -----------|  |---|    |----|   |-----|data processing|--|             |--|flights search|
 QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
              322:  ["a320",  "cf",              768,        2],
              331:  ["b747",  "qar",             512,        4],  # 200
@@ -35,8 +35,8 @@ QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
 
 
 # ------|User id|-|username through code|-|Program window|-|program window|-|list of bitmaps to be included|
-#-------|       |-|                     |-|title         |-|size          |-|at executable build           |
-ACCESS = {1:       ["admin",          "admin",                (1200, 500), ['b747.png',
+# ------|       |-|                     |-|title         |-|size          |-|at executable build           |
+ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747.png',
                                                                             'a320.png',
                                                                             'an148.png',
                                                                             'an32.png',
