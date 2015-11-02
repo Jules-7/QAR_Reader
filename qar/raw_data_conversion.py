@@ -1,5 +1,7 @@
 import struct
 
+apply_swap = lambda x: (x * 0x0202020202 & 0x010884422010) % 1023
+
 
 class ReverseByte(object):
 
@@ -23,9 +25,6 @@ class ReverseByte(object):
                 to_write = (struct.pack("i", value))[:1]
                 target_file.write(to_write)
 
-    def apply_swap(self, byte):
-        return (byte * 0x0202020202 & 0x010884422010) % 1023
-
     def swap_byte(self, byte):
-        #print '{} -> {}'.format(bin(i)[2:].zfill(8), bin(self.apply_swap(i))[2:].zfill(8))
-        return bin(self.apply_swap(byte))[2:].zfill(8)
+        #print '{} -> {}'.format(bin(i)[2:].zfill(8), bin(apply_swap(i))[2:].zfill(8))
+        return bin(apply_swap(byte))[2:].zfill(8)

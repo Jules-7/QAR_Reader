@@ -18,8 +18,8 @@ class PrepareData(object):
         self.bytes_counter = 0
         self.mix_type = None
         self.flag = flag
-        #print self.flag
         self.frame_len = QAR_TYPES[flag][2]
+        self.packet_size = self.frame_len * 4
         self.subframe_len = self.frame_len / 4  # in bytes
         self.progress_bar = progress_bar
         self.acft_qar_type = QAR_TYPES[flag][0] + "_" + QAR_TYPES[flag][1]
@@ -29,12 +29,12 @@ class PrepareData(object):
         while self.bytes_counter < self.param_file_end - 4:
             # cases when flight is too small less than 10 min
             if self.mix_type is None:
-                #print self.mix_type
+                # print self.mix_type
                 self.param_file.close()
             elif self.mix_type % 2 == 1:
-                #if syncword is found at 2d subword, it means that syncword
-                #is at the end of list (2d, 3d bytes), so we shift two byes
-                #and can use the same scheme but for first subword
+                # if syncword is found at 2d subword, it means that syncword
+                # is at the end of list (2d, 3d bytes), so we shift two byes
+                # and can use the same scheme but for first subword
                 self.mix_type -= 1
                 extract_syncword = [self.source_file[self.bytes_counter],
                                     self.source_file[self.bytes_counter + 1],
@@ -132,7 +132,7 @@ class PrepareData(object):
     def scheme_search(self):
         """ Perform search of mix scheme type """
         found_sw = False  # indicator of found/not found syncword
-        #---------four bytes, in which we search for syncword----
+        # ---------four bytes, in which we search for syncword----
         try:
             search_bytes = [self.source_file[self.bytes_counter],
                             self.source_file[self.bytes_counter + 1],
@@ -165,9 +165,9 @@ class PrepareData(object):
             i = 0
             for word in mixed_words:
                 if word == self.sw_one:
-                    #----------------------------------------------------------
-                    #print("found match")
-                    #print(self.bytes_counter)
+                    # ----------------------------------------------------------
+                    # print("found match")
+                    # print(self.bytes_counter)
                     frame = self.source_file[self.bytes_counter:
                                              self.bytes_counter + self.frame_len]
                     self.bytes_counter += self.frame_len
@@ -187,10 +187,10 @@ class PrepareData(object):
 
                     if frame_sw_variants[i] == self.sw_one and \
                             subframe_sw_variants[i] == self.sw_two:
-                    #if frame_sw_variants[i] == self.sw_one:
-                    #------------------------------------------------------
-                        #print("found mix type")
-                        #print("mix type is # %s" % self.mix_type)
+                    # if frame_sw_variants[i] == self.sw_one:
+                    # ------------------------------------------------------
+                        # print("found mix type")
+                        # print("mix type is # %s" % self.mix_type)
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
                         self.mix_type = i
@@ -206,30 +206,30 @@ class PrepareData(object):
         mixed_words = []  # 8 items list
         byte_size = 8
         for byte in four_bytes:
-            #-----convert byte to binary representation---------
-            #-----exclude "0b" at start and fill with ----------
-            #-----zeros at the beginning to make 8 symbols------
+            # -----convert byte to binary representation---------
+            # -----exclude "0b" at start and fill with ----------
+            # -----zeros at the beginning to make 8 symbols------
             bin_str += ((bin(ord(byte)))[2:]).zfill(byte_size)
 
-        #------type one |3|5|8|7|1|------------
+        # ------type one |3|5|8|7|1|------------
         # 0 index/first subword
         mixed_words.append(bin_str[23:24] + bin_str[8:16] + bin_str[:3])
         # 1 index/second subword
         mixed_words.append(bin_str[27:32] + bin_str[16:23])
 
-        #------type two |5|3|1|7|8|------------
+        # ------type two |5|3|1|7|8|------------
         # 2 index/first subword
         mixed_words.append(bin_str[9:16] + bin_str[:5])
         # 3 index/second subword
         mixed_words.append(bin_str[29:32] + bin_str[16:24] + bin_str[8:9])
 
-        #------type three |8|4|4|8|------------
+        # ------type three |8|4|4|8|------------
         # 4 index/first subword
         mixed_words.append(bin_str[12:16] + bin_str[:8])
         # 5 index/second subword
         mixed_words.append(bin_str[16:24] + bin_str[8:12])
 
-        #------type four |6|2|2|6|8|------------
+        # ------type four |6|2|2|6|8|------------
         # 6 index/first subword
         mixed_words.append(bin_str[10:16] + bin_str[:6])
         # 7 index/second subword
@@ -238,8 +238,7 @@ class PrepareData(object):
         return mixed_words
 
     def mix_words(self, bytes_to_mix):
-        """ Create 16 bit words from 12 bit words
-                         to be recorded in target file """
+        """ Create 16 bit words from 12 bit words to be recorded in target file """
         middle = self.mix_syncword(bytes_to_mix)
         tmp_str_1 = "0000" + middle[self.mix_type]
         tmp_str_2 = "0000" + middle[self.mix_type + 1]

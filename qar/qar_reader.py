@@ -14,7 +14,7 @@ from datetime import datetime
 from initialization import Initialize
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen, TenToSixteen
-from harvard_digital import HarvardToDigitConverter
+from harvard_digital import HarvardToArincConverter, ArincToDataConverter
 
 """ This module:
     - creates window for choosing file with flights
@@ -457,9 +457,10 @@ class MyFrame(wx.Frame):
 
             self.toolbar2.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
             self.toolbar2.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
-            self.toolbar2.AddLabelTool(153, 'har_dig', wx.Bitmap('har_dig.png'))
+            self.toolbar2.AddLabelTool(153, 'har_dig', wx.Bitmap('har_arinc.png'))
             self.toolbar2.AddLabelTool(155, '10B->16B', wx.Bitmap('10_16.png'))
             self.toolbar2.AddLabelTool(158, "swap", wx.Bitmap('swap.png'))
+            self.toolbar2.AddLabelTool(159, "arinc_check", wx.Bitmap('arinc_check.png'))
             # -------------------------------------------------------------------
 
             # ----------------- HELP TOOLBAR 2 BITMAPS ---------------------------------
@@ -493,12 +494,13 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.an12_button, id=150)
         self.Bind(wx.EVT_MENU, self.an140_button, id=151)
         self.Bind(wx.EVT_MENU, self.an140_button, id=152)
-        self.Bind(wx.EVT_MENU, self.harvard_to_digital, id=153)
+        self.Bind(wx.EVT_MENU, self.harvard_to_arinc, id=153)
         self.Bind(wx.EVT_MENU, self.il76_button, id=154)
         self.Bind(wx.EVT_MENU, self.ten_to_sixteen, id=155)
         self.Bind(wx.EVT_MENU, self.mi24_button, id=156)
         self.Bind(wx.EVT_MENU, self.b767_button, id=157)
         self.Bind(wx.EVT_MENU, self.swap_button, id=158)
+        self.Bind(wx.EVT_MENU, self.arinc_check, id=159)
         # -------------------- END TOOLBARS EVENTS ----------------------------
 
         ''' for both toolbars to be static when the list of lights is shown -
@@ -637,7 +639,7 @@ class MyFrame(wx.Frame):
         self.chosen_acft_type = 0
         self.on_choose_file()
 
-    #------------------------------------------------------------------
+    # ------------------------------------------------------------------
     def initialization(self, event):
 
         """ Display initialization options for a flash-card """
@@ -646,7 +648,7 @@ class MyFrame(wx.Frame):
         # Show initialization window
         window.Show(True)
 
-    #------------------------------------------------------------------
+    # ------------------------------------------------------------------
     def formatting(self, event):
 
         """ Perform formatting of a flash-card"""
@@ -669,7 +671,7 @@ class MyFrame(wx.Frame):
                                         style=wx.OK | wx.CENTRE,
                                         pos=wx.DefaultPosition)
         done_message.ShowModal()
-    #------------------------------------------------------------------
+    # ------------------------------------------------------------------
 
     def on_open_file(self, event):
 
@@ -685,7 +687,7 @@ class MyFrame(wx.Frame):
         self.progress_bar.SetValue(10)
         self.progress_bar.SetValue(50)
 
-        #--------------THREADING-------------------------------------------
+        # --------------THREADING-------------------------------------------
         self.statusbar.SetStatusText('Start loading')
 
         self.progress_bar.SetValue(50)
@@ -787,7 +789,6 @@ class MyFrame(wx.Frame):
                 # as in list indexes go from 0
                 flight_index = each[1] + 1
                 flight_date = each[2]
-                flight_qar = each[3]
                 name = self.form_name(mode, flight_index, flight_date)
                 flight = Flight(self.progress_bar, start, end, self.file_data.path,
                                 name, self.chosen_acft_type, self.path_to_save,
@@ -827,13 +828,23 @@ class MyFrame(wx.Frame):
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
-    def harvard_to_digital(self, event):
-        """ Transform rectangular Harvard data to digital equivalent """
+    def harvard_to_arinc(self, event):
+        """ Transform rectangular Harvard data to arinc """
         self.get_path_to_file()
         self.get_file_to_save()
         zero_length = self.get_zero_length()
         self.statusbar.SetStatusText("Converting...", 0)
-        convert = HarvardToDigitConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
+        convert = HarvardToArincConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
+        # convert = DigitalToARINCConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
+        self.progress_bar.SetValue(100)
+        self.statusbar.SetStatusText("Conversion is finished", 0)
+
+    def arinc_check(self, event):
+        """ Transform rectangular Harvard data to arinc """
+        self.get_path_to_file()
+        self.get_file_to_save()
+        self.statusbar.SetStatusText("Converting...", 0)
+        convert = ArincToDataConverter(self.path, self.progress_bar, self.path_to_save)
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
@@ -938,8 +949,7 @@ class MyFrame(wx.Frame):
             return
         dlg.Destroy()
 
-
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # this piece of code runs the script
 app = wx.App(False)
 frame = MyFrame()

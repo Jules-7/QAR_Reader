@@ -463,7 +463,7 @@ class B747Series300Process(PrepareData):
         self.progress_bar.SetValue(100)
 
 
-class Boeing737DFDR980(Boeing):
+class Boeing737DFDR980(Boeing, PrepareData):
     """ Boeing 737 DFDR 980
         Find flights to display"""
     sw_one = ARINC_DIRECT[1]
@@ -489,6 +489,7 @@ class Boeing737DFDR980(Boeing):
         self.pattern = None
         self.end_date = []
         self.bytes_counter = 0
+        self.packet_size = self.frame_len * 4
 
         self.find_start()
         self.find_flights()
@@ -650,7 +651,6 @@ class Boeing737DFDR980(Boeing):
         self.mix_type = None
         self.subframe_len = self.frame_len / 4  # in bytes
         source = open(self.path, "rb")
-        self.source_end = self.frame_len * 4
         for i, each in enumerate(self.flights_start):
             source.seek(each)
             three_frames = self.frame_len * 4
@@ -664,15 +664,15 @@ class Boeing737DFDR980(Boeing):
         further getting of date and time from it """
         converted_frame = []
         self.bytes_counter = 0
-        while self.bytes_counter < self.source_end - 4:
+        while self.bytes_counter < self.packet_size - 4:
             # cases when flight is too small less than 10 min
             if self.mix_type is None:
                 print("didnt find syncword")
 
             elif self.mix_type % 2 == 1:
-                #if syncword is found at 2d subword, it means that syncword
-                #is at the end of list (2d, 3d bytes), so we shift two byes
-                #and can use the same scheme but for first subword
+                # if syncword is found at 2d subword, it means that syncword
+                # is at the end of list (2d, 3d bytes), so we shift two byes
+                # and can use the same scheme but for first subword
                 self.mix_type -= 1
                 extract_syncword = [self.source_file[self.bytes_counter],
                                     self.source_file[self.bytes_counter + 1],
@@ -741,12 +741,13 @@ class Boeing737DFDR980(Boeing):
                 else:  # if its not a syncword -> search for it
                     self.bytes_counter -= self.frame_len
                     self.find_mix_type()
+                    #self.scheme_search()
         return converted_frame
 
     def find_mix_type(self):
         """ Perform search of mix scheme type """
         found_sw = False  # indicator of found/not found syncword
-        #---------four bytes, in which we search for syncword----
+        # ---------four bytes, in which we search for syncword----
         try:
             search_bytes = [self.source_file[self.bytes_counter],
                             self.source_file[self.bytes_counter + 1],
@@ -755,7 +756,7 @@ class Boeing737DFDR980(Boeing):
             return
         self.bytes_counter += 3
 
-        while not found_sw and self.bytes_counter < self.source_end:
+        while not found_sw and self.bytes_counter < self.packet_size:
             next_byte = self.source_file[self.bytes_counter]
             self.bytes_counter += 1
             search_bytes.append(next_byte)  # append fourth byte
@@ -765,7 +766,7 @@ class Boeing737DFDR980(Boeing):
             if mixed_words is None:
                 break
             elif mixed_words == ["111111111111"] * 8:  # found end pattern
-                self.bytes_counter = self.source_end
+                self.bytes_counter = self.packet_size
                 break
 
             del search_bytes[0]  # remove first byte -> ensure shift by byte
@@ -773,9 +774,9 @@ class Boeing737DFDR980(Boeing):
             i = 0
             for word in mixed_words:
                 if word == self.sw_one:
-                    #----------------------------------------------------------
-                    #print("found match")
-                    #print(self.bytes_counter)
+                    # ----------------------------------------------------------
+                    # print("found match")
+                    # print(self.bytes_counter)
                     frame = self.source_file[self.bytes_counter:
                                              self.bytes_counter + self.frame_len]
                     self.bytes_counter += self.frame_len
@@ -795,55 +796,18 @@ class Boeing737DFDR980(Boeing):
 
                     if frame_sw_variants[i] == self.sw_one and \
                             subframe_sw_variants[i] == self.sw_two:
-                    #if frame_sw_variants[i] == self.sw_one:
+                        # if frame_sw_variants[i] == self.sw_one:
                         found_sw = True
                         self.bytes_counter -= (self.frame_len + 4)
                         self.mix_type = i
                         break
-                        #------------------------------------------------------
-                        #print("found mix type")
-                        #print("mix type is # %s" % self.mix_type)
+                        # ------------------------------------------------------
+                        # print("found mix type")
+                        # print("mix type is # %s" % self.mix_type)
                     else:
                         self.bytes_counter -= self.frame_len
                 else:
                     i += 1
-
-    def mix_syncword(self, four_bytes):
-        """ Convert words by four types of mix schemes """
-        bin_str = ""
-        mixed_words = []  # 8 items list
-        byte_size = 8
-        for byte in four_bytes:
-            #-----convert byte to binary representation---------
-            #-----exclude "0b" at start and fill with ----------
-            #-----zeros at the beginning to make 8 symbols------
-            bin_str += ((bin(ord(byte)))[2:]).zfill(byte_size)
-
-        #------type one |3|5|8|7|1|------------
-        # 0 index/first subword
-        mixed_words.append(bin_str[23:24] + bin_str[8:16] + bin_str[:3])
-        # 1 index/second subword
-        mixed_words.append(bin_str[27:32] + bin_str[16:23])
-
-        #------type two |5|3|1|7|8|------------
-        # 2 index/first subword
-        mixed_words.append(bin_str[9:16] + bin_str[:5])
-        # 3 index/second subword
-        mixed_words.append(bin_str[29:32] + bin_str[16:24] + bin_str[8:9])
-
-        #------type three |8|4|4|8|------------
-        # 4 index/first subword
-        mixed_words.append(bin_str[12:16] + bin_str[:8])
-        # 5 index/second subword
-        mixed_words.append(bin_str[16:24] + bin_str[8:12])
-
-        #------type four |6|2|2|6|8|------------
-        # 6 index/first subword
-        mixed_words.append(bin_str[10:16] + bin_str[:6])
-        # 7 index/second subword
-        mixed_words.append(bin_str[30:32] + bin_str[16:24] + bin_str[8:10])
-
-        return mixed_words
 
     def mix_words(self, bytes_to_mix):
         """ Create 16 bit words from 12 bit words
@@ -852,8 +816,6 @@ class Boeing737DFDR980(Boeing):
         tmp_str_1 = "0000" + middle[self.mix_type]
         tmp_str_2 = "0000" + middle[self.mix_type + 1]
         mixed_words = [tmp_str_1, tmp_str_2]
-        #mixed_words = [tmp_str_1[8:16], tmp_str_1[0:8],
-                       #tmp_str_2[8:16], tmp_str_2[0:8]]
         return mixed_words
 
     def extract_time(self, converted):

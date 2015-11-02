@@ -4,7 +4,12 @@ from source_data import ARINC_REVERSE, ARINC_DIRECT
 from source_data import HEADER_SIZE
 
 
-class DigitalHarvard:
+WORD_LENGTH = 12
+FRAME_IN_BITS = 3072
+SUBFRAME_IN_BITS = 768
+
+
+class DigitalHarvard(object):
 
     """ CONVERT RECTANGULAR HARVARD SIGNAL TO TEXT AND BINARY FILE
 
@@ -14,15 +19,15 @@ class DigitalHarvard:
     one has full period (two short impulses).
     duration of one and zero is approximately the same.
 
-    Settings for Boeing 737 4700 - YanAir
-
     """
 
-    def __init__(self, tmp_file_name, target_file_name, frame_size, subframe_size,
-                 progress_bar, path_to_save, flag):
-        self.zero = 12  # min number of bytes(length) that determines zero
-        self.target_file = open(r"%s" % path_to_save + r"\\" +
-                                r"%s" % target_file_name, "wb")
+    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag):
+        self.zero = 39  # min number of bytes(length) that determines zero
+        if target_file_name:
+            self.target_file = open(r"%s" % path_to_save + r"\\" +
+                                    r"%s" % target_file_name, "wb")
+        else:
+            self.target_file = open(r"%s" % path_to_save, "wb")
         self.source = open(tmp_file_name, "rb")
         self.start = 0
         self.stop = 0
@@ -30,16 +35,13 @@ class DigitalHarvard:
         self.second_syncword = ARINC_REVERSE[2]
         self.third_syncword = ARINC_REVERSE[3]
         self.fourth_syncword = ARINC_REVERSE[4]
-        self.frame_in_bits = 3072
-        self.sub_frame_bits = 768
+        self.frame_in_bits = FRAME_IN_BITS
+        self.sub_frame_bits = SUBFRAME_IN_BITS
         self.source_size = os.stat(tmp_file_name).st_size
-        self.frame_size = frame_size
-        self.subframe_size = subframe_size
         self.progress_bar = progress_bar
         self.flag = flag
         self.bytes_counter = 0
         self.flight_ord = []
-        self.flight_harvard = []
         self.str_data = None
         self.start_index = 0
         self.flight = True
@@ -47,26 +49,6 @@ class DigitalHarvard:
         self.lengths = []
         self.flight_harvard = []
         self.arinc = []
-
-        self.progress_bar.Show()
-
-        self.write_header()
-        self.progress_bar.SetValue(15)
-
-        self.find_average()
-        self.progress_bar.SetValue(25)
-
-        self.calc_length()
-        self.progress_bar.SetValue(35)
-
-        self.convert_to_arinc()
-        self.progress_bar.SetValue(65)
-
-        self.get_data_as_str()
-        self.progress_bar.SetValue(85)
-
-        self.record_data()
-        self.progress_bar.SetValue(100)
 
     def write_header(self):
         self.target_file.write(self.source.read(HEADER_SIZE))
@@ -134,13 +116,13 @@ class DigitalHarvard:
             elif self.lengths[i] < self.zero:
                 self.flight_harvard.append("1")
                 i += 2
-            # to create binary file of data
-            if len(self.flight_harvard) == 8:
-                byte_to_str = ''.join(self.flight_harvard)
-                str_to_int = int(byte_to_str, 2)
-                data_to_write = struct.pack("i", str_to_int)
-                self.target_file.write(data_to_write[:1])
-                self.flight_harvard = []
+            # to create binary file of data - no frames search and no check
+            # if len(self.flight_harvard) == 8:
+            #     byte_to_str = ''.join(self.flight_harvard)
+            #     str_to_int = int(byte_to_str, 2)
+            #     data_to_write = struct.pack("i", str_to_int)
+            #     self.target_file.write(data_to_write[:1])
+            #     self.flight_harvard = []
 
     def get_data_as_str(self):
         self.str_data = ''.join(self.flight_harvard)
@@ -162,6 +144,7 @@ class DigitalHarvard:
 
     def find_start(self):
         start = self.str_data.find(self.first_syncword, self.start_index)
+        print 'start -> ', start
         if start == -1:
             self.flight = False
             return
@@ -195,7 +178,7 @@ class DigitalHarvard:
     def write_frame(self, frame):
         i = 0
         while i < len(frame):
-            word = frame[i:i+12]
+            word = frame[i:i+WORD_LENGTH]
             reverse_word = "0000" + word[::-1]
             #direct_word = "0000" + word
             bytes_to_write = [reverse_word[8:], reverse_word[0:8]]
@@ -204,43 +187,101 @@ class DigitalHarvard:
                 str_to_int = int(each, 2)
                 data_to_write = struct.pack("i", str_to_int)
                 self.target_file.write(data_to_write[:1])
-            i += 12
+            i += WORD_LENGTH
 
 
-class HarvardToDigitConverter(DigitalHarvard):
+class B737QAR4700Analog(DigitalHarvard):
 
-    """ Harvard encoded data to digital representation
+    """
+        Boeing 737 4700 - YanAir
+
+        Convert signal to valid ARINC packages
+        - data is written as pulse length
+        - based on length get Harvard signal (determine where 0s and 1s)
+        - convert to ARINC signal from Harvard
+        - make binary string from obtained data
+        - find packets
+    """
+
+    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag):
+        DigitalHarvard.__init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, flag)
+        self.zero = 39  # min number of bytes(length) that determines zero
+        self.first_syncword = ARINC_REVERSE[1]
+        self.second_syncword = ARINC_REVERSE[2]
+        self.third_syncword = ARINC_REVERSE[3]
+        self.fourth_syncword = ARINC_REVERSE[4]
+        self.frame_in_bits = FRAME_IN_BITS
+        self.sub_frame_bits = SUBFRAME_IN_BITS
+
+        self.progress_bar.Show()
+
+        self.write_header()
+        self.progress_bar.SetValue(15)
+
+        self.find_average()
+        self.progress_bar.SetValue(25)
+
+        self.calc_length()
+        self.progress_bar.SetValue(35)
+
+        self.convert_to_arinc()
+        self.progress_bar.SetValue(65)
+
+        self.get_data_as_str()
+        self.progress_bar.SetValue(85)
+
+        self.record_data()
+        self.progress_bar.SetValue(100)
+
+    def convert_to_arinc(self):
+        """Convert to arinc (zeros and ones) by lengths"""
+        i = 0
+        while i < len(self.lengths):
+            if self.lengths[i] >= self.zero:  # zero check
+                self.flight_harvard.append("0")
+                i += 1
+            elif self.lengths[i] < self.zero:
+                self.flight_harvard.append("1")
+                i += 2
+
+    def write_frame(self, frame):
+        i = 0
+        while i < len(frame):
+            word = frame[i:i+WORD_LENGTH]
+            reverse_word = "0000" + word[::-1]
+            bytes_to_write = [reverse_word[8:], reverse_word[0:8]]
+            for each in bytes_to_write:
+                str_to_int = int(each, 2)
+                data_to_write = struct.pack("i", str_to_int)
+                self.target_file.write(data_to_write[:1])
+            i += WORD_LENGTH
+
+
+class HarvardToArincConverter(DigitalHarvard):
+
+    """ Harvard encoded data to arinc
 
         HarvardToDigitConverter:
             - determine average
             - calculate pulses length
-            - convert to digital representation
+            - convert to arinc
             - record to file
+
+        Result: digital signal - no packages search and no checking
     """
 
-    def __init__(self, source_file, zero_length,
-                 progress_bar, path_to_save):
+    def __init__(self, tmp_file_name, zero_length, progress_bar, path_to_save):
+        DigitalHarvard.__init__(self, tmp_file_name=tmp_file_name, target_file_name=None,
+                                progress_bar=progress_bar, path_to_save=path_to_save, flag=None)
         self.zero = zero_length
-        self.source = open(source_file, "rb")
-        self.source_size = os.stat(source_file).st_size
+        self.source = open(tmp_file_name, "rb")
+        self.source_size = os.stat(tmp_file_name).st_size
         self.target_file = open(r"%s" % path_to_save, "wb")
-        self.progress_bar = progress_bar
-        self.bytes_counter = 0
-        self.flight_ord = []
-        self.flight_harvard = []
-        self.str_data = None
-        self.start_index = 0
-        self.flight = True
-        self.lengths = []
-        self.flight_harvard = []
 
         self.progress_bar.Show()
 
         self.find_average()
         self.progress_bar.SetValue(15)
-
-        self.find_start()
-        self.progress_bar.SetValue(35)
 
         self.calc_length()
         self.progress_bar.SetValue(65)
@@ -249,12 +290,74 @@ class HarvardToDigitConverter(DigitalHarvard):
         self.convert_to_arinc()
         self.progress_bar.SetValue(100)
 
-    def find_start(self):
-        self.source.seek(0)
-        while True:
-            next_byte = ord(self.source.read(1))
-            self.bytes_counter += 1
-            if next_byte != 255:
-                break
-        print self.bytes_counter
+    def convert_to_arinc(self):
+        """Convert to arinc (zeros and ones) by lengths"""
+        i = 0
+        while i < len(self.lengths):
+            if self.lengths[i] >= self.zero:  # zero check
+                self.flight_harvard.append("0")
+                i += 1
+            elif self.lengths[i] < self.zero:
+                self.flight_harvard.append("1")
+                i += 2
+            # to create binary file of data - no frames search and no check
+            if len(self.flight_harvard) == 8:
+                byte_to_str = ''.join(self.flight_harvard)
+                str_to_int = int(byte_to_str, 2)
+                data_to_write = struct.pack("i", str_to_int)
+                self.target_file.write(data_to_write[:1])
+                self.flight_harvard = []
 
+    # for Kucherenko
+    # def find_start(self):
+    #     self.source.seek(0)
+    #     while True:
+    #         next_byte = ord(self.source.read(1))
+    #         self.bytes_counter += 1
+    #         if next_byte != 255:
+    #             break
+    #     print self.bytes_counter
+
+
+class ArincToDataConverter(DigitalHarvard):
+
+    """ Input: ARINC digital signal
+
+        Convert the whole data into string and search for packets by syncwords
+        Record only valid frames
+
+        Output: data of valid ARINC packets
+
+    """
+
+    def __init__(self, source_file, progress_bar, path_to_save):
+        DigitalHarvard.__init__(self, tmp_file_name=source_file, target_file_name=None,
+                                progress_bar=progress_bar, path_to_save=path_to_save, flag=None)
+        #self.zero = zero_length
+        self.source = open(source_file, "rb")
+        self.source_size = os.stat(source_file).st_size
+        self.target_file = open(r"%s" % path_to_save, "wb")
+        self.str_data = ""
+        self.first_syncword = ARINC_REVERSE[1]
+        self.second_syncword = ARINC_REVERSE[2]
+        self.third_syncword = ARINC_REVERSE[3]
+        self.fourth_syncword = ARINC_REVERSE[4]
+        self.frame_in_bits = 3072
+        self.sub_frame_bits = 768
+
+        self.progress_bar.Show()
+
+        self.get_str_data()
+        self.progress_bar.SetValue(50)
+
+        self.record_data()
+        self.progress_bar.SetValue(100)
+
+    def get_str_data(self):
+        """ Convert all data to binary string representation for further search """
+        while True:
+            packet = self.source.read(512)
+            if packet == "":
+                break
+            for each in packet:
+                self.str_data += (str(bin(ord(each)))[2:]).rjust(8, "0")

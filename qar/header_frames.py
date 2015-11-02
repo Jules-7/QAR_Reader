@@ -140,7 +140,7 @@ class HeaderFrameSearchWrite(object):
         self.source_position = self.source.tell()
         if syncword == self.syncword_one:
             self.source.seek(-(self.frame_size + byte_amount), 1)
-            #self.source_position = self.source.tell()
+            # self.source_position = self.source.tell()
             return True
         return False
 

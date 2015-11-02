@@ -4,7 +4,7 @@ from airbus import A320
 from bur3 import Bur3, Bur3Analog
 from boeing import B737, B767Convert, B737Convert
 from header_frames import HeaderFrameSearchWrite
-from harvard_digital import DigitalHarvard
+from harvard_digital import B737QAR4700Analog
 from source_data import QAR_TYPES, HEADER_SIZE
 from bur_92 import BUR92AN140
 
@@ -182,8 +182,8 @@ class Flight:
             # 768 - bits in subframe, 3072 - bits in frame
             # for now data is recorded in length (Harvard coding)
             elif self.flag == "b737_qar_4700_analog":
-                b737 = DigitalHarvard(tmp_file_name, target_file_name, 3072, 768, self.progress_bar,
-                                      self.path_to_save, self.flag)
+                b737 = B737QAR4700Analog(tmp_file_name, target_file_name, self.progress_bar,
+                                         self.path_to_save, self.flag)
 
             elif (self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or
                   self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV"):
