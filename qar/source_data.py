@@ -6,6 +6,7 @@ USER = 1
 # -----------|  |---|    |----|   |-----|data processing|--|             |--|flights search|
 QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
              322:  ["a320",  "cf",              768,        2],
+             323:  ["a320",  "rsu",             768,        4],
              331:  ["b747",  "qar",             512,        4],  # 200
              3312: ["b747",  "4700",            384,        5,                 512],  # 300
              341:  ["an148", "bur92",           512,        1],
@@ -31,7 +32,8 @@ QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
              501:  ["il76",  "msrp64",          512,        2],
              5011: ["il76",  "msrp64_viewer",   512,        2],
              601:  ["mi24",  "bur4T",           160,        4],
-             701:  ["b767",  "qar",             1536,       4]}
+             701:  ["b767",  "qar",             1536,       4],
+             801:  ["an26",  "bur4105",         512,        4]}
 
 
 # ------|User id|-|username through code|-|Program window|-|program window|-|list of bitmaps to be included|
@@ -51,12 +53,14 @@ ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747
                                                                             'an12.png',
                                                                             'test.png',
                                                                             'an140.png',
-                                                                            'har_arinc.png',
+                                                                            'harvard_data.png',
                                                                             'il76.png',
                                                                             '10_16.png',
                                                                             'mi24.png',
                                                                             'b767.png',
-                                                                            'arinc_check.png']],
+                                                                            'arinc_data.png',
+                                                                            'length_data.png',
+                                                                            'swap.png']],
 
           10:      ["yanair",           "YanAir",               (600, 500), ['a320.png',
                                                                              's340.png',
@@ -77,7 +81,9 @@ ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747
 
           16:      ["il76",                   u"Ил76",           (600, 500), ['il76.png']],
 
-          17:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']]}
+          17:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
+
+          18:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']]}
 
 ARINC_DIRECT = {1: "001001000111",  # 247
                 2: "010110111000",  # 5b8
@@ -95,12 +101,12 @@ HEADER_SIZE = 128  # Monstr
 # it is used for determining how to process data further for flights search
 MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411, 501, 4034]
 OWN_HEADER_TYPES = [322, 5011, 701, 404]
-NO_HEADER_TYPES = [331, 3312, 341, 401, 402, 4022, 4031, 4032, 4033, 421, 601]
+NO_HEADER_TYPES = [331, 3312, 341, 401, 402, 4022, 4031, 4032, 4033, 421, 601, 323, 801]
 
 
 # each button holds information for corresponding bitmap button display onclick
 A320_BUTTON = {'name': 'A320',
-               'choices': {'QAR': 321, 'Compact Flash': 322},
+               'choices': {'QAR': 321, 'Compact Flash': 322, 'RSU': 323},
                'default_choice': 321}
 
 B747_BUTTON = {'name': 'B747',
@@ -116,7 +122,7 @@ AN32_BUTTON = {'name': u"Aн32",
                'default_choice': 351}
 
 AN26_BUTTON = {'name': u"Aн26",
-               'choices': {u"МСРП-12": 361},
+               'choices': {u"МСРП-12": 361, u"БУР-4-1-05": 801},
                'default_choice': 361}
 
 AN72_BUTTON = {'name': u"Aн72",

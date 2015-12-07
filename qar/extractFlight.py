@@ -1,12 +1,13 @@
 import win32api
+import os
 from SAAB340 import SAAB
-from airbus import A320
+from airbus import A320, A320RSU
 from bur3 import Bur3, Bur3Analog
 from boeing import B737, B767Convert, B737Convert
 from header_frames import HeaderFrameSearchWrite
 from harvard_digital import B737QAR4700Analog
 from source_data import QAR_TYPES, HEADER_SIZE
-from bur_92 import BUR92AN140
+from bur_92 import BUR92AN140, BUR1405Data
 
 RESOLUTION = ".inf"
 
@@ -48,6 +49,10 @@ class Flight:
             self.make_flight()
 
         elif self.flag == "b767_qar":  # b767
+            self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "a320_rsu":
             self.get_flight()
             self.make_flight()
 
@@ -97,6 +102,10 @@ class Flight:
 
         elif self.flag == "b737_qar_ng":
             self.get_flight()
+            self.make_flight()
+
+        elif self.flag == "an26_bur4105":
+            self.get_bur4105_flight()
             self.make_flight()
 
     def get_flight(self):
@@ -154,7 +163,11 @@ class Flight:
                 saab = SAAB(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)
 
-            elif self.acft == "a320":
+            elif self.flag == "a320_rsu":
+                a320rsu = A320RSU(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                                  self.chosen_acft_type)
+
+            elif self.acft == "a320":  # TODO - redo this check - include recorder type -> or it can be intercepted earlier by acft type
                 a320 = A320(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                             self.chosen_acft_type)
 
@@ -183,7 +196,7 @@ class Flight:
             # for now data is recorded in length (Harvard coding)
             elif self.flag == "b737_qar_4700_analog":
                 b737 = B737QAR4700Analog(tmp_file_name, target_file_name, self.progress_bar,
-                                         self.path_to_save, self.flag)
+                                         self.path_to_save, self.flag, self.optional_arg)
 
             elif (self.flag == "b737_dfdr_980" or self.flag == "b737_dfdr_980_BDB" or
                   self.flag == "b737_dfdr_980_BDO" or self.flag == "b737_dfdr_980_BDV"):
@@ -210,6 +223,10 @@ class Flight:
             elif self.flag == "b737_qar_ng":
                 b737 = B737Convert(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
                                    self.chosen_acft_type)
+
+            elif self.flag == "an26_bur4105":
+                bur1405 = BUR1405Data(tmp_file_name, target_file_name, self.progress_bar, self.path_to_save,
+                                      self.chosen_acft_type)
 
     def prepare_cf_file(self):
 
@@ -276,3 +293,10 @@ class Flight:
         self.flight = source_data.read()
         source_data.close()
         return tmp_file_name
+
+    def get_bur4105_flight(self):
+        path = os.path.splitext(self.path)[0] + ".inf"
+        data = open(path, "rb")
+        data.seek(self.start)
+        length = self.end - self.start
+        self.flight = data.read(length)

@@ -1,8 +1,9 @@
 from monstr import MonstrHeader
 from boeing import Boeing737DFDR980, B747Series200, B747Series300
-from bur_92 import Bur
+from bur_92 import Bur, BUR1405
 from compactFlash import CompactFlash, B767QARFlights, B737QARNG
 from msrp64_viewer import MSRP64EBNViewer
+from airbus import A320RSUFlightsSearch
 from source_data import QAR_TYPES, MONSTR_HEADER_TYPES
 from source_data import OWN_HEADER_TYPES, NO_HEADER_TYPES
 
@@ -61,3 +62,7 @@ class Redirect(object):
               self.chosen_acft_type == 4031 or self.chosen_acft_type == 4032 or
               self.chosen_acft_type == 4033):  # boeing 737-dfdr-980
             self.result = Boeing737DFDR980(self.path, self.chosen_acft_type)
+        elif self.chosen_acft_type == 323:
+            self.result = A320RSUFlightsSearch(self.path, self.chosen_acft_type)
+        elif self.chosen_acft_type == 801:
+            self.result = BUR1405(self.path, self.chosen_acft_type)

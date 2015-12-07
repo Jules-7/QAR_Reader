@@ -425,6 +425,296 @@ class Bur4T(object):
         self.target_file = open(r"%s" % self.path_to_save + r"\\" + r"%s" % self.name, "wb")
 
 
+class BUR1405(object):
+    """ An26 Bur 1-4-05 display flights
+        - Starting from index 512B - 16B of technical info goes after each 512B
+          (between end of first technical info and beginning os second - 512 bytes)
+        - Delete all technical info
+        - Each flight ends with 7 FF
+        - Date set to 01.01.2015
+        - Time take as following:
+          starting from the first information byte
+            17 byte - sconds
+            81 byte - minutes
+            209 byte - hours
+
+        If file with flights is opened first - undergo all necessary conversions and removing headers.
+
+        If it was opened before - therefore already converted - no need to convert it again - just extract flights
+
+    """
+
+    def __init__(self, path, chosen_acft_type):
+        self.path = path
+        self.chosen_acft_type = chosen_acft_type
+        self.copy_file_path = os.path.splitext(self.path)[0] + ".inf"
+        self.search_frame_len = QAR_TYPES[self.chosen_acft_type][2]
+        self.data_frame_len = 160  # TODO: redo this
+        self.qar_type = QAR_TYPES[self.chosen_acft_type][1]
+        self.header_size = 16
+        self.end_pattern = 7  # FF
+        self.source_file = open(self.path, 'rb')
+        self.source_len = os.stat(path).st_size
+        self.start = False
+        self.data_start = []
+        self.bytes_counter = 0
+        self.first_syncword = "11011011"
+        self.second_syncword = "00100101"
+        self.third_syncword = "11011010"
+        self.fourth_syncword = "00100100"
+        self.data_frame_len_in_bits = self.data_frame_len * 8
+        self.flight_first_frame = []
+        self.flights_start = []
+        self.flights_end = []
+        self.data_end = False
+        self.flight_intervals = []
+        self.durations = []
+        self.start_date = []
+        self.end_date = []
+        self.key_word = ['10101010', '11111111', '10101010', '11111111']  # in hex AA FF AA FF
+        self.checked = False
+
+        self.check_file()
+
+        if self.checked:
+            self.find_flights()
+            self.get_flight_intervals()
+            self.get_durations()
+            self.get_start_date()
+            self.get_end_date()
+        else:
+            self.find_start()
+            self.remove_all_headers()
+            self.find_flights()
+            self.get_flight_intervals()
+            self.get_durations()
+            self.get_start_date()
+            self.get_end_date()
+
+    def check_file(self):
+        """ If first bytes in file are checked - no need to do conversions """
+        if [str(bin(ord(each)))[2:] for each in self.source_file.read(4)] == self.key_word:
+            self.checked = True
+            self.source_file.close()
+            self.clear_copy = open(self.path, 'rb')
+            self.clear_copy_size = os.stat(self.copy_file_path).st_size
+        else:
+            self.source_file.seek(0, 0)
+            self.clear_copy = open(self.copy_file_path, "wb")
+
+    def find_start(self):
+
+        """ Flights start at index 512
+            1. Check for header - store first byte
+            2. Pass 512 bytes
+            3. Repeat 1 and 2 steps three times
+            4. If first bytes increments by 1 (its a counter) - first header index is a start
+        """
+
+        while not self.start:
+            self.get_header()
+            if len(self.data_start) == 3:
+                # check its incrementing and
+                if self.data_start[2][1] - self.data_start[1][1] == 1 and self.data_start[1][1] - self.data_start[0][1] == 1:
+                    self.start = self.data_start[0][0]
+                    self.source_file.seek(self.start + self.header_size, 0)
+                else:
+                    # if it is not incrementing - start right after first header
+                    self.source_file.seek(self.data_start[0][0] + self.header_size, 0)
+                    self.data_start = []  # clear it to get new data
+
+    def get_header(self):
+        self.source_file.seek(self.search_frame_len, 1)
+        self.bytes_counter = self.source_file.tell()
+        header = self.source_file.read(self.header_size)
+        self.data_start.append([self.bytes_counter, int(ord(header[0]))])
+        return
+
+    def remove_all_headers(self):
+        """ Not to change original file - store data without headers in separate tmp file
+            In order not to do all these steps for headers removal and other checks - create a copy of orginal file
+            cleared from header.
+            Mark this file as already cleaned - so this property could be checked next time
+        """
+        for element in self.key_word:
+            self.clear_copy.write((struct.pack("i", int(element, 2)))[:1])
+        while self.bytes_counter < self.source_len - self.search_frame_len:
+            self.clear_copy.write(self.source_file.read(self.search_frame_len))
+            self.source_file.seek(self.header_size, 1)
+            self.bytes_counter = self.source_file.tell()
+        self.clear_copy.close()  # close - because it was opened for writing before - and now we need to read from it
+        self.clear_copy = open(self.copy_file_path, 'rb')
+        self.clear_copy_size = os.stat(self.copy_file_path).st_size
+        self.bytes_counter = 0
+
+    def find_flights(self):
+        while self.bytes_counter < self.clear_copy_size - self.data_frame_len:
+            self.find_flight_start()
+            self.find_flight_end()
+            self.extract_all_ff_at_flight_end()
+
+    def find_flight_start(self):
+        self.bits_counter = 0
+        while self.bytes_counter < self.clear_copy_size - self.data_frame_len:
+            frames = self.clear_copy.read(self.data_frame_len * 3)
+            frames_in_str = [(str(bin(ord(data)))[2:]).rjust(8, "0") for data in frames]
+            frames_in_bin = ''.join(frames_in_str)
+            #---------------------------------------
+            first_syncword_index = frames_in_bin.find(self.first_syncword, self.bits_counter)
+            second_syncword_index = frames_in_bin.find(self.second_syncword, first_syncword_index + 320)
+            third_syncword_index = frames_in_bin.find(self.third_syncword, second_syncword_index + 320)
+            fourth_syncword_index = frames_in_bin.find(self.fourth_syncword, third_syncword_index + 320)
+
+            if (fourth_syncword_index - third_syncword_index == 320 and
+                third_syncword_index - second_syncword_index == 320 and
+                second_syncword_index - first_syncword_index == 320):
+                self.flight_first_frame.append(frames_in_bin[first_syncword_index:fourth_syncword_index + self.data_frame_len_in_bits])
+                self.flights_start.append(self.bytes_counter)
+                return
+            else:
+                self.bits_counter = first_syncword_index + len(self.first_syncword)
+                self.bytes_counter = self.clear_copy.tell()
+
+    def find_flight_end(self):
+        while self.bytes_counter < self.clear_copy_size - self.data_frame_len:
+            few_frames = self.clear_copy.read(self.data_frame_len)
+            frames_in_ord = [str(ord(data)) for data in few_frames]
+            frames = ''.join(frames_in_ord)
+            end_pattern = '255'*7
+            if end_pattern in frames:
+                self.bytes_counter = self.clear_copy.tell()
+                self.flights_end.append(self.bytes_counter)
+                return
+            else:
+                self.bytes_counter = self.clear_copy.tell()
+
+    def extract_all_ff_at_flight_end(self):
+        while True:
+            check_byte = self.clear_copy.read(1)
+            val = ord(check_byte)
+            if val == 255:
+                pass
+            else:
+                self.bytes_counter = self.clear_copy.tell()
+                return
+
+    def get_flight_intervals(self):
+        """ if the length of start and ends is different - starts are greater on one index
+            add source size as the last end
+        """
+        if len(self.flights_start) - len(self.flights_end) == 1:
+            self.flights_end.append(self.clear_copy_size)
+        self.flight_intervals = zip(self.flights_start, self.flights_end)
+
+    def get_durations(self):
+        """ 1. End - start = bytes
+            2. Bytes * 8 = bits
+            3. Bits / 10 = amount of 10bit channels
+            4. amount of 10bit channels * 6 = amount of bits (000000) to add
+            5. bits + amount of bits to add = tot bits after adding zeros
+            6. tot bits / 8 = amount of bytes
+            7. amount of bytes / 256 = seconds
+        """
+        each_flight_bits = map(lambda start, end: (end - start)*8, self.flights_start, self.flights_end)
+        each_flight_channels = map(lambda start, end: ((end - start)*8)/10, self.flights_start, self.flights_end)
+        each_flight_additional_zeros = map(lambda bits: bits * 6, each_flight_channels)
+        self.durations = map(lambda bits, zeros: ((bits + zeros)/8)/256, each_flight_bits, each_flight_additional_zeros)
+
+    def get_start_date(self):
+        """ Get time from first two frames of each flight
+            - make data 16 bit words out of 10 bit words:
+                take 10 bit and + '000000' in front of it
+            - take corresponding byte for each time value
+            - take first 6 bits
+            - inverse them
+            - get decimal representation for time
+        """
+        sec_index = 8 * 17
+        min_index = 8 * 81
+        hour_index = 8 * 209
+        for each in self.flight_first_frame:
+            i = 0
+            converted_first_frame = ""
+            while i < len(each):
+                converted_first_frame += "000000" + each[i:i+10]
+                i += 10
+            original_sec_value = (converted_first_frame[sec_index:sec_index + 6])
+            original_min_value = (converted_first_frame[min_index:min_index + 6])
+            original_hour_value = (converted_first_frame[hour_index:hour_index + 6])
+            inverse_sec_value = ''.join(['1' if number == "0" else "0" for number in original_sec_value])
+            inverse_min_value = ''.join(['1' if number == "0" else "0" for number in original_min_value])
+            inverse_hour_value = ''.join(['1' if number == "0" else "0" for number in original_hour_value])
+            sec_value = int(inverse_sec_value, 2)
+            min_value = int(inverse_min_value, 2)
+            hour_value = int(inverse_hour_value, 2)
+            start_date_time = datetime.datetime(year=2015, month=1, day=1,
+                                                hour=hour_value, minute=min_value, second=sec_value)
+            self.start_date.append(start_date_time)
+
+    def get_end_date(self):
+        self.end_date = map(lambda start, duration: start + datetime.timedelta(seconds=duration),
+                            self.start_date, self.durations)
 
 
+class BUR1405Data(object):
 
+    def __init__(self, tmp_file_name, target_file_name, progress_bar, path_to_save, chosen_acft_type):
+        self.source = open(tmp_file_name, "rb")
+        self.source_len = os.stat(tmp_file_name).st_size
+        self.param_file = open(r"%s" % path_to_save + r"\\" +
+                               r"%s" % target_file_name, "wb")
+        self.progress_bar = progress_bar
+        self.chosen_acft_type = chosen_acft_type
+        self.first_syncword  = "11011011"
+        self.second_syncword = "00100101"
+        self.third_syncword  = "11011010"
+        self.fourth_syncword = "00100100"
+        self.bits_counter = 0
+
+        self.progress_bar.Show()
+
+        self.record_flight()
+        self.progress_bar.SetValue(100)
+
+    def record_flight(self):
+        data = self.find_flight_start()
+        self.progress_bar.SetValue(35)
+        i = 0
+        while True:
+            try:
+                ten_bit_word = data[i:i+10]
+                sixteen_bit_word = "000000" + ten_bit_word
+                data_to_write = [int(sixteen_bit_word[:8], 2), int(sixteen_bit_word[8:], 2)]
+                for each in data_to_write:
+                    self.param_file.write(struct.pack("i", each)[:1])
+                i += 10
+            except:
+                break
+        self.progress_bar.SetValue(85)
+
+    def find_flight_start(self):
+        self.progress_bar.SetValue(5)
+        frames = self.source.read()
+        frames_in_str = [(str(bin(ord(data)))[2:]).rjust(8, "0") for data in frames]
+        frames_in_bin = ''.join(frames_in_str)
+        # while True:
+        #     first_syncword_index = frames_in_bin.find(self.first_syncword, self.bits_counter)
+        #     second_syncword = frames_in_bin.find(self.second_syncword, first_syncword_index + 320)
+        #     if second_syncword - first_syncword_index == 320:
+        #         self.progress_bar.SetValue(15)
+        #         return frames_in_bin[first_syncword_index:]
+        #     else:
+        #         self.bits_counter = first_syncword_index + 10
+        while True:
+            first_syncword_index = frames_in_bin.find(self.first_syncword, self.bits_counter)
+            second_syncword_index = frames_in_bin.find(self.second_syncword, first_syncword_index + 319)
+            third_syncword_index = frames_in_bin.find(self.third_syncword, second_syncword_index + 319)
+            fourth_syncword_index = frames_in_bin.find(self.fourth_syncword, third_syncword_index + 319)
+            if (fourth_syncword_index - third_syncword_index == 320 and
+                third_syncword_index - second_syncword_index == 320 and
+                second_syncword_index - first_syncword_index == 320):
+                sequence_to_write = frames_in_bin[first_syncword_index:]
+                self.progress_bar.SetValue(15)
+                return sequence_to_write
+            else:
+                self.bits_counter = first_syncword_index + len(self.first_syncword)

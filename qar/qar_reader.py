@@ -14,7 +14,7 @@ from datetime import datetime
 from initialization import Initialize
 from formatting import FormatCompactFlash
 from converter import TwelveToSixteen, TenToSixteen
-from harvard_digital import HarvardToArincConverter, ArincToDataConverter
+from harvard_digital import HarvardToDataConverter, ArincToDataConverter, LengthToDataConverter
 
 """ This module:
     - creates window for choosing file with flights
@@ -457,18 +457,21 @@ class MyFrame(wx.Frame):
 
             self.toolbar2.AddLabelTool(135, 'Save RAW', wx.Bitmap('save_raw.png'))
             self.toolbar2.AddLabelTool(149, '12B->16B', wx.Bitmap('12_16.png'))
-            self.toolbar2.AddLabelTool(153, 'har_dig', wx.Bitmap('har_arinc.png'))
             self.toolbar2.AddLabelTool(155, '10B->16B', wx.Bitmap('10_16.png'))
             self.toolbar2.AddLabelTool(158, "swap", wx.Bitmap('swap.png'))
-            self.toolbar2.AddLabelTool(159, "arinc_check", wx.Bitmap('arinc_check.png'))
+            self.toolbar2.AddLabelTool(153, 'har_dig', wx.Bitmap('harvard_data.png'))
+            self.toolbar2.AddLabelTool(160, "length_arinc", wx.Bitmap('length_data.png'))
+            self.toolbar2.AddLabelTool(159, "arinc_check", wx.Bitmap('arinc_data.png'))
             # -------------------------------------------------------------------
 
             # ----------------- HELP TOOLBAR 2 BITMAPS ---------------------------------
             self.toolbar2.SetToolLongHelp(135, "Save chosen flight in RAW format")
             self.toolbar2.SetToolLongHelp(149, "Convert from 12 bit-word to 16 bit-word")
-            self.toolbar2.SetToolLongHelp(153, "Convert from Harvard to digital")
+            self.toolbar2.SetToolLongHelp(153, "Harvard -> Data: count pulses lengths, convert to arinc, record valid frames only")
             self.toolbar2.SetToolLongHelp(155, "Convert from 10 bit-word to 16 bit-word")
             self.toolbar2.SetToolLongHelp(158, "Swap bytes")
+            self.toolbar2.SetToolLongHelp(159, "Arinc -> Data: record valid frames only")
+            self.toolbar2.SetToolLongHelp(160, "Lengths -> Data: convert to arinc, record valid frames only")
             # ------------------------------------------------------------------------
 
             self.toolbar2.Realize()  # actually display toolbar
@@ -494,13 +497,14 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.an12_button, id=150)
         self.Bind(wx.EVT_MENU, self.an140_button, id=151)
         self.Bind(wx.EVT_MENU, self.an140_button, id=152)
-        self.Bind(wx.EVT_MENU, self.harvard_to_arinc, id=153)
+        self.Bind(wx.EVT_MENU, self.harvard_to_data, id=153)
         self.Bind(wx.EVT_MENU, self.il76_button, id=154)
         self.Bind(wx.EVT_MENU, self.ten_to_sixteen, id=155)
         self.Bind(wx.EVT_MENU, self.mi24_button, id=156)
         self.Bind(wx.EVT_MENU, self.b767_button, id=157)
         self.Bind(wx.EVT_MENU, self.swap_button, id=158)
         self.Bind(wx.EVT_MENU, self.arinc_check, id=159)
+        self.Bind(wx.EVT_MENU, self.length_to_data, id=160)
         # -------------------- END TOOLBARS EVENTS ----------------------------
 
         ''' for both toolbars to be static when the list of lights is shown -
@@ -523,7 +527,7 @@ class MyFrame(wx.Frame):
         choices_dict = collections.OrderedDict(sorted(button_type["choices"].items()))
         choices_list = [key for key, value in choices_dict.iteritems()]
         option = self.make_choice_window(name, choices_list)
-        if option:
+        if option:  # obtain choice
             self.chosen_acft_type = choices_dict[option]
         else:  # if nothing was chosen - select default type
             self.chosen_acft_type = button_type['default_choice']
@@ -602,18 +606,18 @@ class MyFrame(wx.Frame):
                 self.chosen_acft_type = 4032
             elif dfdr_type == "BDV":
                 self.chosen_acft_type = 4033
-            self.on_choose_file()
         elif option == "DFDR 980 I":
             self.chosen_acft_type = 4022
-            self.on_choose_file()
         elif option == "QAR 4700 (analog)":
             self.chosen_acft_type = 403
-            self.on_choose_file()
+            zero = self.get_zero_length()  # get zero for conversion
+            direction = self.get_arinc_direction()
+            self.optional_arg = [zero, direction[:1]]
         elif option == "QAR 4700":
             self.chosen_acft_type = 4034
         elif option == "QAR NG":
             self.chosen_acft_type = 404
-
+        if option:
             self.on_choose_file()
 
     def an12_button(self, event):
@@ -828,23 +832,35 @@ class MyFrame(wx.Frame):
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
-    def harvard_to_arinc(self, event):
+    def harvard_to_data(self, event):
         """ Transform rectangular Harvard data to arinc """
         self.get_path_to_file()
         self.get_file_to_save()
         zero_length = self.get_zero_length()
+        direction = self.get_arinc_direction()
         self.statusbar.SetStatusText("Converting...", 0)
-        convert = HarvardToArincConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
-        # convert = DigitalToARINCConverter(self.path, zero_length, self.progress_bar, self.path_to_save)
+        convert = HarvardToDataConverter(self.path, zero_length, self.progress_bar, self.path_to_save, direction)
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
     def arinc_check(self, event):
-        """ Transform rectangular Harvard data to arinc """
+        """ Search in arinc digital data for valid arinc packets """
         self.get_path_to_file()
         self.get_file_to_save()
+        direction = self.get_arinc_direction()
         self.statusbar.SetStatusText("Converting...", 0)
-        convert = ArincToDataConverter(self.path, self.progress_bar, self.path_to_save)
+        convert = ArincToDataConverter(self.path, self.progress_bar, self.path_to_save, direction)
+        self.progress_bar.SetValue(100)
+        self.statusbar.SetStatusText("Conversion is finished", 0)
+
+    def length_to_data(self, event):
+        """ Convert already calculated length to arinc """
+        self.get_path_to_file()
+        self.get_file_to_save()
+        zero_length = self.get_zero_length()
+        direction = self.get_arinc_direction()
+        self.statusbar.SetStatusText("Converting...", 0)
+        convert = LengthToDataConverter(self.path, zero_length, self.progress_bar, self.path_to_save, direction)
         self.progress_bar.SetValue(100)
         self.statusbar.SetStatusText("Conversion is finished", 0)
 
@@ -944,10 +960,24 @@ class MyFrame(wx.Frame):
         dlg = wx.TextEntryDialog(self, 'Insert zero length')
         if dlg.ShowModal() == wx.ID_OK:
             zero_length = dlg.GetValue()
+            dlg.Destroy()
             return int(zero_length)
         else:
+            dlg.Destroy()
             return
+
+
+    def get_arinc_direction(self):
+        choices = ["Direct", "Reverse"]
+        dlg = wx.SingleChoiceDialog(self, '', "Insert direction for ARINC words search",
+                                    choices, wx.CHOICEDLG_STYLE)
+        if dlg.ShowModal() == wx.ID_OK:
+            option = dlg.GetStringSelection()
+        else:  # Cancel button has been pressed
+            return False
         dlg.Destroy()
+        return option[:1]
+
 
 # ----------------------------------------------------------------------
 # this piece of code runs the script
