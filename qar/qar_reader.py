@@ -421,6 +421,9 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH1604":
             self.toolbar1.AddLabelTool(156, 'Mi24', wx.Bitmap('mi24.png'))
 
+        if ACCESS[USER][0] == "An26":
+            self.toolbar1.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
+
         # --------- HELP TOOLBAR 1 BITMAPS -----------------------------
         self.toolbar1.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar1.SetToolLongHelp(133, "Open file containing flights")

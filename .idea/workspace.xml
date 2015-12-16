@@ -14,7 +14,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/QAR_Reader$qar_reader.coverage" NAME="qar_reader Coverage Results" MODIFIED="1442934285850" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/qar" />
+    <SUITE FILE_PATH="coverage/QAR_Reader$qar_reader.coverage" NAME="qar_reader Coverage Results" MODIFIED="1450255883260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/qar" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -35,60 +35,115 @@
         <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="594" column="0" selection-start-line="594" selection-start-column="0" selection-end-line="594" selection-end-column="0" />
+              <caret line="398" column="0" selection-start-line="398" selection-start-column="0" selection-end-line="398" selection-end-column="0" />
               <folding>
                 <element signature="e#21#30#0" expanded="true" />
-                <element signature="e#504#691#1" expanded="true" />
-                <element signature="e#1025#1097#0" expanded="true" />
-                <element signature="e#1225#1316#0" expanded="true" />
-                <element signature="e#1505#1867#0" expanded="true" />
-                <element signature="e#1896#2234#0" expanded="true" />
-                <element signature="e#2441#5048#0" expanded="true" />
-                <element signature="e#5098#6198#0" expanded="true" />
-                <element signature="e#6271#6529#0" expanded="true" />
-                <element signature="e#6669#10953#0" expanded="true" />
-                <element signature="e#10995#11025#0" expanded="true" />
-                <element signature="e#11073#11106#0" expanded="true" />
-                <element signature="e#11154#11181#0" expanded="true" />
-                <element signature="e#11229#11258#0" expanded="true" />
-                <element signature="e#11296#12619#0" expanded="true" />
-                <element signature="e#12661#12680#0" expanded="true" />
-                <element signature="e#12865#13617#0" expanded="true" />
-                <element signature="e#13660#14398#0" expanded="true" />
-                <element signature="e#14440#20918#0" expanded="true" />
-                <element signature="e#21446#22199#0" expanded="true" />
-                <element signature="e#22243#22295#0" expanded="true" />
-                <element signature="e#22339#22391#0" expanded="true" />
-                <element signature="e#22436#22489#0" expanded="true" />
-                <element signature="e#22534#22978#0" expanded="true" />
-                <element signature="e#23022#23074#0" expanded="true" />
-                <element signature="e#23118#23170#0" expanded="true" />
-                <element signature="e#23214#23266#0" expanded="true" />
-                <element signature="e#23310#23362#0" expanded="true" />
-                <element signature="e#23406#23458#0" expanded="true" />
-                <element signature="e#25503#25555#0" expanded="true" />
-                <element signature="e#25599#25651#0" expanded="true" />
-                <element signature="e#25695#25747#0" expanded="true" />
-                <element signature="e#25806#26117#0" expanded="true" />
-                <element signature="e#26159#26214#0" expanded="true" />
-                <element signature="e#26334#26492#0" expanded="true" />
-                <element signature="e#29106#29120#0" expanded="true" />
-                <element signature="e#29161#29772#0" expanded="true" />
-                <element signature="e#29841#30769#0" expanded="true" />
-                <element signature="e#30813#30942#0" expanded="true" />
-                <element signature="e#30983#30999#0" expanded="true" />
-                <element signature="e#31035#32200#0" expanded="true" />
-                <element signature="e#32251#32737#0" expanded="true" />
-                <element signature="e#32785#33277#0" expanded="true" />
-                <element signature="e#33328#33768#0" expanded="true" />
-                <element signature="e#33812#34287#0" expanded="true" />
-                <element signature="e#34349#34466#0" expanded="true" />
-                <element signature="e#34524#35409#0" expanded="true" />
-                <element signature="e#35451#35944#0" expanded="true" />
-                <element signature="e#35986#36571#0" expanded="true" />
-                <element signature="e#36613#36870#0" expanded="true" />
-                <element signature="e#36911#37316#0" expanded="true" />
-                <element signature="e#37357#37581#0" expanded="true" />
+                <element signature="e#592#780#1" expanded="true" />
+                <element signature="e#1114#1186#0" expanded="true" />
+                <element signature="e#1314#1405#0" expanded="true" />
+                <element signature="e#1594#1956#0" expanded="true" />
+                <element signature="e#1985#2323#0" expanded="true" />
+                <element signature="e#2530#5137#0" expanded="true" />
+                <element signature="e#5187#6288#0" expanded="true" />
+                <element signature="e#6333#6619#0" expanded="false" />
+                <element signature="e#6361#6619#0" expanded="true" />
+                <element signature="e#6664#12773#0" expanded="false" />
+                <element signature="e#6759#11043#0" expanded="true" />
+                <element signature="e#11085#11115#0" expanded="true" />
+                <element signature="e#11163#11196#0" expanded="true" />
+                <element signature="e#11244#11271#0" expanded="true" />
+                <element signature="e#11319#11348#0" expanded="true" />
+                <element signature="e#11386#12709#0" expanded="true" />
+                <element signature="e#12751#12770#0" expanded="true" />
+                <element signature="e#12955#13789#0" expanded="true" />
+                <element signature="e#13832#14514#0" expanded="true" />
+                <element signature="e#23967#24737#0" expanded="true" />
+                <element signature="e#24781#24833#0" expanded="true" />
+                <element signature="e#24877#24929#0" expanded="true" />
+                <element signature="e#24974#25027#0" expanded="true" />
+                <element signature="e#25072#25516#0" expanded="true" />
+                <element signature="e#25560#25612#0" expanded="true" />
+                <element signature="e#25656#25708#0" expanded="true" />
+                <element signature="e#25752#25804#0" expanded="true" />
+                <element signature="e#25848#25900#0" expanded="true" />
+                <element signature="e#25944#25996#0" expanded="true" />
+                <element signature="e#26040#28087#0" expanded="true" />
+                <element signature="e#28131#28183#0" expanded="true" />
+                <element signature="e#28227#28279#0" expanded="true" />
+                <element signature="e#28323#28375#0" expanded="true" />
+                <element signature="e#28434#28745#0" expanded="true" />
+                <element signature="e#28787#28842#0" expanded="true" />
+                <element signature="e#28963#29121#0" expanded="true" />
+                <element signature="e#29238#30139#0" expanded="true" />
+                <element signature="e#30258#31697#0" expanded="true" />
+                <element signature="e#31738#31752#0" expanded="true" />
+                <element signature="e#31793#32404#0" expanded="true" />
+                <element signature="e#32473#33401#0" expanded="true" />
+                <element signature="e#33445#33574#0" expanded="true" />
+                <element signature="e#33615#33631#0" expanded="true" />
+                <element signature="e#33667#34795#0" expanded="true" />
+                <element signature="e#34846#35332#0" expanded="true" />
+                <element signature="e#35380#35872#0" expanded="true" />
+                <element signature="e#35920#36404#0" expanded="true" />
+                <element signature="e#36448#36881#0" expanded="true" />
+                <element signature="e#36928#37410#0" expanded="true" />
+                <element signature="e#37454#37825#0" expanded="true" />
+                <element signature="e#37869#38344#0" expanded="true" />
+                <element signature="e#38406#38523#0" expanded="true" />
+                <element signature="e#38581#39466#0" expanded="true" />
+                <element signature="e#39508#40001#0" expanded="true" />
+                <element signature="e#40043#40628#0" expanded="true" />
+                <element signature="e#40670#40927#0" expanded="true" />
+                <element signature="e#40968#41373#0" expanded="true" />
+                <element signature="e#41414#41668#0" expanded="true" />
+                <element signature="e#41714#42106#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="source_data.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/qar/source_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.075780086">
+              <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bur_92.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/qar/bur_92.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="600" column="29" selection-start-line="600" selection-start-column="29" selection-end-line="600" selection-end-column="29" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#152#1124#0" expanded="true" />
+                <element signature="e#4286#8332#0" expanded="true" />
+                <element signature="e#8376#8769#0" expanded="true" />
+                <element signature="e#8815#9023#0" expanded="true" />
+                <element signature="e#10002#10182#0" expanded="true" />
+                <element signature="e#10216#12002#0" expanded="false" />
+                <element signature="e#12659#13649#0" expanded="true" />
+                <element signature="e#18472#19179#1" expanded="true" />
+                <element signature="e#19237#20879#0" expanded="true" />
+                <element signature="e#20915#21386#0" expanded="true" />
+                <element signature="e#21423#22352#0" expanded="true" />
+                <element signature="e#22388#22634#0" expanded="true" />
+                <element signature="e#22678#23668#0" expanded="true" />
+                <element signature="e#23706#23896#0" expanded="true" />
+                <element signature="e#23939#25305#0" expanded="true" />
+                <element signature="e#25346#25888#0" expanded="true" />
+                <element signature="e#26383#26718#0" expanded="true" />
+                <element signature="e#26757#27551#0" expanded="true" />
+                <element signature="e#27591#29191#0" expanded="true" />
+                <element signature="e#29229#29379#0" expanded="true" />
+                <element signature="e#29521#30134#0" expanded="true" />
+                <element signature="e#30173#30708#0" expanded="true" />
+                <element signature="e#30751#32331#0" expanded="true" />
+                <marker date="1449495203717" expanded="true" signature="30959:31426" placeholder="..." />
+                <marker date="1449495203717" expanded="true" signature="30971:31342" placeholder="..." />
               </folding>
             </state>
           </provider>
@@ -98,87 +153,14 @@
         <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="210" column="32" selection-start-line="210" selection-start-column="32" selection-end-line="210" selection-end-column="32" />
+              <caret line="29" column="54" selection-start-line="29" selection-start-column="54" selection-end-line="29" selection-end-column="54" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
-                <element signature="e#360#526#1" expanded="true" />
-                <element signature="e#666#3072#0" expanded="true" />
-                <element signature="e#3108#3888#0" expanded="true" />
-                <element signature="e#8658#9375#0" expanded="true" />
-                <element signature="e#9413#9577#0" expanded="true" />
-                <element signature="e#9623#9919#0" expanded="true" />
-                <element signature="e#9967#11322#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="boeing.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/boeing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="919" column="47" selection-start-line="919" selection-start-column="47" selection-end-line="919" selection-end-column="47" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="source_data.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/source_data.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="27" column="60" selection-start-line="27" selection-start-column="60" selection-end-line="27" selection-end-column="60" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="splitter.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/splitter.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-              <folding>
-                <element signature="e#1569#2067#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="compactFlash.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/qar/compactFlash.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="141" column="61" selection-start-line="141" selection-start-column="61" selection-end-line="141" selection-end-column="61" />
-              <folding>
-                <element signature="e#21#30#0" expanded="true" />
-                <element signature="e#199#1712#0" expanded="true" />
-                <element signature="e#1805#2471#0" expanded="true" />
-                <element signature="e#2515#2685#1" expanded="true" />
-                <element signature="e#2735#3501#0" expanded="true" />
-                <element signature="e#3750#4991#0" expanded="true" />
-                <element signature="e#5885#6762#0" expanded="true" />
-                <element signature="e#6808#7175#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="specific_header_types.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/qar/specific_header_types.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8464052">
-              <caret line="164" column="13" selection-start-line="164" selection-start-column="13" selection-end-line="164" selection-end-column="13" />
-              <folding>
-                <element signature="e#22#37#0" expanded="true" />
-                <element signature="e#164#854#0" expanded="true" />
-                <element signature="e#1629#1793#0" expanded="true" />
-                <element signature="e#1832#3070#0" expanded="true" />
-                <element signature="e#3108#4402#0" expanded="true" />
-                <element signature="e#4448#4869#0" expanded="true" />
-                <element signature="e#4921#5701#0" expanded="true" />
-                <element signature="e#7023#8118#0" expanded="true" />
-                <element signature="e#8159#8365#0" expanded="true" />
+                <element signature="e#395#561#1" expanded="true" />
+                <element signature="e#3355#4135#0" expanded="true" />
+                <element signature="e#4192#9398#0" expanded="true" />
+                <element signature="e#10749#12104#0" expanded="true" />
+                <element signature="e#12148#12335#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -205,18 +187,23 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/qar/airbus.py" />
         <option value="$PROJECT_DIR$/qar/monstr.py" />
-        <option value="$PROJECT_DIR$/qar/bur3.py" />
         <option value="$PROJECT_DIR$/docs/compact_flash.txt" />
-        <option value="$PROJECT_DIR$/qar/processing.py" />
-        <option value="$PROJECT_DIR$/qar/splitter.py" />
-        <option value="$PROJECT_DIR$/qar/boeing.py" />
-        <option value="$PROJECT_DIR$/qar/extractFlight.py" />
-        <option value="$PROJECT_DIR$/qar/qar_reader.py" />
         <option value="$PROJECT_DIR$/qar/compactFlash.py" />
-        <option value="$PROJECT_DIR$/qar/source_data.py" />
         <option value="$PROJECT_DIR$/qar/specific_header_types.py" />
+        <option value="$PROJECT_DIR$/qar/raw_data_conversion.py" />
+        <option value="$PROJECT_DIR$/qar/processing.py" />
+        <option value="$PROJECT_DIR$/qar/boeing.py" />
+        <option value="$PROJECT_DIR$/qar/header_frames.py" />
+        <option value="$PROJECT_DIR$/qar/msrp64_viewer.py" />
+        <option value="$PROJECT_DIR$/qar/bur3.py" />
+        <option value="$PROJECT_DIR$/qar/harvard_digital.py" />
+        <option value="$PROJECT_DIR$/qar/airbus.py" />
+        <option value="$PROJECT_DIR$/qar/splitter.py" />
+        <option value="$PROJECT_DIR$/qar/extractFlight.py" />
+        <option value="$PROJECT_DIR$/qar/bur_92.py" />
+        <option value="$PROJECT_DIR$/qar/qar_reader.py" />
+        <option value="$PROJECT_DIR$/qar/source_data.py" />
       </list>
     </option>
   </component>
@@ -228,10 +215,10 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1288" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1296" />
-    <option name="height" value="1040" />
+    <option name="height" value="1010" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -278,7 +265,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -312,26 +298,13 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="QAR_Reader" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="QAR_Reader" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="docs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="C:/Python27/python.exe" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="options.lastSelected" value="reference.settingsdialog.IDE.editor.colors.Font" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.splitter.details.proportions" value="0.2" />
@@ -963,21 +936,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1288" y="-8" width="1296" height="1040" extended-state="6" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1296" height="1010" extended-state="1" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19579288" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13349515" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25594565" sideWeight="0.496875" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25607064" sideWeight="0.503125" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32928804" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295583" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37458926" sideWeight="0.22716442" order="2" side_tool="true" content_ui="tabs" x="-4" y="729" width="1280" height="308" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2751982" sideWeight="0.78984374" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17819461" sideWeight="0.78984374" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.15234375" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29558325" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30464327" sideWeight="0.7671875" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.36459553" sideWeight="0.7671875" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.12852311" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32976446" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -985,7 +958,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32616082" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32473624" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -1039,11 +1012,6 @@
           <option name="timeStamp" value="400" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>149</line>
-          <option name="timeStamp" value="408" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/SAAB340.py</url>
           <line>29</line>
           <option name="timeStamp" value="411" />
@@ -1052,11 +1020,6 @@
           <url>file://$PROJECT_DIR$/qar/header_frames.py</url>
           <line>48</line>
           <option name="timeStamp" value="435" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/header_frames.py</url>
-          <line>62</line>
-          <option name="timeStamp" value="436" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/header_frames.py</url>
@@ -1069,69 +1032,14 @@
           <option name="timeStamp" value="439" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/airbus.py</url>
-          <line>27</line>
-          <option name="timeStamp" value="479" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>67</line>
-          <option name="timeStamp" value="483" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>52</line>
-          <option name="timeStamp" value="484" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>55</line>
-          <option name="timeStamp" value="485" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>58</line>
-          <option name="timeStamp" value="487" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>64</line>
-          <option name="timeStamp" value="490" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="502" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/bur_92.py</url>
           <line>252</line>
           <option name="timeStamp" value="523" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/bur_92.py</url>
-          <line>34</line>
-          <option name="timeStamp" value="526" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/bur3.py</url>
-          <line>259</line>
-          <option name="timeStamp" value="536" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/harvard_digital.py</url>
-          <line>120</line>
+          <line>109</line>
           <option name="timeStamp" value="543" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/qar_reader.py</url>
-          <line>771</line>
-          <option name="timeStamp" value="564" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/extractFlight.py</url>
-          <line>197</line>
-          <option name="timeStamp" value="592" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/monstr.py</url>
@@ -1155,39 +1063,9 @@
           <option name="timeStamp" value="633" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/qar_reader.py</url>
-          <line>825</line>
-          <option name="timeStamp" value="634" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/extractFlight.py</url>
-          <line>35</line>
+          <line>36</line>
           <option name="timeStamp" value="640" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/extractFlight.py</url>
-          <line>157</line>
-          <option name="timeStamp" value="641" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/airbus.py</url>
-          <line>23</line>
-          <option name="timeStamp" value="642" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/processing.py</url>
-          <line>154</line>
-          <option name="timeStamp" value="644" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/processing.py</url>
-          <line>160</line>
-          <option name="timeStamp" value="645" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/processing.py</url>
-          <line>171</line>
-          <option name="timeStamp" value="646" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/qar/boeing.py</url>
@@ -1195,30 +1073,35 @@
           <option name="timeStamp" value="650" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/bur3.py</url>
-          <line>194</line>
-          <option name="timeStamp" value="653" />
+          <url>file://$PROJECT_DIR$/qar/airbus.py</url>
+          <line>80</line>
+          <option name="timeStamp" value="686" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/bur3.py</url>
-          <line>191</line>
-          <option name="timeStamp" value="655" />
+          <url>file://$PROJECT_DIR$/qar/extractFlight.py</url>
+          <line>227</line>
+          <option name="timeStamp" value="713" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/splitter.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="657" />
+          <url>file://$PROJECT_DIR$/qar/bur_92.py</url>
+          <line>712</line>
+          <option name="timeStamp" value="742" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/qar/specific_header_types.py</url>
-          <line>52</line>
-          <option name="timeStamp" value="658" />
+          <url>file://$PROJECT_DIR$/qar/bur_92.py</url>
+          <line>705</line>
+          <option name="timeStamp" value="744" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/qar/extractFlight.py</url>
+          <line>106</line>
+          <option name="timeStamp" value="747" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="665" />
+      <option name="time" value="748" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -1231,90 +1114,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/qar/initialization.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="120" column="25" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/monstr.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="38" column="22" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="484" column="23" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#21#30#0" expanded="true" />
-            <element signature="e#504#691#1" expanded="true" />
-            <element signature="e#1025#1097#0" expanded="true" />
-            <element signature="e#1225#1316#0" expanded="true" />
-            <element signature="e#1505#1867#0" expanded="true" />
-            <element signature="e#1896#2234#0" expanded="true" />
-            <element signature="e#2441#5048#0" expanded="true" />
-            <element signature="e#5098#6198#0" expanded="true" />
-            <element signature="e#6271#6529#0" expanded="true" />
-            <element signature="e#6669#10953#0" expanded="true" />
-            <element signature="e#10995#11025#0" expanded="true" />
-            <element signature="e#11073#11106#0" expanded="true" />
-            <element signature="e#11154#11181#0" expanded="true" />
-            <element signature="e#11229#11258#0" expanded="true" />
-            <element signature="e#11296#12619#0" expanded="true" />
-            <element signature="e#12661#12680#0" expanded="true" />
-            <element signature="e#12865#13617#0" expanded="true" />
-            <element signature="e#13660#14398#0" expanded="true" />
-            <element signature="e#14440#20918#0" expanded="true" />
-            <element signature="e#21446#22199#0" expanded="true" />
-            <element signature="e#22243#22295#0" expanded="true" />
-            <element signature="e#22339#22391#0" expanded="true" />
-            <element signature="e#22436#22489#0" expanded="true" />
-            <element signature="e#22534#22978#0" expanded="true" />
-            <element signature="e#23022#23074#0" expanded="true" />
-            <element signature="e#23118#23170#0" expanded="true" />
-            <element signature="e#23214#23266#0" expanded="true" />
-            <element signature="e#23310#23362#0" expanded="true" />
-            <element signature="e#23406#23458#0" expanded="true" />
-            <element signature="e#25503#25555#0" expanded="true" />
-            <element signature="e#25599#25651#0" expanded="true" />
-            <element signature="e#25695#25747#0" expanded="true" />
-            <element signature="e#25806#26117#0" expanded="true" />
-            <element signature="e#26159#26214#0" expanded="true" />
-            <element signature="e#26334#26492#0" expanded="true" />
-            <element signature="e#29106#29120#0" expanded="true" />
-            <element signature="e#29161#29772#0" expanded="true" />
-            <element signature="e#29841#30769#0" expanded="true" />
-            <element signature="e#30813#30942#0" expanded="true" />
-            <element signature="e#30983#30999#0" expanded="true" />
-            <element signature="e#31035#32200#0" expanded="true" />
-            <element signature="e#32251#32737#0" expanded="true" />
-            <element signature="e#32785#33277#0" expanded="true" />
-            <element signature="e#33328#33768#0" expanded="true" />
-            <element signature="e#33812#34287#0" expanded="true" />
-            <element signature="e#34349#34466#0" expanded="true" />
-            <element signature="e#34524#35409#0" expanded="true" />
-            <element signature="e#35451#35944#0" expanded="true" />
-            <element signature="e#35986#36571#0" expanded="true" />
-            <element signature="e#36613#36870#0" expanded="true" />
-            <element signature="e#36911#37316#0" expanded="true" />
-            <element signature="e#37357#37581#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/initialization.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="82" column="16" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/qar/monstr.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1328,57 +1127,65 @@
           <caret line="728" column="50" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#21#30#0" expanded="true" />
-            <element signature="e#504#691#1" expanded="true" />
-            <element signature="e#1025#1097#0" expanded="true" />
-            <element signature="e#1225#1316#0" expanded="true" />
-            <element signature="e#1505#1867#0" expanded="true" />
-            <element signature="e#1896#2234#0" expanded="true" />
-            <element signature="e#2441#5048#0" expanded="true" />
-            <element signature="e#5098#6198#0" expanded="true" />
-            <element signature="e#6271#6529#0" expanded="true" />
-            <element signature="e#6669#10953#0" expanded="true" />
-            <element signature="e#10995#11025#0" expanded="true" />
-            <element signature="e#11073#11106#0" expanded="true" />
-            <element signature="e#11154#11181#0" expanded="true" />
-            <element signature="e#11229#11258#0" expanded="true" />
-            <element signature="e#11296#12619#0" expanded="true" />
-            <element signature="e#12661#12680#0" expanded="true" />
-            <element signature="e#12865#13617#0" expanded="true" />
-            <element signature="e#13660#14398#0" expanded="true" />
-            <element signature="e#14440#20918#0" expanded="true" />
-            <element signature="e#21446#22199#0" expanded="true" />
-            <element signature="e#22243#22295#0" expanded="true" />
-            <element signature="e#22339#22391#0" expanded="true" />
-            <element signature="e#22436#22489#0" expanded="true" />
-            <element signature="e#22534#22978#0" expanded="true" />
-            <element signature="e#23022#23074#0" expanded="true" />
-            <element signature="e#23118#23170#0" expanded="true" />
-            <element signature="e#23214#23266#0" expanded="true" />
-            <element signature="e#23310#23362#0" expanded="true" />
-            <element signature="e#23406#23458#0" expanded="true" />
-            <element signature="e#25503#25555#0" expanded="true" />
-            <element signature="e#25599#25651#0" expanded="true" />
-            <element signature="e#25695#25747#0" expanded="true" />
-            <element signature="e#25806#26117#0" expanded="true" />
-            <element signature="e#26159#26214#0" expanded="true" />
-            <element signature="e#26334#26492#0" expanded="true" />
-            <element signature="e#29106#29120#0" expanded="true" />
-            <element signature="e#29161#29772#0" expanded="true" />
-            <element signature="e#29841#30769#0" expanded="true" />
-            <element signature="e#30813#30942#0" expanded="true" />
-            <element signature="e#30983#30999#0" expanded="true" />
-            <element signature="e#31035#32200#0" expanded="true" />
-            <element signature="e#32251#32737#0" expanded="true" />
-            <element signature="e#32785#33277#0" expanded="true" />
-            <element signature="e#33328#33768#0" expanded="true" />
-            <element signature="e#33812#34287#0" expanded="true" />
-            <element signature="e#34349#34466#0" expanded="true" />
-            <element signature="e#34524#35409#0" expanded="true" />
-            <element signature="e#35451#35944#0" expanded="true" />
-            <element signature="e#35986#36571#0" expanded="true" />
-            <element signature="e#36613#36870#0" expanded="true" />
-            <element signature="e#36911#37316#0" expanded="true" />
-            <element signature="e#37357#37581#0" expanded="true" />
+            <element signature="e#592#780#1" expanded="true" />
+            <element signature="e#1114#1186#0" expanded="true" />
+            <element signature="e#1314#1405#0" expanded="true" />
+            <element signature="e#1594#1956#0" expanded="true" />
+            <element signature="e#1985#2323#0" expanded="true" />
+            <element signature="e#2530#5137#0" expanded="true" />
+            <element signature="e#5187#6288#0" expanded="true" />
+            <element signature="e#6333#6619#0" expanded="false" />
+            <element signature="e#6361#6619#0" expanded="true" />
+            <element signature="e#6664#12773#0" expanded="false" />
+            <element signature="e#6759#11043#0" expanded="true" />
+            <element signature="e#11085#11115#0" expanded="true" />
+            <element signature="e#11163#11196#0" expanded="true" />
+            <element signature="e#11244#11271#0" expanded="true" />
+            <element signature="e#11319#11348#0" expanded="true" />
+            <element signature="e#11386#12709#0" expanded="true" />
+            <element signature="e#12751#12770#0" expanded="true" />
+            <element signature="e#12955#13789#0" expanded="true" />
+            <element signature="e#13832#14514#0" expanded="true" />
+            <element signature="e#23967#24737#0" expanded="true" />
+            <element signature="e#24781#24833#0" expanded="true" />
+            <element signature="e#24877#24929#0" expanded="true" />
+            <element signature="e#24974#25027#0" expanded="true" />
+            <element signature="e#25072#25516#0" expanded="true" />
+            <element signature="e#25560#25612#0" expanded="true" />
+            <element signature="e#25656#25708#0" expanded="true" />
+            <element signature="e#25752#25804#0" expanded="true" />
+            <element signature="e#25848#25900#0" expanded="true" />
+            <element signature="e#25944#25996#0" expanded="true" />
+            <element signature="e#26040#28087#0" expanded="true" />
+            <element signature="e#28131#28183#0" expanded="true" />
+            <element signature="e#28227#28279#0" expanded="true" />
+            <element signature="e#28323#28375#0" expanded="true" />
+            <element signature="e#28434#28745#0" expanded="true" />
+            <element signature="e#28787#28842#0" expanded="true" />
+            <element signature="e#28963#29121#0" expanded="true" />
+            <element signature="e#29238#30139#0" expanded="true" />
+            <element signature="e#30258#31697#0" expanded="true" />
+            <element signature="e#31738#31752#0" expanded="true" />
+            <element signature="e#31793#32404#0" expanded="true" />
+            <element signature="e#32473#33401#0" expanded="true" />
+            <element signature="e#33445#33574#0" expanded="true" />
+            <element signature="e#33615#33631#0" expanded="true" />
+            <element signature="e#33667#34795#0" expanded="true" />
+            <element signature="e#34846#35332#0" expanded="true" />
+            <element signature="e#35380#35872#0" expanded="true" />
+            <element signature="e#35920#36404#0" expanded="true" />
+            <element signature="e#36448#36881#0" expanded="true" />
+            <element signature="e#36928#37410#0" expanded="true" />
+            <element signature="e#37454#37825#0" expanded="true" />
+            <element signature="e#37869#38344#0" expanded="true" />
+            <element signature="e#38406#38523#0" expanded="true" />
+            <element signature="e#38581#39466#0" expanded="true" />
+            <element signature="e#39508#40001#0" expanded="true" />
+            <element signature="e#40043#40628#0" expanded="true" />
+            <element signature="e#40670#40927#0" expanded="true" />
+            <element signature="e#40968#41373#0" expanded="true" />
+            <element signature="e#41414#41668#0" expanded="true" />
+            <element signature="e#41714#42106#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1410,57 +1217,65 @@
           <caret line="21" column="7" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#21#30#0" expanded="true" />
-            <element signature="e#504#691#1" expanded="true" />
-            <element signature="e#1025#1097#0" expanded="true" />
-            <element signature="e#1225#1316#0" expanded="true" />
-            <element signature="e#1505#1867#0" expanded="true" />
-            <element signature="e#1896#2234#0" expanded="true" />
-            <element signature="e#2441#5048#0" expanded="true" />
-            <element signature="e#5098#6198#0" expanded="true" />
-            <element signature="e#6271#6529#0" expanded="true" />
-            <element signature="e#6669#10953#0" expanded="true" />
-            <element signature="e#10995#11025#0" expanded="true" />
-            <element signature="e#11073#11106#0" expanded="true" />
-            <element signature="e#11154#11181#0" expanded="true" />
-            <element signature="e#11229#11258#0" expanded="true" />
-            <element signature="e#11296#12619#0" expanded="true" />
-            <element signature="e#12661#12680#0" expanded="true" />
-            <element signature="e#12865#13617#0" expanded="true" />
-            <element signature="e#13660#14398#0" expanded="true" />
-            <element signature="e#14440#20918#0" expanded="true" />
-            <element signature="e#21446#22199#0" expanded="true" />
-            <element signature="e#22243#22295#0" expanded="true" />
-            <element signature="e#22339#22391#0" expanded="true" />
-            <element signature="e#22436#22489#0" expanded="true" />
-            <element signature="e#22534#22978#0" expanded="true" />
-            <element signature="e#23022#23074#0" expanded="true" />
-            <element signature="e#23118#23170#0" expanded="true" />
-            <element signature="e#23214#23266#0" expanded="true" />
-            <element signature="e#23310#23362#0" expanded="true" />
-            <element signature="e#23406#23458#0" expanded="true" />
-            <element signature="e#25503#25555#0" expanded="true" />
-            <element signature="e#25599#25651#0" expanded="true" />
-            <element signature="e#25695#25747#0" expanded="true" />
-            <element signature="e#25806#26117#0" expanded="true" />
-            <element signature="e#26159#26214#0" expanded="true" />
-            <element signature="e#26334#26492#0" expanded="true" />
-            <element signature="e#29106#29120#0" expanded="true" />
-            <element signature="e#29161#29772#0" expanded="true" />
-            <element signature="e#29841#30769#0" expanded="true" />
-            <element signature="e#30813#30942#0" expanded="true" />
-            <element signature="e#30983#30999#0" expanded="true" />
-            <element signature="e#31035#32200#0" expanded="true" />
-            <element signature="e#32251#32737#0" expanded="true" />
-            <element signature="e#32785#33277#0" expanded="true" />
-            <element signature="e#33328#33768#0" expanded="true" />
-            <element signature="e#33812#34287#0" expanded="true" />
-            <element signature="e#34349#34466#0" expanded="true" />
-            <element signature="e#34524#35409#0" expanded="true" />
-            <element signature="e#35451#35944#0" expanded="true" />
-            <element signature="e#35986#36571#0" expanded="true" />
-            <element signature="e#36613#36870#0" expanded="true" />
-            <element signature="e#36911#37316#0" expanded="true" />
-            <element signature="e#37357#37581#0" expanded="true" />
+            <element signature="e#592#780#1" expanded="true" />
+            <element signature="e#1114#1186#0" expanded="true" />
+            <element signature="e#1314#1405#0" expanded="true" />
+            <element signature="e#1594#1956#0" expanded="true" />
+            <element signature="e#1985#2323#0" expanded="true" />
+            <element signature="e#2530#5137#0" expanded="true" />
+            <element signature="e#5187#6288#0" expanded="true" />
+            <element signature="e#6333#6619#0" expanded="false" />
+            <element signature="e#6361#6619#0" expanded="true" />
+            <element signature="e#6664#12773#0" expanded="false" />
+            <element signature="e#6759#11043#0" expanded="true" />
+            <element signature="e#11085#11115#0" expanded="true" />
+            <element signature="e#11163#11196#0" expanded="true" />
+            <element signature="e#11244#11271#0" expanded="true" />
+            <element signature="e#11319#11348#0" expanded="true" />
+            <element signature="e#11386#12709#0" expanded="true" />
+            <element signature="e#12751#12770#0" expanded="true" />
+            <element signature="e#12955#13789#0" expanded="true" />
+            <element signature="e#13832#14514#0" expanded="true" />
+            <element signature="e#23967#24737#0" expanded="true" />
+            <element signature="e#24781#24833#0" expanded="true" />
+            <element signature="e#24877#24929#0" expanded="true" />
+            <element signature="e#24974#25027#0" expanded="true" />
+            <element signature="e#25072#25516#0" expanded="true" />
+            <element signature="e#25560#25612#0" expanded="true" />
+            <element signature="e#25656#25708#0" expanded="true" />
+            <element signature="e#25752#25804#0" expanded="true" />
+            <element signature="e#25848#25900#0" expanded="true" />
+            <element signature="e#25944#25996#0" expanded="true" />
+            <element signature="e#26040#28087#0" expanded="true" />
+            <element signature="e#28131#28183#0" expanded="true" />
+            <element signature="e#28227#28279#0" expanded="true" />
+            <element signature="e#28323#28375#0" expanded="true" />
+            <element signature="e#28434#28745#0" expanded="true" />
+            <element signature="e#28787#28842#0" expanded="true" />
+            <element signature="e#28963#29121#0" expanded="true" />
+            <element signature="e#29238#30139#0" expanded="true" />
+            <element signature="e#30258#31697#0" expanded="true" />
+            <element signature="e#31738#31752#0" expanded="true" />
+            <element signature="e#31793#32404#0" expanded="true" />
+            <element signature="e#32473#33401#0" expanded="true" />
+            <element signature="e#33445#33574#0" expanded="true" />
+            <element signature="e#33615#33631#0" expanded="true" />
+            <element signature="e#33667#34795#0" expanded="true" />
+            <element signature="e#34846#35332#0" expanded="true" />
+            <element signature="e#35380#35872#0" expanded="true" />
+            <element signature="e#35920#36404#0" expanded="true" />
+            <element signature="e#36448#36881#0" expanded="true" />
+            <element signature="e#36928#37410#0" expanded="true" />
+            <element signature="e#37454#37825#0" expanded="true" />
+            <element signature="e#37869#38344#0" expanded="true" />
+            <element signature="e#38406#38523#0" expanded="true" />
+            <element signature="e#38581#39466#0" expanded="true" />
+            <element signature="e#39508#40001#0" expanded="true" />
+            <element signature="e#40043#40628#0" expanded="true" />
+            <element signature="e#40670#40927#0" expanded="true" />
+            <element signature="e#40968#41373#0" expanded="true" />
+            <element signature="e#41414#41668#0" expanded="true" />
+            <element signature="e#41714#42106#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1555,32 +1370,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/SAAB340.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5141903">
-          <caret line="15" column="58" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/_controls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="3796" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bitmaps/har_dig.png">
       <provider selected="true" editor-type-id="images">
         <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/header_frames.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="177" column="14" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bitmaps/test.png">
@@ -1602,34 +1394,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/msrp64_viewer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27113238">
-          <caret line="101" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/qar/setup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.039627038">
           <caret line="4" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/converter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="53" selection-start-line="13" selection-start-column="53" selection-end-line="13" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/bur_92.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="23" column="26" selection-start-line="23" selection-start-column="26" selection-end-line="23" selection-end-column="26" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1655,90 +1423,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/harvard_digital.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="118" column="70" selection-start-line="118" selection-start-column="70" selection-end-line="118" selection-end-column="70" />
-          <folding>
-            <element signature="e#141#564#1" expanded="false" />
-            <element signature="e#709#2195#0" expanded="false" />
-            <element signature="e#2233#2286#0" expanded="false" />
-            <element signature="e#2324#2682#0" expanded="false" />
-            <element signature="e#2737#3071#0" expanded="false" />
-            <element signature="e#3126#3460#0" expanded="false" />
-            <element signature="e#4181#4887#0" expanded="false" />
-            <element signature="e#4928#4972#0" expanded="false" />
-            <element signature="e#5009#5593#0" expanded="false" />
-            <element signature="e#5629#5860#0" expanded="false" />
-            <element signature="e#5897#6732#0" expanded="false" />
-            <element signature="e#6776#7286#0" expanded="false" />
-            <element signature="e#7341#7580#1" expanded="false" />
-            <element signature="e#7685#8509#0" expanded="false" />
-            <element signature="e#8545#8757#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/raw_data_conversion.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.099415205">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docs/compact_flash.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="13" column="46" selection-start-line="13" selection-start-column="46" selection-end-line="13" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/bur3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="195" column="38" selection-start-line="195" selection-start-column="38" selection-end-line="195" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#9#0" expanded="false" />
-            <element signature="e#476#1781#0" expanded="false" />
-            <element signature="e#1820#1939#0" expanded="false" />
-            <element signature="e#1979#2441#0" expanded="false" />
-            <element signature="e#2485#2730#0" expanded="false" />
-            <element signature="e#2771#2815#0" expanded="false" />
-            <element signature="e#2852#3472#0" expanded="false" />
-            <element signature="e#3508#3733#0" expanded="false" />
-            <element signature="e#3770#3998#0" expanded="false" />
-            <element signature="e#4042#4445#0" expanded="false" />
-            <element signature="e#4482#4810#0" expanded="false" />
-            <element signature="e#6594#6647#0" expanded="false" />
-            <element signature="e#6685#6972#0" expanded="false" />
-            <element signature="e#7027#7463#0" expanded="false" />
-            <element signature="e#7518#7852#0" expanded="false" />
-            <element signature="e#7889#8744#0" expanded="false" />
-            <element signature="e#8786#9471#0" expanded="false" />
-            <element signature="e#9512#9556#0" expanded="false" />
-            <element signature="e#9593#10177#0" expanded="false" />
-            <element signature="e#10213#10438#0" expanded="false" />
-            <element signature="e#10475#10703#0" expanded="false" />
-            <element signature="e#10747#11297#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/processing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.5945945">
-          <caret line="112" column="59" selection-start-line="112" selection-start-column="59" selection-end-line="112" selection-end-column="59" />
-          <folding>
-            <element signature="e#5932#6761#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qar/airbus.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="62" selection-start-line="9" selection-start-column="8" selection-end-line="10" selection-end-column="62" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1749,142 +1437,285 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
+    <entry file="file://$PROJECT_DIR$/qar/compactFlash.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="594" column="0" selection-start-line="594" selection-start-column="0" selection-end-line="594" selection-end-column="0" />
-          <folding>
-            <element signature="e#21#30#0" expanded="true" />
-            <element signature="e#504#691#1" expanded="true" />
-            <element signature="e#1025#1097#0" expanded="true" />
-            <element signature="e#1225#1316#0" expanded="true" />
-            <element signature="e#1505#1867#0" expanded="true" />
-            <element signature="e#1896#2234#0" expanded="true" />
-            <element signature="e#2441#5048#0" expanded="true" />
-            <element signature="e#5098#6198#0" expanded="true" />
-            <element signature="e#6271#6529#0" expanded="true" />
-            <element signature="e#6669#10953#0" expanded="true" />
-            <element signature="e#10995#11025#0" expanded="true" />
-            <element signature="e#11073#11106#0" expanded="true" />
-            <element signature="e#11154#11181#0" expanded="true" />
-            <element signature="e#11229#11258#0" expanded="true" />
-            <element signature="e#11296#12619#0" expanded="true" />
-            <element signature="e#12661#12680#0" expanded="true" />
-            <element signature="e#12865#13617#0" expanded="true" />
-            <element signature="e#13660#14398#0" expanded="true" />
-            <element signature="e#14440#20918#0" expanded="true" />
-            <element signature="e#21446#22199#0" expanded="true" />
-            <element signature="e#22243#22295#0" expanded="true" />
-            <element signature="e#22339#22391#0" expanded="true" />
-            <element signature="e#22436#22489#0" expanded="true" />
-            <element signature="e#22534#22978#0" expanded="true" />
-            <element signature="e#23022#23074#0" expanded="true" />
-            <element signature="e#23118#23170#0" expanded="true" />
-            <element signature="e#23214#23266#0" expanded="true" />
-            <element signature="e#23310#23362#0" expanded="true" />
-            <element signature="e#23406#23458#0" expanded="true" />
-            <element signature="e#25503#25555#0" expanded="true" />
-            <element signature="e#25599#25651#0" expanded="true" />
-            <element signature="e#25695#25747#0" expanded="true" />
-            <element signature="e#25806#26117#0" expanded="true" />
-            <element signature="e#26159#26214#0" expanded="true" />
-            <element signature="e#26334#26492#0" expanded="true" />
-            <element signature="e#29106#29120#0" expanded="true" />
-            <element signature="e#29161#29772#0" expanded="true" />
-            <element signature="e#29841#30769#0" expanded="true" />
-            <element signature="e#30813#30942#0" expanded="true" />
-            <element signature="e#30983#30999#0" expanded="true" />
-            <element signature="e#31035#32200#0" expanded="true" />
-            <element signature="e#32251#32737#0" expanded="true" />
-            <element signature="e#32785#33277#0" expanded="true" />
-            <element signature="e#33328#33768#0" expanded="true" />
-            <element signature="e#33812#34287#0" expanded="true" />
-            <element signature="e#34349#34466#0" expanded="true" />
-            <element signature="e#34524#35409#0" expanded="true" />
-            <element signature="e#35451#35944#0" expanded="true" />
-            <element signature="e#35986#36571#0" expanded="true" />
-            <element signature="e#36613#36870#0" expanded="true" />
-            <element signature="e#36911#37316#0" expanded="true" />
-            <element signature="e#37357#37581#0" expanded="true" />
-          </folding>
+          <caret line="141" column="61" selection-start-line="141" selection-start-column="61" selection-end-line="141" selection-end-column="61" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/splitter.py">
+    <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/lib/grids.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding>
-            <element signature="e#1569#2067#0" expanded="true" />
-          </folding>
+          <caret line="87" column="8" selection-start-line="87" selection-start-column="8" selection-end-line="87" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
+    <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/lib/agw/ribbon/toolbar.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="210" column="32" selection-start-line="210" selection-start-column="32" selection-end-line="210" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#360#526#1" expanded="true" />
-            <element signature="e#666#3072#0" expanded="true" />
-            <element signature="e#3108#3888#0" expanded="true" />
-            <element signature="e#8658#9375#0" expanded="true" />
-            <element signature="e#9413#9577#0" expanded="true" />
-            <element signature="e#9623#9919#0" expanded="true" />
-            <element signature="e#9967#11322#0" expanded="true" />
-          </folding>
+          <caret line="953" column="8" selection-start-line="953" selection-start-column="8" selection-end-line="953" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/source_data.py">
+    <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/_windows.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3888889">
+          <caret line="650" column="35" selection-start-line="650" selection-start-column="35" selection-end-line="650" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm40/system/python_stubs/-762174762/wx/_windows_.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3611111">
+          <caret line="758" column="8" selection-start-line="758" selection-start-column="8" selection-end-line="758" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python27/Lib/site-packages/wx-3.0-msw/wx/_controls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="60" selection-start-line="27" selection-start-column="60" selection-end-line="27" selection-end-column="60" />
+          <caret line="3648" column="40" selection-start-line="3648" selection-start-column="40" selection-end-line="3648" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/raw_data_conversion.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/specific_header_types.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4722222">
+          <caret line="52" column="0" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/msrp64_viewer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/converter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.44371942">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding>
+            <element signature="e#180#491#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/bur3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="181" column="32" selection-start-line="181" selection-start-column="32" selection-end-line="181" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/SAAB340.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="58" selection-start-line="15" selection-start-column="58" selection-end-line="15" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/header_frames.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="126" column="26" selection-start-line="126" selection-start-column="26" selection-end-line="126" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/harvard_digital.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="180" column="23" selection-start-line="180" selection-start-column="23" selection-end-line="180" selection-end-column="23" />
+          <folding>
+            <element signature="e#6857#7385#0" expanded="false" />
+            <element signature="e#7864#8848#0" expanded="false" />
+            <element signature="e#12088#13400#0" expanded="false" />
+            <element signature="e#13452#14733#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/qar/boeing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="919" column="47" selection-start-line="919" selection-start-column="47" selection-end-line="919" selection-end-column="47" />
-          <folding />
+          <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="54" selection-end-column="50" />
+          <folding>
+            <element signature="e#274#938#0" expanded="false" />
+            <element signature="e#1313#1796#0" expanded="false" />
+            <element signature="e#1837#2148#0" expanded="false" />
+            <element signature="e#2422#3107#0" expanded="false" />
+            <element signature="e#3144#10682#0" expanded="false" />
+            <element signature="e#10718#15987#0" expanded="false" />
+            <element signature="e#16036#16947#0" expanded="false" />
+            <element signature="e#17161#18125#0" expanded="false" />
+            <element signature="e#19285#20050#0" expanded="false" />
+            <element signature="e#20088#20331#0" expanded="false" />
+            <element signature="e#20384#21244#0" expanded="false" />
+            <element signature="e#34606#35561#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/compactFlash.py">
+    <entry file="file://$PROJECT_DIR$/qar/airbus.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="141" column="61" selection-start-line="141" selection-start-column="61" selection-end-line="141" selection-end-column="61" />
+          <caret line="42" column="20" selection-start-line="42" selection-start-column="20" selection-end-line="42" selection-end-column="20" />
           <folding>
-            <element signature="e#21#30#0" expanded="true" />
-            <element signature="e#199#1712#0" expanded="true" />
-            <element signature="e#1805#2471#0" expanded="true" />
-            <element signature="e#2515#2685#1" expanded="true" />
-            <element signature="e#2735#3501#0" expanded="true" />
-            <element signature="e#3750#4991#0" expanded="true" />
-            <element signature="e#5885#6762#0" expanded="true" />
-            <element signature="e#6808#7175#0" expanded="true" />
+            <element signature="e#6847#7011#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/qar/specific_header_types.py">
+    <entry file="file://$PROJECT_DIR$/qar/splitter.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8464052">
-          <caret line="164" column="13" selection-start-line="164" selection-start-column="13" selection-end-line="164" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.6003861">
+          <caret line="67" column="67" selection-start-line="67" selection-start-column="67" selection-end-line="67" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/processing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="14" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/extractFlight.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="54" selection-start-line="29" selection-start-column="54" selection-end-line="29" selection-end-column="54" />
           <folding>
-            <element signature="e#22#37#0" expanded="true" />
-            <element signature="e#164#854#0" expanded="true" />
-            <element signature="e#1629#1793#0" expanded="true" />
-            <element signature="e#1832#3070#0" expanded="true" />
-            <element signature="e#3108#4402#0" expanded="true" />
-            <element signature="e#4448#4869#0" expanded="true" />
-            <element signature="e#4921#5701#0" expanded="true" />
-            <element signature="e#7023#8118#0" expanded="true" />
-            <element signature="e#8159#8365#0" expanded="true" />
+            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#395#561#1" expanded="true" />
+            <element signature="e#3355#4135#0" expanded="true" />
+            <element signature="e#4192#9398#0" expanded="true" />
+            <element signature="e#10749#12104#0" expanded="true" />
+            <element signature="e#12148#12335#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/bur_92.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="600" column="29" selection-start-line="600" selection-start-column="29" selection-end-line="600" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#152#1124#0" expanded="true" />
+            <element signature="e#4286#8332#0" expanded="true" />
+            <element signature="e#8376#8769#0" expanded="true" />
+            <element signature="e#8815#9023#0" expanded="true" />
+            <element signature="e#10002#10182#0" expanded="true" />
+            <element signature="e#10216#12002#0" expanded="false" />
+            <element signature="e#12659#13649#0" expanded="true" />
+            <element signature="e#18472#19179#1" expanded="true" />
+            <element signature="e#19237#20879#0" expanded="true" />
+            <element signature="e#20915#21386#0" expanded="true" />
+            <element signature="e#21423#22352#0" expanded="true" />
+            <element signature="e#22388#22634#0" expanded="true" />
+            <element signature="e#22678#23668#0" expanded="true" />
+            <element signature="e#23706#23896#0" expanded="true" />
+            <element signature="e#23939#25305#0" expanded="true" />
+            <element signature="e#25346#25888#0" expanded="true" />
+            <element signature="e#26383#26718#0" expanded="true" />
+            <element signature="e#26757#27551#0" expanded="true" />
+            <element signature="e#27591#29191#0" expanded="true" />
+            <element signature="e#29229#29379#0" expanded="true" />
+            <element signature="e#29521#30134#0" expanded="true" />
+            <element signature="e#30173#30708#0" expanded="true" />
+            <element signature="e#30751#32331#0" expanded="true" />
+            <marker date="1449495203717" expanded="true" signature="30959:31426" placeholder="..." />
+            <marker date="1449495203717" expanded="true" signature="30971:31342" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/qar_reader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="398" column="0" selection-start-line="398" selection-start-column="0" selection-end-line="398" selection-end-column="0" />
+          <folding>
+            <element signature="e#21#30#0" expanded="true" />
+            <element signature="e#592#780#1" expanded="true" />
+            <element signature="e#1114#1186#0" expanded="true" />
+            <element signature="e#1314#1405#0" expanded="true" />
+            <element signature="e#1594#1956#0" expanded="true" />
+            <element signature="e#1985#2323#0" expanded="true" />
+            <element signature="e#2530#5137#0" expanded="true" />
+            <element signature="e#5187#6288#0" expanded="true" />
+            <element signature="e#6333#6619#0" expanded="false" />
+            <element signature="e#6361#6619#0" expanded="true" />
+            <element signature="e#6664#12773#0" expanded="false" />
+            <element signature="e#6759#11043#0" expanded="true" />
+            <element signature="e#11085#11115#0" expanded="true" />
+            <element signature="e#11163#11196#0" expanded="true" />
+            <element signature="e#11244#11271#0" expanded="true" />
+            <element signature="e#11319#11348#0" expanded="true" />
+            <element signature="e#11386#12709#0" expanded="true" />
+            <element signature="e#12751#12770#0" expanded="true" />
+            <element signature="e#12955#13789#0" expanded="true" />
+            <element signature="e#13832#14514#0" expanded="true" />
+            <element signature="e#23967#24737#0" expanded="true" />
+            <element signature="e#24781#24833#0" expanded="true" />
+            <element signature="e#24877#24929#0" expanded="true" />
+            <element signature="e#24974#25027#0" expanded="true" />
+            <element signature="e#25072#25516#0" expanded="true" />
+            <element signature="e#25560#25612#0" expanded="true" />
+            <element signature="e#25656#25708#0" expanded="true" />
+            <element signature="e#25752#25804#0" expanded="true" />
+            <element signature="e#25848#25900#0" expanded="true" />
+            <element signature="e#25944#25996#0" expanded="true" />
+            <element signature="e#26040#28087#0" expanded="true" />
+            <element signature="e#28131#28183#0" expanded="true" />
+            <element signature="e#28227#28279#0" expanded="true" />
+            <element signature="e#28323#28375#0" expanded="true" />
+            <element signature="e#28434#28745#0" expanded="true" />
+            <element signature="e#28787#28842#0" expanded="true" />
+            <element signature="e#28963#29121#0" expanded="true" />
+            <element signature="e#29238#30139#0" expanded="true" />
+            <element signature="e#30258#31697#0" expanded="true" />
+            <element signature="e#31738#31752#0" expanded="true" />
+            <element signature="e#31793#32404#0" expanded="true" />
+            <element signature="e#32473#33401#0" expanded="true" />
+            <element signature="e#33445#33574#0" expanded="true" />
+            <element signature="e#33615#33631#0" expanded="true" />
+            <element signature="e#33667#34795#0" expanded="true" />
+            <element signature="e#34846#35332#0" expanded="true" />
+            <element signature="e#35380#35872#0" expanded="true" />
+            <element signature="e#35920#36404#0" expanded="true" />
+            <element signature="e#36448#36881#0" expanded="true" />
+            <element signature="e#36928#37410#0" expanded="true" />
+            <element signature="e#37454#37825#0" expanded="true" />
+            <element signature="e#37869#38344#0" expanded="true" />
+            <element signature="e#38406#38523#0" expanded="true" />
+            <element signature="e#38581#39466#0" expanded="true" />
+            <element signature="e#39508#40001#0" expanded="true" />
+            <element signature="e#40043#40628#0" expanded="true" />
+            <element signature="e#40670#40927#0" expanded="true" />
+            <element signature="e#40968#41373#0" expanded="true" />
+            <element signature="e#41414#41668#0" expanded="true" />
+            <element signature="e#41714#42106#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qar/source_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.075780086">
+          <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
+          <folding />
         </state>
       </provider>
     </entry>

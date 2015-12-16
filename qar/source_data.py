@@ -83,7 +83,9 @@ ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747
 
           17:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
 
-          18:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']]}
+          18:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
+
+          19:      ["An26",               u'Ан-26',              (600, 500), ['an26.png']]}
 
 ARINC_DIRECT = {1: "001001000111",  # 247
                 2: "010110111000",  # 5b8
@@ -121,9 +123,14 @@ AN32_BUTTON = {'name': u"Aн32",
                'choices': {u"Тестер У3-2": 351},
                'default_choice': 351}
 
-AN26_BUTTON = {'name': u"Aн26",
-               'choices': {u"МСРП-12": 361, u"БУР-4-1-05": 801},
-               'default_choice': 361}
+if USER == 19:
+    AN26_BUTTON = {'name': u"Aн26",
+                   'choices': {u"БУР-4-1-05": 801},
+                   'default_choice': 361}
+else:
+    AN26_BUTTON = {'name': u"Aн26",
+                   'choices': {u"МСРП-12": 361, u"БУР-4-1-05": 801},
+                   'default_choice': 361}
 
 AN72_BUTTON = {'name': u"Aн72",
                'choices': {u"Тестер У3-2": 371},

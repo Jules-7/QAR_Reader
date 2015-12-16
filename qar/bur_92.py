@@ -591,11 +591,15 @@ class BUR1405(object):
     def extract_all_ff_at_flight_end(self):
         while True:
             check_byte = self.clear_copy.read(1)
-            val = ord(check_byte)
-            if val == 255:
-                pass
-            else:
-                self.bytes_counter = self.clear_copy.tell()
+            try:
+                val = ord(check_byte)
+                if val == 255:
+                    pass
+                else:
+                    self.bytes_counter = self.clear_copy.tell()
+                    return
+            except TypeError:
+                self.bytes_counter = self.clear_copy_size
                 return
 
     def get_flight_intervals(self):
