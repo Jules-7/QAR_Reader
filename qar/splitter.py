@@ -54,8 +54,8 @@ class Redirect(object):
             self.result = B747Series200(self.path, self.chosen_acft_type)
         elif self.chosen_acft_type == 3312:
             self.result = B747Series300(self.path, self.chosen_acft_type)
-        elif self.chosen_acft_type == 341:  # bur92 an148
-            self.result = Bur(self.path, self.chosen_acft_type)
+        elif self.chosen_acft_type == 341 or self.chosen_acft_type == 3412:  # bur92 an148
+            self.result = Bur(self.path, self.chosen_acft_type, self.progress_bar)
         elif self.chosen_acft_type == 421:  # bur92 an140
             self.result = Bur(self.path, self.chosen_acft_type)
         elif (self.chosen_acft_type == 402 or self.chosen_acft_type == 4022 or

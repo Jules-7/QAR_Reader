@@ -9,7 +9,8 @@ QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
              323:  ["a320",  "rsu",             768,        4],
              331:  ["b747",  "qar",             512,        4],  # 200
              3312: ["b747",  "4700",            384,        5,                 512],  # 300
-             341:  ["an148", "bur92",           512,        1],
+             341:  ["an148", "bur92_header",    512,        1],
+             3412: ["an148", "bur92_no_header", 512,        1],
              351:  ["an32",  "testerU32",       512,        1],
              361:  ["an26",  "msrp12",          512,        0.5],
              371:  ["an72",  "testerU32",       512,        1],
@@ -85,7 +86,9 @@ ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747
 
           18:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
 
-          19:      ["An26",               u'Ан-26',              (600, 500), ['an26.png']]}
+          19:      ["An26",               u'Ан-26',              (600, 500), ['an26.png']],
+
+          20:      ["cubana",               u'Cubana',           (600, 500), ['an148.png']]}
 
 ARINC_DIRECT = {1: "001001000111",  # 247
                 2: "010110111000",  # 5b8
@@ -103,7 +106,7 @@ HEADER_SIZE = 128  # Monstr
 # it is used for determining how to process data further for flights search
 MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411, 501, 4034]
 OWN_HEADER_TYPES = [322, 5011, 701, 404]
-NO_HEADER_TYPES = [331, 3312, 341, 401, 402, 4022, 4031, 4032, 4033, 421, 601, 323, 801]
+NO_HEADER_TYPES = [331, 3312, 341, 3412, 401, 402, 4022, 4031, 4032, 4033, 421, 601, 323, 801]
 
 
 # each button holds information for corresponding bitmap button display onclick
@@ -116,7 +119,7 @@ B747_BUTTON = {'name': 'B747',
                'default_choice': 331}
 
 AN148_BUTTON = {'name': u"Aн148",
-                'choices': {u"БУР-92 А-05": 341},
+                'choices': {u"БУР-92 А-05 (header)": 341, u"БУР-92 А-05 (no header)": 3412},
                 'default_choice': 341}
 
 AN32_BUTTON = {'name': u"Aн32",

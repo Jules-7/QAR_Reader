@@ -1,16 +1,23 @@
 import os
 import datetime
 import struct
+import win32api
 from source_data import QAR_TYPES
 
 
 class Bur(object):
 
-    def __init__(self, path, chosen_acft_type):
+    """
+        if An148 with no header then it has technical info inside
+        1.create second file - cleaned from technical info and save
+        2.work with cleaned file
+        3.mark cleaned file with F5 5F at the beginning
+        4. on file opening check if F% 5F is at the beginning - no need to cleaned
+    """
+
+    def __init__(self, path, chosen_acft_type, progress_bar):
         self.path = path
         self.dat = open(path, "rb")
-        # in order to avoid header and starting "noises"
-        self.dat.seek(12800, 0)
         self.file_len = os.stat(path).st_size
         self.chosen_acft_type = chosen_acft_type
         self.qar_type = QAR_TYPES[self.chosen_acft_type][1]
@@ -22,18 +29,92 @@ class Bur(object):
         self.durations = []
         self.start_date = []
         self.end_date = []
-        # in order to avoid header and starting "noises"
-        self.bytes_counter = 12800
+        self.flights_ids = []
+        if self.qar_type == "bur92_header":
+            # in order to avoid header and starting "noises" for record with header
+            self.bytes_counter = 12800
+            self.dat.seek(12800, 0)
+        else:  # record with no header - records are continuously overwritten each other
+            self.bytes_counter = 0
         self.frame_size = 512  # byte
         self.frame_duration = 1  # sec
         self.end_check = [255] * 4
         self.end_pattern = [255] * self.frame_size
+        self.progress_bar = progress_bar
+
+        if self.qar_type == "bur92_no_header":
+            check = self.check_if_clean()
+            if not check:
+                self.clean_file()
+
         self.find_start()
         self.get_flights()
+        self.progress_bar.SetValue(25)
+
         self.get_flight_intervals()
+        self.progress_bar.SetValue(45)
+
         self.get_durations()
+        self.progress_bar.SetValue(65)
+
         self.get_date_time()
+        self.get_flight_ids()
+        self.progress_bar.SetValue(85)
+
         self.get_flight_ends()
+        self.progress_bar.SetValue(95)
+
+    def check_if_clean(self):
+        first_two_byte = self.dat.read(2)
+        word_one = ord(first_two_byte[0])
+        word_two = ord(first_two_byte[1])
+        print word_one, word_two
+        if word_one == 245 and word_two == 95:
+            self.bytes_counter = 2
+            return True
+        else:
+            self.dat.seek(0)
+            return False
+
+    def clean_file(self):
+        """ in an148 bur92 with no header there is technical info which repeats through the whole file
+            Clean file from technical info
+            technical info appears each 2048 bytes
+            the length of technical info is 64 bytes
+            thus the length of data + technical info is 2112 bytes
+            it has to be removed from file before saving flights
+
+            1. copy flight data skipping technical info
+            """
+        info_size = 64  # bytes
+        interval = 2112 # bytes
+        segment_length = 2048
+        # go to the propper index in the file
+        # copy infor from the start index till first technical info (2048 byte)
+        # copy all info skipping each 64 bytes with 2112 bytes interval
+        new_file_name = self.path[:-4] + "_clean.dat"
+        new_file = open(new_file_name, "wb")
+        byte_one = "11110101"
+        byte_two = "01011111"
+        for each in [byte_one, byte_two]:
+            str_to_int = int(each, 2)
+            data_to_write = struct.pack("i", str_to_int)
+            new_file.write(data_to_write[:1])
+        new_file.write(self.dat.read(segment_length))
+        bytes_counter = segment_length
+        while bytes_counter < self.file_len:
+            self.dat.seek(info_size, 1)
+            new_file.write(self.dat.read(segment_length))
+            bytes_counter += interval
+        # close the original file and reopen newly created and work with it
+        self.dat.close()
+        new_file.close()
+        # by this reassignment - we also provide new path to qar_reader.py to get data from it when saving flights
+        self.path = new_file_name
+        self.dat = open(new_file_name, "rb")
+        self.file_len = os.stat(new_file_name).st_size
+
+
 
     def get_flights(self):
         while self.bytes_counter < self.file_len - self.frame_size:
@@ -65,6 +146,15 @@ class Bur(object):
                     self.bytes_counter += self.frame_size
 
     def find_start(self):
+        """ An148 can be with or without header.
+
+            -> If it has header go to index 12800 and from there look for syncword - 00 00
+
+            -> If there is no header - it means that record can start from teh beginning of the file and
+            starting from 2048 byte each 2112 byte there are 64 byte of technical information.
+            This info is not necessary and need to be deleted
+
+            """
         while not self.start:
             byte_one = self.dat.read(1)
             byte_two = self.dat.read(1)
@@ -80,6 +170,8 @@ class Bur(object):
 
     def get_flight_intervals(self):
         """ according to end pattern """
+        # if for the last flight end is not found - add the index of file end
+        # in other words that last flight will end by flight ending
         if (len(self.flights_start)) > (len(self.flights_end)):
             self.flights_end.append(self.file_len)
         i = 0
@@ -96,7 +188,7 @@ class Bur(object):
         i = 0
         while i < len(self.flight_intervals):
             interval = self.flight_intervals[i]
-        #for each in self.flight_intervals:
+            #for each in self.flight_intervals:
             duration = ((interval[1] - interval[0]) / self.frame_size) * \
                         self.frame_duration
             # if flight is of frame size - it`s not flight
@@ -111,6 +203,7 @@ class Bur(object):
     def get_date_time(self):
         """
                    An 148
+
         time and date are recorded at the beginning of each frame
         (each 512 starting with 00 00 - 1st and 2d bytes):
         - seconds at 3-4 B
@@ -153,41 +246,49 @@ class Bur(object):
                 self.start_date.append(start_date_time)
 
         else:
-            datetime_reference_table = {}
-            for each in self.flight_intervals:
-                # amount of frames in flight
-                frames_in_flight = (each[1] - each[0]) / self.frame_size
-                frame_half_flight = frames_in_flight / 2  # amount of frames in half
-                # byte
-                middle_flight_index = each[0] + frame_half_flight * self.frame_size
-                self.dat.seek(middle_flight_index, 0)
-                # one minute is 60 frames
-                seconds_N = 0
-                while seconds_N < 60:
-                    one_frame = self.dat.read(self.frame_size)
-                    sec = self.convert_data(one_frame[2:4])
-                    sec_ord = self.convert_in_ord(sec)
-                    if sec_ord == 3:  # at 3d second year is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                    elif sec_ord == 4:  # at 4th second month is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                    elif sec_ord == 5:  # at 5th second day is recorded as date channel
-                        minute = self.convert_data(one_frame[4:6])
-                        hour = self.convert_data(one_frame[6:8])
-                        date = self.convert_data(one_frame[8:])
-                        datetime_reference_table[sec_ord] = [minute, hour, date]
-                        break
-                    seconds_N += 1
-                middle_flight_date_time = self.get_middle_flight_date(datetime_reference_table)
-                duration = frame_half_flight * self.frame_duration  # sec first half of flight
-                start_date = middle_flight_date_time - datetime.timedelta(seconds=duration)
-                self.start_date.append(start_date)
+
+            try:
+                datetime_reference_table = {}
+                for each in self.flight_intervals:
+                    # amount of frames in flight
+                    frames_in_flight = (each[1] - each[0]) / self.frame_size
+                    frame_half_flight = frames_in_flight / 2  # amount of frames in half
+                    # byte
+                    middle_flight_index = each[0] + frame_half_flight * self.frame_size
+                    self.dat.seek(middle_flight_index, 0)
+                    # one minute is 60 frames
+                    seconds_N = 0
+                    while seconds_N < 60:
+                        one_frame = self.dat.read(self.frame_size)
+                        sec = self.convert_data(one_frame[2:4])
+                        sec_ord = self.convert_in_ord(sec)
+                        #print sec_ord
+                        if sec_ord == 3:  # at 3d second year is recorded as date channel
+                            minute = self.convert_data(one_frame[4:6])
+                            hour = self.convert_data(one_frame[6:8])
+                            date = self.convert_data(one_frame[8:])
+                            datetime_reference_table[sec_ord] = [minute, hour, date]
+                        elif sec_ord == 4:  # at 4th second month is recorded as date channel
+                            minute = self.convert_data(one_frame[4:6])
+                            hour = self.convert_data(one_frame[6:8])
+                            date = self.convert_data(one_frame[8:])
+                            datetime_reference_table[sec_ord] = [minute, hour, date]
+                        elif sec_ord == 5:  # at 5th second day is recorded as date channel
+                            minute = self.convert_data(one_frame[4:6])
+                            hour = self.convert_data(one_frame[6:8])
+                            date = self.convert_data(one_frame[8:])
+                            datetime_reference_table[sec_ord] = [minute, hour, date]
+                            break
+                        seconds_N += 1
+                    middle_flight_date_time = self.get_middle_flight_date(datetime_reference_table)
+                    duration = frame_half_flight * self.frame_duration  # sec first half of flight
+                    start_date = middle_flight_date_time - datetime.timedelta(seconds=duration)
+                    self.start_date.append(start_date)
+            except TypeError:  # something is wrong with data type
+                for each in self.flight_intervals:
+                    start_date_time = datetime.datetime(year=2000, month=1, day=1,
+                                                        hour=0, minute=0, second=0)
+                    self.start_date.append(start_date_time)
 
     def convert_data(self, data):
         """ Perform change by place bytes and obtain string binary representation """
@@ -214,17 +315,18 @@ class Bur(object):
         for key, value in date_time.iteritems():
             if key == 3:  # get minutes, hour and year
                 sec = key
-                minutes = self.convert_in_ord(value[0])
-                hours = self.convert_in_ord(value[1])
+                minutes = int(self.convert_in_ord(value[0]))
+                hours = int(self.convert_in_ord(value[1]))
                 year = int("20" + str(self.convert_in_ord(value[2])))
             elif key == 4:
-                month = self.convert_in_ord(value[2])
+                month = int(self.convert_in_ord(value[2]))
             elif key == 5:
-                day = self.convert_in_ord(value[2])
+                day = (self.convert_in_ord(value[2]))
         if minutes < 0:
             minutes = 0
         elif minutes > 59:
             minutes = 59
+        print year, month, day, hours, minutes, sec
         middle_date_time = datetime.datetime(year=year, month=month, day=day,
                                              hour=hours, minute=minutes, second=sec)
         return middle_date_time
@@ -236,6 +338,9 @@ class Bur(object):
             self.end_date.append(end_date)
             i += 1
 
+    def get_flight_ids(self):
+        for each in self.flight_intervals:
+            self.flights_ids.append(0)
 
 class BUR92AN140(object):
 

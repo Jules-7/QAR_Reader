@@ -36,7 +36,12 @@ class Flight:
             self.prepare_cf_file()
             self.make_flight()
 
-        elif self.flag == "b747_qar" or self.flag == "an148_bur92":
+        elif self.flag == "b747_qar" or self.flag == "an148_bur92_header":
+            self.get_flight()
+            self.save_flight()
+
+        elif self.flag == "an148_bur92_no_header":
+            #self.prepare_bur_92_file_and_get_flight()
             self.get_flight()
             self.save_flight()
 
@@ -300,3 +305,31 @@ class Flight:
         data.seek(self.start)
         length = self.end - self.start
         self.flight = data.read(length)
+
+    # def prepare_bur_92_file_and_get_flight(self):
+    #     """ in an148 bur92 with no header there is technical info which repeats through the whole file
+    #         Clean file from technical info
+    #         technical info appears each 2048 bytes
+    #         the length of technical info is 64 bytes
+    #         thus the length of data + technical info is 2112 bytes
+    #         it has to be removed from file before saving flights
+    #
+    #         1. copy flight data skipping technical info
+    #         """
+    #     info_size = 64  # bytes
+    #     interval = 2112 # bytes
+    #     segment_length = 2048
+    #     # go to the propper index in the file
+    #     # copy infor from the start index till first technical info (2048 byte)
+    #     # copy all info skipping each 64 bytes with 2112 bytes interval
+    #     data = open(self.path, "rb")
+    #     data.seek(self.start)
+    #     flight_length = self.end - self.start
+    #
+    #     self.flight = data.read(segment_length)
+    #     bytes_counter = segment_length
+    #     while bytes_counter < flight_length:
+    #         data.seek(info_size, 1)
+    #         current_position = data.tell()
+    #         self.flight += data.read(segment_length)
+    #         bytes_counter += interval

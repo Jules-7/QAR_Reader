@@ -96,9 +96,10 @@ class MyPanel(wx.Panel):
         self.list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
         self.list_ctrl.InsertColumn(0, u"Flight №", width=70)
         self.list_ctrl.InsertColumn(1, "ID", width=100)
-        self.list_ctrl.InsertColumn(2, "Start date", width=140)
-        self.list_ctrl.InsertColumn(3, "End date", width=140)
-        self.list_ctrl.InsertColumn(4, "Duration", width=100)
+        self.list_ctrl.InsertColumn(2, "Flight", width=75)
+        self.list_ctrl.InsertColumn(3, "Start date", width=140)
+        self.list_ctrl.InsertColumn(4, "End date", width=140)
+        self.list_ctrl.InsertColumn(5, "Duration", width=100)
 
         index = 0
         self.flights_dict = {}
@@ -125,9 +126,16 @@ class MyPanel(wx.Panel):
             # without it it is impossible to create the list
             self.list_ctrl.InsertStringItem(index, str(index + 1))
             self.list_ctrl.SetStringItem(index, 1, str(data.flights_start[index]))
-            self.list_ctrl.SetStringItem(index, 2, start_date)
-            self.list_ctrl.SetStringItem(index, 3, end_date)
-            self.list_ctrl.SetStringItem(index, 4, duration)
+
+            # ToDo: add attribute - flights_ids to each class
+            try:
+                self.list_ctrl.SetStringItem(index, 2, str(data.flights_ids[index]))
+            except AttributeError:
+                self.list_ctrl.SetStringItem(index, 2, str(0))
+
+            self.list_ctrl.SetStringItem(index, 3, start_date)
+            self.list_ctrl.SetStringItem(index, 4, end_date)
+            self.list_ctrl.SetStringItem(index, 5, duration)
 
             # associate index of the row with a particular flight
             self.flights_dict[index] = [flight, index, start_date, self.qar_type]
@@ -409,7 +417,7 @@ class MyFrame(wx.Frame):
             self.toolbar1.AddLabelTool(145, "AN72", wx.Bitmap('an72.png'))
             self.toolbar1.AddLabelTool(146, "AN74", wx.Bitmap('an74.png'))
 
-        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine":
+        if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "gap_ukraine" or ACCESS[USER][0] == "cubana":
             self.toolbar1.AddLabelTool(142, "AN148", wx.Bitmap('an148.png'))
 
         if ACCESS[USER][0] == "mak":

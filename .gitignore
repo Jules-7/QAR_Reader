@@ -2,6 +2,7 @@
 *.pyc
 .idea\*
 qar\*.pyc
+.idea\*.xml
 
 # Windows image file caches
 Thumbs.db
