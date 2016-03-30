@@ -1,7 +1,7 @@
 #-*-coding: utf-8-*-
 
 # admin
-USER = 1
+USER = 21
 # -----------|id|---|acft|----|qar|-----|frame, B for   |--|duration, sec|--|frame, B for  |
 # -----------|  |---|    |----|   |-----|data processing|--|             |--|flights search|
 QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
@@ -34,12 +34,13 @@ QAR_TYPES = {321:  ["a320",  "qar",             768,        4],
              5011: ["il76",  "msrp64_viewer",   512,        2],
              601:  ["mi24",  "bur4T",           160,        4],
              701:  ["b767",  "qar",             1536,       4],
-             801:  ["an26",  "bur4105",         512,        4]}
+             801:  ["an26",  "bur4105",         512,        4],
+             901:  ["b300",  "f_1000",          130,        1]}
 
 
 # ------|User id|-|username through code|-|Program window|-|program window|-|list of bitmaps to be included|
 # ------|       |-|                     |-|title         |-|size          |-|at executable build           |
-ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747.png',
+ACCESS = {1:       ["admin",          "admin",                (1000, 800), ['b747.png',
                                                                             'a320.png',
                                                                             'an148.png',
                                                                             'an32.png',
@@ -61,34 +62,38 @@ ACCESS = {1:       ["admin",          "admin",                (950, 800), ['b747
                                                                             'b767.png',
                                                                             'arinc_data.png',
                                                                             'length_data.png',
-                                                                            'swap.png']],
+                                                                            'swap.png',
+                                                                            'b300.png']],
 
           10:      ["yanair",           "YanAir",               (600, 500), ['a320.png',
                                                                              's340.png',
                                                                              'open_CF.png',
                                                                              'b737.png']],
 
-          11:      ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (600, 500), []],
+          11:      ["gap_ukraine", u'ГАП "Украина" Ан148 БУР-92 А-05', (650, 500), []],
 
-          12:      ["VCH2269",             u'В/Ч №2269',        (600, 500), ['an26.png',
+          12:      ["VCH2269",             u'В/Ч №2269',        (650, 500), ['an26.png',
                                                                              'an72.png',
                                                                              'an74.png']],
 
-          13:      ["bukovina",           u"Буковина",           (600, 500), []],
+          13:      ["bukovina",           u"Буковина",           (650, 500), []],
 
-          14:      ["mak",                   u"МАК",             (600, 500), ['bur92.png']],
+          14:      ["mak",                   u"МАК",             (650, 500), ['bur92.png']],
 
-          15:      ["badr_airlines",      "Badr Airlines",       (600, 500), ['b737.png']],
+          15:      ["badr_airlines",      "Badr Airlines",       (650, 500), ['b737.png']],
 
-          16:      ["il76",                   u"Ил76",           (600, 500), ['il76.png']],
+          16:      ["il76",                   u"Ил76",           (650, 500), ['il76.png']],
 
-          17:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
+          17:      ["VCH1604",            u'В/Ч A1604',          (650, 500), ['mi24.png']],
 
-          18:      ["VCH1604",            u'В/Ч A1604',          (600, 500), ['mi24.png']],
+          18:      ["VCH1604",            u'В/Ч A1604',          (650, 500), ['mi24.png']],
 
-          19:      ["An26",               u'Ан-26',              (600, 500), ['an26.png']],
+          19:      ["An26",               u'Ан-26',              (650, 500), ['an26.png']],
 
-          20:      ["cubana",               u'Cubana',           (600, 500), ['an148.png']]}
+          20:      ["cubana",               u'Cubana',           (650, 500), ['an148.png']],
+
+          21:      ["uksatse",              u'UKSATSE',          (650, 500), ['an26.png',
+                                                                              'b300.png']]}
 
 ARINC_DIRECT = {1: "001001000111",  # 247
                 2: "010110111000",  # 5b8
@@ -106,7 +111,7 @@ HEADER_SIZE = 128  # Monstr
 # it is used for determining how to process data further for flights search
 MONSTR_HEADER_TYPES = [321, 351, 361, 371, 381, 382, 383, 391, 3911, 403, 411, 501, 4034]
 OWN_HEADER_TYPES = [322, 5011, 701, 404]
-NO_HEADER_TYPES = [331, 3312, 341, 3412, 401, 402, 4022, 4031, 4032, 4033, 421, 601, 323, 801]
+NO_HEADER_TYPES = [331, 3312, 341, 3412, 401, 402, 4022, 4031, 4032, 4033, 421, 601, 323, 801, 901]
 
 
 # each button holds information for corresponding bitmap button display onclick
@@ -126,7 +131,7 @@ AN32_BUTTON = {'name': u"Aн32",
                'choices': {u"Тестер У3-2": 351},
                'default_choice': 351}
 
-if USER == 19:
+if USER == 19 or USER == 21:
     AN26_BUTTON = {'name': u"Aн26",
                    'choices': {u"БУР-4-1-05": 801},
                    'default_choice': 361}
@@ -170,6 +175,10 @@ B767_BUTTON = {'name': 'B767',
                'choices': {'QAR': 701},
                'default_choice': 701}
 
+B300_BUTTON = {'name': 'B300 - Beechcraft',
+               'choices': {'DFDR1000': 901},
+               'default_choice': 901}
+
 BUTTONS = {"a320": A320_BUTTON,
            "b747": B747_BUTTON,
            "an148": AN148_BUTTON,
@@ -181,7 +190,8 @@ BUTTONS = {"a320": A320_BUTTON,
            "an12": AN12_BUTTON,
            "il76": IL76_BUTTON,
            "mi24": MI24_BUTTON,
-           "b767": B767_BUTTON}
+           "b767": B767_BUTTON,
+           "b300": B300_BUTTON}
 
 
 # def b737_button(self, event):

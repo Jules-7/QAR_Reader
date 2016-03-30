@@ -130,7 +130,7 @@ class MyPanel(wx.Panel):
             # ToDo: add attribute - flights_ids to each class
             try:
                 self.list_ctrl.SetStringItem(index, 2, str(data.flights_ids[index]))
-            except AttributeError:
+            except:
                 self.list_ctrl.SetStringItem(index, 2, str(0))
 
             self.list_ctrl.SetStringItem(index, 3, start_date)
@@ -411,6 +411,7 @@ class MyFrame(wx.Frame):
             self.toolbar1.AddLabelTool(151, "AN140", wx.Bitmap('an140.png'))
             self.toolbar1.AddLabelTool(150, "AN12", wx.Bitmap('an12.png'))
             self.toolbar1.AddLabelTool(157, "B767", wx.Bitmap('b767.png'))
+            self.toolbar1.AddLabelTool(161, "B300", wx.Bitmap('b300.png'))
 
         if ACCESS[USER][0] == "admin" or ACCESS[USER][0] == "VCH2269":
             self.toolbar1.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
@@ -432,6 +433,11 @@ class MyFrame(wx.Frame):
         if ACCESS[USER][0] == "An26":
             self.toolbar1.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
 
+        if ACCESS[USER][0] == "uksatse":
+            self.toolbar1.AddLabelTool(144, "AN26", wx.Bitmap('an26.png'))
+            self.toolbar1.AddLabelTool(161, "B300", wx.Bitmap('b300.png'))
+
+
         # --------- HELP TOOLBAR 1 BITMAPS -----------------------------
         self.toolbar1.SetToolLongHelp(134, "Save chosen flight")
         self.toolbar1.SetToolLongHelp(133, "Open file containing flights")
@@ -451,6 +457,7 @@ class MyFrame(wx.Frame):
         self.toolbar1.SetToolLongHelp(154, u"Ил76. Choose data source")
         self.toolbar1.SetToolLongHelp(156, u"Ми-24. Choose data source")
         self.toolbar1.SetToolLongHelp(157, "B767. Choose data source")
+        self.toolbar1.SetToolLongHelp(161, "B300. Choose data source")
 
         self.toolbar1.AddSeparator()
         self.toolbar1.Realize()  # actually display toolbar
@@ -513,6 +520,8 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.ten_to_sixteen, id=155)
         self.Bind(wx.EVT_MENU, self.mi24_button, id=156)
         self.Bind(wx.EVT_MENU, self.b767_button, id=157)
+        self.Bind(wx.EVT_MENU, self.b300_button, id=161)
+
         self.Bind(wx.EVT_MENU, self.swap_button, id=158)
         self.Bind(wx.EVT_MENU, self.arinc_check, id=159)
         self.Bind(wx.EVT_MENU, self.length_to_data, id=160)
@@ -639,6 +648,9 @@ class MyFrame(wx.Frame):
 
     def b767_button(self, event):
         self.choose_acft_qar_onclick_button(BUTTONS["b767"])
+
+    def b300_button(self, event):
+        self.choose_acft_qar_onclick_button(BUTTONS["b300"])
 
     def make_choice_window(self, name, choices):
         dlg = wx.SingleChoiceDialog(self, '', name,
