@@ -51,8 +51,8 @@ class ResultEvent(wx.PyEvent):
         self.data = data
 
 
-class WorkerThread(Thread):  # Thread class that executes processing
-    """ Worker Thread Class """
+class WorkerThread(Thread): 
+    """ Thread class that executes processing """
     def __init__(self, notify_window, path, chosen_acft_type, progress_bar):
         Thread.__init__(self)
         self._notify_window = notify_window
@@ -60,16 +60,16 @@ class WorkerThread(Thread):  # Thread class that executes processing
         self.path = path
         self.chosen_acft_type = chosen_acft_type
         self.progress_bar = progress_bar
-        # This starts the thread running on creation, but you could
+        # this starts the thread running on creation, but you could
         # also make the GUI thread responsible for calling this
         self.start()
 
     def run(self):
         """ Run Worker Thread """
-        # This is the code executing in the new thread
+        # this is the code executing in the new thread
         out_instance = Redirect(self.path, self.chosen_acft_type, self.progress_bar)
         file_data = out_instance.result
-        # Here's where the result would be returned
+        # here's where the result is returned
         wx.PostEvent(self._notify_window, ResultEvent(file_data))
         return
 
@@ -338,12 +338,12 @@ class MyFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, wx.ID_ANY, "QAR Reader  %s" % WIN_TITLE, size=SIZE)
         # self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)  # vertical allows second toolbar be below the first one
+        self.sizer = wx.BoxSizer(wx.VERTICAL)  # vertical allows second toolbar to be below the first one
 
         self.create_status_bar()
         # chosen_acft_type stands for both acft type and data source type
         # this is global like variable
-        # it is used by almost all methods
+        # it is used in almost all methods
         self.chosen_acft_type = None
         self.selected = []  # flights selected from the list
         # self.create_file_menu()
@@ -358,8 +358,10 @@ class MyFrame(wx.Frame):
         self.SetSizer(self.sizer)
 
     def create_status_bar(self):
-        """ Create StatusBar in the bottom of the window It contains text description (help info),
-            information about aircraft type and QAR type, progress bar with progress status
+        """ Create StatusBar at the bottom of the window.
+            It contains text description (help info),
+            information about aircraft type and QAR type, 
+            progress bar with progress status.
         """
         self.statusbar = self.CreateStatusBar()
         self.statusbar.SetFieldsCount(3)  # Set number of fields for statusbar
@@ -386,7 +388,7 @@ class MyFrame(wx.Frame):
             !!! DO NOT !!! use this at window reload -> toolbar is not shown at first and
             then it appears on the top of the flights` data
 
-            !!! NOTE !!! at executable creation -> images must be at the same folder with script
+            !!! NOTE !!! at executable creation -> images must be in the same folder with script
 
         """
         # ------------------- TOOLBAR 1 -------------------------------
@@ -464,7 +466,7 @@ class MyFrame(wx.Frame):
         # ------------------- END TOOLBAR 1 -------------------------------
         # -----------------------------------------------------------------
 
-        # if it is admin mode - display additional toolbox with additional functionality
+        # in admin mode - display additional toolbox with additional functionality
         if ACCESS[USER][0] == "admin":
             # ------------------- TOOLBAR 2 -----------------------------------
             self.toolbar2 = wx.ToolBar(self)  # create toolbar
@@ -543,7 +545,7 @@ class MyFrame(wx.Frame):
     # ---- as it is already marked in the ChoiceDialog (as it is the first one)
     def choose_acft_qar_onclick_button(self, button_type):
         name = button_type["name"]  # choice window name
-        # use orderdict, so each time keys are of the same order
+        # use orderdict, so each time keys are in the same order
         choices_dict = collections.OrderedDict(sorted(button_type["choices"].items()))
         choices_list = [key for key, value in choices_dict.iteritems()]
         option = self.make_choice_window(name, choices_list)
@@ -723,7 +725,7 @@ class MyFrame(wx.Frame):
 
         self.create_tool_bar()
 
-        # at this point separate thread starts and perform processing
+        # at this point separate thread starts and performs processing
         panel = MyPanel(self, self.file_data, self.file_data.path)
 
         if panel.no_flights:
@@ -748,7 +750,7 @@ class MyFrame(wx.Frame):
 
     def on_choose_file(self):
 
-        """ Open a file which contain flights"""
+        """ Open a file which contains flights"""
 
         self.get_path_to_file()
         # redirect path and choice of acft/qar for file opening
